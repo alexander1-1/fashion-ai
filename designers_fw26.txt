@@ -1,0 +1,65 @@
+# Топ дизайнеры FW26 — Paris, Milan, New York, London
+# Формат: одно имя на строку, как на Vogue Runway
+# Раскомментируй нужные города/дизайнеров
+
+# ── PARIS WOMENSWEAR ──────────────────────────────────────
+Chanel
+Dior
+Saint Laurent
+Givenchy
+Balenciaga
+Loewe
+Valentino
+Celine
+Jacquemus
+Alaïa
+Miu Miu
+Giambattista Valli
+Balmain
+Lanvin
+Rabanne
+Rick Owens
+Comme des Garçons
+Issey Miyake
+Stella McCartney
+Acne Studios
+
+# ── MILAN WOMENSWEAR ──────────────────────────────────────
+Gucci
+Prada
+Versace
+Fendi
+Bottega Veneta
+Dolce & Gabbana
+Max Mara
+Etro
+Missoni
+Jil Sander
+Moschino
+Alberta Ferretti
+Marni
+Sportmax
+Tod's
+
+# ── NEW YORK WOMENSWEAR ───────────────────────────────────
+The Row
+Ralph Lauren
+Tom Ford
+Marc Jacobs
+Proenza Schouler
+Altuzarra
+Tory Burch
+Michael Kors
+Coach
+Helmut Lang
+Area
+Thom Browne
+
+# ── LONDON WOMENSWEAR ─────────────────────────────────────
+Burberry
+Alexander McQueen
+Erdem
+Simone Rocha
+JW Anderson
+Roksanda
+Vivienne Westwood

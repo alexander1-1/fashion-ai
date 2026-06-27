@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fashion AI{% block title %}{% endblock %}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080808;
+      --bg2: #111111;
+      --bg3: #1a1a1a;
+      --border: #222222;
+      --text: #f0f0f0;
+      --text2: #888888;
+      --text3: #555555;
+      --accent: #f0f0f0;
+      --gold: #c9a84c;
+      --pink: #e8c4c4;
+    }
+
+    body {
+      font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(8,8,8,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      height: 52px;
+      display: flex; align-items: center;
+      padding: 0 32px;
+      gap: 40px;
+    }
+    .nav-logo {
+      font-size: 13px; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text);
+      text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 28px; margin-left: 16px; }
+    .nav-links a {
+      font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text2); text-decoration: none; transition: color .2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); }
+    .nav-right { margin-left: auto; display: flex; gap: 16px; align-items: center; }
+    .nav-badge {
+      font-size: 11px; background: var(--bg3); border: 1px solid var(--border);
+      padding: 4px 10px; border-radius: 20px; color: var(--text2);
+    }
+
+    /* MAIN */
+    main { padding-top: 52px; min-height: 100vh; }
+
+    /* COMPONENTS */
+    .tag {
+      display: inline-block; font-size: 10px; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text2);
+      border: 1px solid var(--border); padding: 3px 8px; border-radius: 3px;
+    }
+    .tag.live { border-color: #3a5a3a; color: #6aaa6a; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 8px 16px; border-radius: 4px; cursor: pointer;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--text2); text-decoration: none; transition: all .2s;
+    }
+    .btn:hover { border-color: var(--text2); color: var(--text); }
+    .btn.primary {
+      background: var(--text); color: var(--bg);
+      border-color: var(--text);
+    }
+    .btn.primary:hover { background: #ccc; }
+
+    .section-label {
+      font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--text3); margin-bottom: 20px;
+    }
+
+    /* LOOK CARD */
+    .look-card {
+      position: relative; overflow: hidden; cursor: pointer;
+      background: var(--bg2); border-radius: 4px;
+    }
+    .look-card img {
+      width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block;
+      transition: transform .4s ease;
+    }
+    .look-card:hover img { transform: scale(1.03); }
+    .look-card .card-overlay {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 12px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.85));
+      opacity: 0; transition: opacity .2s;
+    }
+    .look-card:hover .card-overlay { opacity: 1; }
+    .look-card .card-designer {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; color: #fff;
+    }
+    .look-card .card-show {
+      font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 2px;
+    }
+    .look-card .pin-btn {
+      position: absolute; top: 8px; right: 8px;
+      background: rgba(0,0,0,0.6); border: none; border-radius: 50%;
+      width: 28px; height: 28px; cursor: pointer; color: #fff; font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity .2s; text-decoration: none;
+    }
+    .look-card:hover .pin-btn { opacity: 1; }
+    .look-card .pin-btn:hover { background: rgba(0,0,0,0.9); }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 999;
+      background: var(--bg3); border: 1px solid var(--border);
+      padding: 12px 20px; border-radius: 6px; font-size: 12px;
+      transform: translateY(100px); opacity: 0;
+      transition: all .3s ease;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="/">Fashion AI</a>
+  <div class="nav-links">
+    <a href="/" class="{% if request.path == '/' %}active{% endif %}">Insights</a>
+    <a href="/explore" class="{% if request.path == '/explore' %}active{% endif %}">Explore</a>
+    <a href="/studio" class="{% if request.path == '/studio' %}active{% endif %}">Studio</a>
+    <a href="/moodboard" class="{% if request.path == '/moodboard' %}active{% endif %}">Moodboard</a>
+  </div>
+  <div class="nav-right">
+    <span class="nav-badge tag live">FW26 · Live</span>
+  </div>
+</nav>
+
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  function pinLook(designer, show, look_number, image_url, btn) {
+    fetch('/api/moodboard/add', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({designer, show, look_number, image_url})
+    }).then(r => r.json()).then(d => {
+      showToast('✓ Добавлено в Moodboard (' + d.count + ')');
+      if(btn) btn.textContent = '★';
+    });
+  }
+</script>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

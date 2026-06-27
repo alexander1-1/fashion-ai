@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block title %} · Moodboard{% endblock %}
+
+{% block head %}
+<style>
+  .moodboard-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: calc(100vh - 52px);
+  }
+
+  .mb-sidebar {
+    border-right: 1px solid var(--border);
+    padding: 32px 24px;
+    position: sticky; top: 52px; height: calc(100vh - 52px);
+    overflow-y: auto;
+  }
+  .mb-sidebar h2 { font-size: 14px; font-weight: 400; margin-bottom: 8px; }
+  .mb-sidebar .subtitle { font-size: 11px; color: var(--text2); margin-bottom: 28px; line-height: 1.5; }
+
+  .board-stat {
+    padding: 16px; background: var(--bg3); border-radius: 4px;
+    border: 1px solid var(--border); margin-bottom: 12px;
+  }
+  .board-stat .stat-n { font-size: 24px; font-weight: 200; }
+  .board-stat .stat-l { font-size: 10px; color: var(--text2); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+
+  .mb-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
+
+  .mb-content { padding: 32px; }
+  .mb-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 28px;
+  }
+  .mb-header h2 { font-size: 20px; font-weight: 300; }
+
+  .mb-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+  }
+
+  .mb-card {
+    position: relative; overflow: hidden;
+    background: var(--bg2); border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  .mb-card img {
+    width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block;
+  }
+  .mb-card .mb-info {
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+  }
+  .mb-card .mb-designer { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .mb-card .mb-show { font-size: 10px; color: var(--text2); margin-top: 2px; }
+  .mb-card .remove-btn {
+    position: absolute; top: 6px; right: 6px;
+    background: rgba(0,0,0,0.7); border: none; color: #fff;
+    width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+    font-size: 12px; display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity .2s;
+  }
+  .mb-card:hover .remove-btn { opacity: 1; }
+
+  .empty-state {
+    text-align: center; padding: 80px 40px;
+    color: var(--text2); font-size: 14px; line-height: 2;
+  }
+  .empty-state a { color: var(--text); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="moodboard-layout">
+
+  <div class="mb-sidebar">
+    <h2>Moodboard</h2>
+    <p class="subtitle">Pin looks from Explore. Build your season reference.</p>
+
+    <div class="board-stat">
+      <div class="stat-n" id="lookCount">{{ saved|length }}</div>
+      <div class="stat-l">Looks pinned</div>
+    </div>
+
+    <div class="mb-actions">
+      <a href="/explore" class="btn">+ Browse Runway</a>
+      <button class="btn" onclick="exportBoard()">Export CSV</button>
+      <button class="btn" onclick="clearBoard()" style="color: #c06060; border-color: #3a2222;">Clear board</button>
+    </div>
+
+    <div style="margin-top: 28px;">
+      <div class="section-label">Designers on board</div>
+      <div id="designerTags" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px;">
+        {% set designers = saved | map(attribute='designer') | unique | list %}
+        {% for d in designers %}
+        <span style="font-size: 10px; background: var(--bg3); border: 1px solid var(--border);
+                     padding: 4px 8px; border-radius: 3px; color: var(--text2);">{{ d }}</span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-content">
+    <div class="mb-header">
+      <h2>My Board</h2>
+      <span style="font-size: 12px; color: var(--text2);" id="boardDate">FW 2025–26</span>
+    </div>
+
+    <div class="mb-grid" id="boardGrid">
+      {% if saved %}
+        {% for look in saved %}
+        <div class="mb-card" id="card-{{ loop.index }}">
+          <img src="{{ look.image_url }}" alt="{{ look.designer }}" loading="lazy"
+               onerror="this.src=''">
+          <div class="mb-info">
+            <div class="mb-designer">{{ look.designer }}</div>
+            <div class="mb-show">{{ look.show }} · Look {{ look.look_number }}</div>
+          </div>
+          <button class="remove-btn" onclick="removeLook('{{ look.image_url }}', this)" title="Remove">✕</button>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state" id="emptyState" style="grid-column: 1/-1;">
+          No looks pinned yet.<br>
+          <a href="/explore">Browse the runway</a> and click ☆ to pin looks here.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function removeLook(imageUrl, btn) {
+    fetch('/api/moodboard/remove', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({image_url: imageUrl})
+    }).then(r => r.json()).then(d => {
+      btn.closest('.mb-card').remove();
+      document.getElementById('lookCount').textContent = d.count;
+      if (d.count === 0) {
+        document.getElementById('boardGrid').innerHTML =
+          '<div class="empty-state" style="grid-column:1/-1;">No looks pinned yet.<br><a href="/explore">Browse the runway</a>.</div>';
+      }
+      showToast('Removed from board');
+    });
+  }
+
+  function clearBoard() {
+    if (!confirm('Clear the entire board?')) return;
+    fetch('/api/moodboard/clear', {method: 'POST'})
+      .then(r => r.json()).then(() => {
+        document.getElementById('boardGrid').innerHTML =
+          '<div class="empty-state" style="grid-column:1/-1;">No looks pinned yet.<br><a href="/explore">Browse the runway</a>.</div>';
+        document.getElementById('lookCount').textContent = '0';
+        showToast('Board cleared');
+      });
+  }
+
+  function exportBoard() {
+    const cards = document.querySelectorAll('.mb-card');
+    if (!cards.length) { showToast('Nothing to export'); return; }
+
+    let csv = 'designer,show,look_number,image_url\n';
+    cards.forEach(card => {
+      const designer = card.querySelector('.mb-designer').textContent;
+      const showText = card.querySelector('.mb-show').textContent;
+      const img = card.querySelector('img').src;
+      csv += `"${designer}","${showText}","","${img}"\n`;
+    });
+
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'moodboard.csv';
+    a.click();
+    showToast('Exported moodboard.csv');
+  }
+</script>
+{% endblock %}

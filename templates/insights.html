@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% block title %} · Insights{% endblock %}
+
+{% block head %}
+<style>
+  .hero {
+    padding: 64px 48px 48px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text3); margin-bottom: 16px; }
+  .hero-title { font-size: 36px; font-weight: 300; letter-spacing: -0.02em; line-height: 1.1; }
+  .hero-title span { color: var(--text2); }
+  .hero-stats {
+    display: flex; gap: 48px; margin-top: 32px;
+  }
+  .stat-item .stat-num {
+    font-size: 28px; font-weight: 200; letter-spacing: -0.02em;
+  }
+  .stat-item .stat-lbl {
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text3); margin-top: 4px;
+  }
+
+  .insights-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  }
+  .panel {
+    padding: 40px 48px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .panel:nth-child(2n) { border-right: none; }
+
+  /* COLOR SWATCHES */
+  .colors-list { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; }
+  .color-row {
+    display: flex; align-items: center; gap: 16px;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: opacity .2s;
+  }
+  .color-row:hover { opacity: 0.8; }
+  .color-row:last-child { border-bottom: none; }
+  .swatch {
+    width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .color-info { flex: 1; }
+  .color-name { font-size: 13px; font-weight: 400; }
+  .color-code { font-size: 10px; color: var(--text3); letter-spacing: 0.06em; margin-top: 2px; }
+  .color-bar-wrap { flex: 1; height: 2px; background: var(--border); border-radius: 1px; }
+  .color-bar { height: 100%; border-radius: 1px; }
+  .color-count { font-size: 11px; color: var(--text2); min-width: 48px; text-align: right; }
+
+  /* DESIGNER LIST */
+  .designer-list { margin-top: 24px; }
+  .designer-row {
+    display: flex; align-items: center; gap: 16px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .designer-row:last-child { border-bottom: none; }
+  .designer-rank { font-size: 11px; color: var(--text3); min-width: 20px; }
+  .designer-name { font-size: 13px; flex: 1; }
+  .designer-looks { font-size: 11px; color: var(--text2); }
+
+  /* SEASON CARD */
+  .season-card {
+    background: var(--bg3); border-radius: 6px; padding: 24px;
+    border: 1px solid var(--border); margin-top: 24px;
+  }
+  .season-card h3 { font-size: 16px; font-weight: 400; }
+  .season-card .season-sub { font-size: 11px; color: var(--text2); margin-top: 4px; }
+  .season-card .season-colors {
+    display: flex; gap: 6px; margin-top: 16px;
+  }
+  .mini-swatch { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if insights %}
+<div class="hero">
+  <div class="hero-label">Fashion Week Insights</div>
+  <h1 class="hero-title">FW26 · <span>Trend Intelligence</span></h1>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num">{{ "{:,}".format(insights.total_looks) }}</div>
+      <div class="stat-lbl">Runway Looks</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">{{ insights.total_designers }}</div>
+      <div class="stat-lbl">Designers</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">{{ insights.total_shows }}</div>
+      <div class="stat-lbl">Shows</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">3</div>
+      <div class="stat-lbl">Seasons</div>
+    </div>
+  </div>
+</div>
+
+<div class="insights-grid">
+
+  <!-- KEY COLORS -->
+  <div class="panel">
+    <div class="section-label">Key Colors · FW26</div>
+    {% set max_count = insights.top_colors[0].count %}
+    <div class="colors-list">
+      {% for c in insights.top_colors %}
+      <div class="color-row" onclick="window.location='/explore?color={{ c.name }}'">
+        <div class="swatch" style="background: {{ c.hex }};"></div>
+        <div class="color-info">
+          <div class="color-name">{{ c.name }}</div>
+          <div class="color-code">{{ c.code }}</div>
+        </div>
+        <div class="color-bar-wrap">
+          <div class="color-bar" style="width: {{ (c.count / max_count * 100)|int }}%; background: {{ c.hex }};"></div>
+        </div>
+        <div class="color-count">{{ "{:,}".format(c.count) }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- TOP DESIGNERS -->
+  <div class="panel">
+    <div class="section-label">Top Designers · FW26</div>
+    <div class="designer-list">
+      {% for d in insights.top_designers %}
+      <div class="designer-row">
+        <div class="designer-rank">{{ loop.index }}</div>
+        <div class="designer-name">
+          <a href="/explore?designer={{ d.name }}" style="color: inherit; text-decoration: none; transition: color .2s;"
+             onmouseover="this.style.color='#ccc'" onmouseout="this.style.color='inherit'">
+            {{ d.name }}
+          </a>
+        </div>
+        <div class="designer-looks">{{ d.looks }} looks</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- COLOR PALETTE PREVIEW -->
+    <div style="margin-top: 40px;">
+      <div class="section-label">Season Palette</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px;">
+        {% for c in insights.top_colors[:12] %}
+        <div title="{{ c.name }} · {{ c.code }}"
+             style="width: 40px; height: 40px; border-radius: 50%;
+                    background: {{ c.hex }};
+                    border: 1px solid rgba(255,255,255,0.08);
+                    cursor: pointer;"
+             onclick="window.location='/explore'">
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGNALS -->
+  <div class="panel">
+    <div class="section-label">Key Signals</div>
+    <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 12px;">
+      {% set signals = [
+        ("Dark Palette Dominance", "Black, Charcoal, Coffee Bean account for 50%+ of looks", "+12% vs FW25"),
+        ("Soft Pink Rising", "Powder Pink and Flamingo Pink gaining momentum", "+28% vs FW25"),
+        ("Earth Tones Return", "Warm Taupe, Mushroom, Sage Mist trending up", "+18% vs FW25"),
+        ("Lilac Emergence", "Pastel Lilac unexpectedly strong for FW season", "+45% vs FW25"),
+      ] %}
+      {% for title, desc, growth in signals %}
+      <div style="padding: 16px; background: var(--bg3); border-radius: 4px; border: 1px solid var(--border);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div style="font-size: 13px; font-weight: 500;">{{ title }}</div>
+          <div style="font-size: 11px; color: #6aaa6a; margin-left: 12px; white-space: nowrap;">{{ growth }}</div>
+        </div>
+        <div style="font-size: 11px; color: var(--text2); margin-top: 6px; line-height: 1.5;">{{ desc }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="panel">
+    <div class="section-label">Explore by City</div>
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 24px;">
+      {% for city, count in [("Paris Womenswear", "20 designers"), ("Milan Womenswear", "15 designers"), ("New York Womenswear", "12 designers"), ("London Womenswear", "7 designers")] %}
+      <a href="/explore" style="display: flex; justify-content: space-between; align-items: center;
+          padding: 16px 20px; background: var(--bg3); border-radius: 4px;
+          border: 1px solid var(--border); text-decoration: none; color: inherit;
+          transition: border-color .2s;"
+         onmouseover="this.style.borderColor='#444'" onmouseout="this.style.borderColor='var(--border)'">
+        <span style="font-size: 13px;">{{ city }}</span>
+        <span style="font-size: 11px; color: var(--text2);">{{ count }} →</span>
+      </a>
+      {% endfor %}
+    </div>
+
+    <div style="margin-top: 32px;">
+      <div class="section-label">Quick Actions</div>
+      <div style="display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap;">
+        <a href="/explore" class="btn">Browse Gallery</a>
+        <a href="/studio" class="btn">Open Studio</a>
+        <a href="/moodboard" class="btn">Moodboard</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% else %}
+<div style="padding: 80px 48px; text-align: center;">
+  <div style="font-size: 14px; color: var(--text2);">
+    Данные не найдены.<br><br>
+    Запусти <code style="background: var(--bg3); padding: 2px 6px; border-radius: 3px;">python3 color_analysis.py</code> для генерации аналитики.
+  </div>
+</div>
+{% endif %}
+{% endblock %}
