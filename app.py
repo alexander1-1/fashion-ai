@@ -163,7 +163,7 @@ def _load_clip():
     except Exception as e:
         print(f"CLIP not available: {e}")
 
-_load_clip()
+# _load_clip()  # disabled on Railway
 
 # ─── Маршруты ─────────────────────────────────────────────────────────────────
 
