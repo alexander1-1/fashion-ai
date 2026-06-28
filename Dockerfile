@@ -13,4 +13,4 @@ COPY . .
 
 ENV PYTHONUNBUFFERED=1
 
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:7860", "--workers", "1", "--timeout", "300"]
+CMD gunicorn app:app --bind 0.0.0.0:${PORT:-7860} --workers 1 --timeout 300
