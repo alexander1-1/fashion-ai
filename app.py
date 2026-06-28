@@ -163,7 +163,7 @@ def _load_clip():
     except Exception as e:
         print(f"CLIP not available: {e}")
 
-# _load_clip()  # disabled: too heavy for free tier
+_load_clip()
 
 # ─── Маршруты ─────────────────────────────────────────────────────────────────
 
@@ -198,33 +198,24 @@ def moodboard():
 
 # ─── API ──────────────────────────────────────────────────────────────────────
 
+HF_SPACES_URL = "https://alexanderl12-fashion-ai.hf.space"
+
 @app.route("/api/search")
 def api_search():
     query = request.args.get("q", "").strip()
     if not query:
         return jsonify([])
 
-    # CLIP поиск (если модель загружена при старте)
-    if _clip_model is not None and _clip_embeddings is not None:
-        try:
-            import numpy as np
-            text_feat = _clip_model.encode([query], convert_to_numpy=True)[0]
-            text_feat = text_feat / (np.linalg.norm(text_feat) + 1e-9)
-            scores = _clip_embeddings @ text_feat
-            top_idx = list((-scores).argsort()[:24])
-            results = []
-            for idx in top_idx:
-                m = _clip_metadata[int(idx)]
-                results.append({
-                    "designer": m["designer"], "show": m["show"],
-                    "look_number": m["look_number"], "image_url": m["image_url"],
-                    "score": float(scores[idx]), "mode": "clip",
-                })
-            return jsonify(results)
-        except Exception as e:
-            print(f"CLIP search error: {e}")
+    # Проксируем на HF Spaces (там работает CLIP с 16GB RAM)
+    try:
+        import requests as req
+        resp = req.get(f"{HF_SPACES_URL}/api/search", params={"q": query}, timeout=25)
+        if resp.status_code == 200:
+            return jsonify(resp.json())
+    except Exception as e:
+        print(f"HF proxy failed: {e}")
 
-    # Фолбэк: цветовой + текстовый поиск (возвращает список)
+    # Фолбэк: локальный цветовой + текстовый поиск
     return jsonify(_text_search(query))
 
 
