@@ -266,12 +266,12 @@ def _text_search(query):
                     })
                     break
         if results:
-            return results[:24]
+            return results[:96]
 
     # Последний фолбэк: поиск по имени дизайнера
     rows = load_csv(f"{DATA_DIR}/all_designers.csv")
     results = [r for r in rows if q in r["designer"].lower() or q in r["show"].lower()]
-    return results[:24]
+    return results[:96]
 
 
 @app.route("/api/looks")
