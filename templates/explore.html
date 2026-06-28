@@ -251,20 +251,25 @@
     fetch('/api/search?q=' + encodeURIComponent(query))
       .then(r => r.json())
       .then(data => {
-        if (data.error) {
-          document.getElementById('looksGrid').innerHTML =
-            '<div class="searching-indicator">' + data.error + '</div>';
-          return;
-        }
+        const results = Array.isArray(data) ? data : [];
+        const mode = results[0]?.mode === 'clip' ? 'AI semantic' :
+                     results[0]?.mode === 'color' ? 'Color match' :
+                     results[0]?.mode === 'random' ? 'Inspiration' : 'Text match';
         const header = document.getElementById('searchResultsHeader');
         header.style.display = 'block';
-        header.textContent = `AI search · "${query}" · ${data.length} results`;
-        document.getElementById('totalCount').textContent = data.length + ' results';
-        renderLooks(data, false);
+        header.textContent = `${mode} · "${query}" · ${results.length} results`;
+        document.getElementById('totalCount').textContent = results.length + ' results';
+        if (results.length === 0) {
+          document.getElementById('looksGrid').innerHTML =
+            '<div class="searching-indicator">No results for "' + query + '"</div>';
+        } else {
+          renderLooks(results, false);
+        }
       })
-      .catch(() => {
+      .catch(err => {
+        console.error('Search error:', err);
         document.getElementById('looksGrid').innerHTML =
-          '<div class="searching-indicator">Search unavailable — build the CLIP index first</div>';
+          '<div class="searching-indicator">Search error — try again</div>';
       });
   }
 

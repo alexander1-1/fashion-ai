@@ -139,6 +139,32 @@ def get_shows(designer=None):
     return shows
 
 
+# ─── CLIP (загружаем один раз при старте) ─────────────────────────────────────
+
+_clip_model = None
+_clip_embeddings = None
+_clip_metadata = None
+
+def _load_clip():
+    global _clip_model, _clip_embeddings, _clip_metadata
+    try:
+        import numpy as np
+        from sentence_transformers import SentenceTransformer
+        index_path = f"{DATA_DIR}/clip_index.npy"
+        meta_path = f"{DATA_DIR}/clip_metadata.json"
+        if not (os.path.exists(index_path) and os.path.exists(meta_path)):
+            print("CLIP index not found, using text search fallback")
+            return
+        _clip_embeddings = np.load(index_path)
+        with open(meta_path, "r") as f2:
+            _clip_metadata = json.load(f2)
+        _clip_model = SentenceTransformer("clip-ViT-B-32")
+        print(f"CLIP loaded — {len(_clip_metadata)} looks")
+    except Exception as e:
+        print(f"CLIP not available: {e}")
+
+_load_clip()
+
 # ─── Маршруты ─────────────────────────────────────────────────────────────────
 
 @app.route("/")
@@ -178,45 +204,32 @@ def api_search():
     if not query:
         return jsonify([])
 
-    index_path = f"{DATA_DIR}/clip_index.npy"
-    meta_path = f"{DATA_DIR}/clip_metadata.json"
-
-    # Попробуем CLIP поиск
-    if os.path.exists(index_path) and os.path.exists(meta_path):
+    # CLIP поиск (если модель загружена при старте)
+    if _clip_model is not None and _clip_embeddings is not None:
         try:
             import numpy as np
-            from sentence_transformers import SentenceTransformer
-
-            model = SentenceTransformer("clip-ViT-B-32")
-            embeddings = np.load(index_path)
-            with open(meta_path, "r") as f:
-                metadata = json.load(f)
-
-            text_feat = model.encode([query], convert_to_numpy=True)[0]
-            text_feat = text_feat / np.linalg.norm(text_feat)
-            scores = embeddings @ text_feat
-            top_idx = np.argsort(scores)[::-1][:24]
-
+            text_feat = _clip_model.encode([query], convert_to_numpy=True)[0]
+            text_feat = text_feat / (np.linalg.norm(text_feat) + 1e-9)
+            scores = _clip_embeddings @ text_feat
+            top_idx = list((-scores).argsort()[:24])
             results = []
             for idx in top_idx:
-                m = metadata[idx]
+                m = _clip_metadata[int(idx)]
                 results.append({
-                    "designer": m["designer"],
-                    "show": m["show"],
-                    "look_number": m["look_number"],
-                    "image_url": m["image_url"],
-                    "score": float(scores[idx]),
+                    "designer": m["designer"], "show": m["show"],
+                    "look_number": m["look_number"], "image_url": m["image_url"],
+                    "score": float(scores[idx]), "mode": "clip",
                 })
             return jsonify(results)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"CLIP search error: {e}")
 
-    # Фолбэк: поиск по цвету и дизайнеру из CSV
-    return color_text_search(query)
+    # Фолбэк: цветовой + текстовый поиск (возвращает список)
+    return jsonify(_text_search(query))
 
 
-def color_text_search(query):
-    """Быстрый текстовый поиск по цветам и дизайнерам без CLIP."""
+def _text_search(query):
+    """Возвращает список dict (не Response)."""
     q = query.lower()
 
     # Маппинг ключевых слов → Pantone названия
@@ -262,12 +275,12 @@ def color_text_search(query):
                     })
                     break
         if results:
-            return jsonify(results[:24])
+            return results[:24]
 
     # Последний фолбэк: поиск по имени дизайнера
     rows = load_csv(f"{DATA_DIR}/all_designers.csv")
     results = [r for r in rows if q in r["designer"].lower() or q in r["show"].lower()]
-    return jsonify(results[:24])
+    return results[:24]
 
 
 @app.route("/api/looks")
