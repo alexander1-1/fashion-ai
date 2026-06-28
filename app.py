@@ -219,7 +219,12 @@ def api_search():
             params["designer"] = designer
         if show:
             params["show"] = show
-        resp = req.get(f"{HF_SPACES_URL}/api/search", params=params, timeout=25)
+        # Сначала будим Space (если спит), потом делаем запрос
+        try:
+            req.get(f"{HF_SPACES_URL}/", timeout=5)
+        except Exception:
+            pass
+        resp = req.get(f"{HF_SPACES_URL}/api/search", params=params, timeout=90)
         if resp.status_code == 200:
             return jsonify(resp.json())
     except Exception as e:
