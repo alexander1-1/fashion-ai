@@ -248,7 +248,10 @@
       '<div class="searching-indicator">Searching runway for "' + query + '"…</div>';
     document.getElementById('loadMoreWrap').innerHTML = '';
 
-    fetch('/api/search?q=' + encodeURIComponent(query))
+    const filterParams = new URLSearchParams({q: query});
+    if (currentDesigner) filterParams.set('designer', currentDesigner);
+    if (currentShow) filterParams.set('show', currentShow);
+    fetch('/api/search?' + filterParams.toString())
       .then(r => r.json())
       .then(data => {
         const results = Array.isArray(data) ? data : [];

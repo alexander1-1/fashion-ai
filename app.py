@@ -205,21 +205,31 @@ def api_search():
     query = request.args.get("q", "").strip()
     if not query:
         return jsonify([])
+    designer_filter = request.args.get("designer", "").strip().lower()
+    show_filter = request.args.get("show", "").strip().lower()
+
+    designer = request.args.get("designer", "").strip()
+    show = request.args.get("show", "").strip()
 
     # Проксируем на HF Spaces (там работает CLIP с 16GB RAM)
     try:
         import requests as req
-        resp = req.get(f"{HF_SPACES_URL}/api/search", params={"q": query}, timeout=25)
+        params = {"q": query}
+        if designer:
+            params["designer"] = designer
+        if show:
+            params["show"] = show
+        resp = req.get(f"{HF_SPACES_URL}/api/search", params=params, timeout=25)
         if resp.status_code == 200:
             return jsonify(resp.json())
     except Exception as e:
         print(f"HF proxy failed: {e}")
 
     # Фолбэк: локальный цветовой + текстовый поиск
-    return jsonify(_text_search(query))
+    return jsonify(_text_search(query, designer=designer, show=show))
 
 
-def _text_search(query):
+def _text_search(query, designer=None, show=None):
     """Возвращает список dict (не Response)."""
     q = query.lower()
 
