@@ -16,7 +16,7 @@
     position: sticky; top: 52px; height: calc(100vh - 52px);
     overflow-y: auto;
   }
-  .sidebar-section { margin-bottom: 32px; }
+  .sidebar-section { margin-bottom: 28px; }
   .sidebar-section label {
     font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
     color: var(--text3); display: block; margin-bottom: 10px;
@@ -30,9 +30,20 @@
     border-color: var(--text3);
   }
 
+  /* City pills */
+  .city-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .city-pill {
+    font-size: 11px; padding: 5px 10px; border-radius: 20px;
+    background: var(--bg2); border: 1px solid var(--border);
+    color: var(--text2); cursor: pointer; transition: all .2s;
+  }
+  .city-pill:hover, .city-pill.active {
+    background: var(--text); color: var(--bg); border-color: var(--text);
+  }
+
   /* SEARCH */
   .search-bar {
-    position: relative; margin-bottom: 32px;
+    position: relative; margin-bottom: 28px;
   }
   .search-bar input {
     width: 100%; background: var(--bg2); border: 1px solid var(--border);
@@ -81,6 +92,16 @@
   .searching-indicator {
     text-align: center; padding: 40px; color: var(--text2); font-size: 13px;
   }
+
+  /* Similar search button */
+  .similar-btn {
+    position: absolute; bottom: 6px; right: 6px;
+    background: rgba(0,0,0,0.75); border: none; color: #fff;
+    padding: 4px 8px; border-radius: 3px; cursor: pointer;
+    font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+    opacity: 0; transition: opacity .2s;
+  }
+  .look-card:hover .similar-btn { opacity: 1; }
 </style>
 {% endblock %}
 
@@ -95,6 +116,16 @@
              value="" autocomplete="off">
       <button class="search-icon" onclick="runSearch()">⌕</button>
       <div class="search-mode" id="searchMode">AI semantic search</div>
+    </div>
+
+    <div class="sidebar-section">
+      <label>City</label>
+      <div class="city-pills">
+        <div class="city-pill {% if not selected_city %}active{% endif %}" onclick="setCity('')">All</div>
+        {% for c in cities %}
+        <div class="city-pill {% if c == selected_city %}active{% endif %}" onclick="setCity('{{ c }}')">{{ c }}</div>
+        {% endfor %}
+      </div>
     </div>
 
     <div class="sidebar-section">
@@ -114,13 +145,13 @@
         {% for s in shows %}
         <option value="{{ s }}" {% if s == selected_show %}selected{% endif %}>{{ s }}</option>
         {% endfor %}
-    </select>
+      </select>
     </div>
 
     <div class="sidebar-section">
       <label>Quick filters</label>
       <div style="display: flex; flex-direction: column; gap: 6px;">
-        {% for label, designer in [("Chanel", "Chanel"), ("Dior", "Christian Dior"), ("Gucci", "Gucci"), ("Prada", "Prada"), ("Balenciaga", "Balenciaga")] %}
+        {% for label, designer in [("Chanel", "Chanel"), ("Gucci", "Gucci"), ("Prada", "Prada"), ("Balenciaga", "Balenciaga"), ("Saint Laurent", "Saint Laurent")] %}
         <button onclick="setDesigner('{{ designer }}')"
                 style="text-align: left; background: var(--bg2); border: 1px solid var(--border);
                        color: var(--text2); padding: 7px 10px; border-radius: 3px;
@@ -143,7 +174,7 @@
   <div class="content">
     <div class="content-header">
       <h2 id="contentTitle">
-        {% if selected_designer %}{{ selected_designer }}{% else %}All Looks{% endif %}
+        {% if selected_city %}{{ selected_city }}{% elif selected_designer %}{{ selected_designer }}{% else %}All Looks{% endif %}
       </h2>
       <div class="count" id="totalCount">{{ total }} looks</div>
     </div>
@@ -162,6 +193,10 @@
         <button class="pin-btn"
                 onclick="pinLook('{{ look.designer }}', '{{ look.show }}', '{{ look.look_number }}', '{{ look.image_url }}', this)">
           ☆
+        </button>
+        <button class="similar-btn"
+                onclick="findSimilar('{{ look.image_url }}', '{{ look.designer }}')">
+          Similar
         </button>
       </div>
       {% endfor %}
@@ -182,7 +217,68 @@
   let currentOffset = 60;
   let currentDesigner = '{{ selected_designer }}';
   let currentShow = '{{ selected_show }}';
+  let currentCity = '{{ selected_city }}';
   let isSearchMode = false;
+
+  // ── Moodboard (localStorage) ─────────────────────────────────────────────
+  function getActiveBoardId() {
+    return localStorage.getItem('activeBoardId') || 'default';
+  }
+  function getBoards() {
+    try { return JSON.parse(localStorage.getItem('mb_boards') || '{}'); } catch { return {}; }
+  }
+  function saveBoards(boards) {
+    localStorage.setItem('mb_boards', JSON.stringify(boards));
+  }
+  function getActiveLooks() {
+    const boards = getBoards();
+    const id = getActiveBoardId();
+    return (boards[id] && boards[id].looks) || [];
+  }
+
+  function pinLook(designer, show, lookNum, imageUrl, btn) {
+    const boards = getBoards();
+    const id = getActiveBoardId();
+    if (!boards[id]) boards[id] = { name: 'My Board', looks: [] };
+    const look = { designer, show, look_number: lookNum, image_url: imageUrl };
+    const already = boards[id].looks.some(l => l.image_url === imageUrl);
+    if (!already) {
+      boards[id].looks.push(look);
+      saveBoards(boards);
+      btn.textContent = '★';
+      btn.style.color = '#fff';
+      showToast('Pinned to ' + boards[id].name);
+    } else {
+      boards[id].looks = boards[id].looks.filter(l => l.image_url !== imageUrl);
+      saveBoards(boards);
+      btn.textContent = '☆';
+      btn.style.color = '';
+      showToast('Removed from board');
+    }
+  }
+
+  // Mark already-pinned looks on load
+  function markPinned() {
+    const pinned = new Set(getActiveLooks().map(l => l.image_url));
+    document.querySelectorAll('.pin-btn').forEach(btn => {
+      const card = btn.closest('.look-card');
+      const img = card && card.querySelector('img');
+      if (img && pinned.has(img.src)) {
+        btn.textContent = '★';
+        btn.style.color = '#fff';
+      }
+    });
+  }
+  document.addEventListener('DOMContentLoaded', markPinned);
+
+  // ── Filters ──────────────────────────────────────────────────────────────
+  function setCity(city) {
+    currentCity = city;
+    document.querySelectorAll('.city-pill').forEach(p => p.classList.remove('active'));
+    const pills = document.querySelectorAll('.city-pill');
+    pills.forEach(p => { if (p.textContent.trim() === (city || 'All')) p.classList.add('active'); });
+    applyFilters();
+  }
 
   function setDesigner(d) {
     document.getElementById('designerFilter').value = d;
@@ -200,6 +296,7 @@
     const params = new URLSearchParams();
     if (currentDesigner) params.set('designer', currentDesigner);
     if (currentShow) params.set('show', currentShow);
+    if (currentCity) params.set('city', currentCity);
 
     fetch('/api/looks?' + params.toString())
       .then(r => r.json())
@@ -207,9 +304,10 @@
         renderLooks(data.looks, false);
         document.getElementById('totalCount').textContent = data.total + ' looks';
         document.getElementById('contentTitle').textContent =
-          currentDesigner || 'All Looks';
+          currentCity || currentDesigner || 'All Looks';
         currentOffset = data.looks.length;
         updateLoadMore(data.total);
+        markPinned();
       });
   }
 
@@ -218,6 +316,7 @@
     const params = new URLSearchParams();
     if (currentDesigner) params.set('designer', currentDesigner);
     if (currentShow) params.set('show', currentShow);
+    if (currentCity) params.set('city', currentCity);
     params.set('offset', currentOffset);
 
     fetch('/api/looks?' + params.toString())
@@ -226,6 +325,7 @@
         renderLooks(data.looks, true);
         currentOffset += data.looks.length;
         updateLoadMore(data.total);
+        markPinned();
       });
   }
 
@@ -239,6 +339,7 @@
     }
   }
 
+  // ── Search ────────────────────────────────────────────────────────────────
   function runSearch() {
     const query = document.getElementById('searchInput').value.trim();
     if (!query) { applyFilters(); return; }
@@ -248,16 +349,18 @@
       '<div class="searching-indicator">Searching runway for "' + query + '"…</div>';
     document.getElementById('loadMoreWrap').innerHTML = '';
 
-    const filterParams = new URLSearchParams({q: query});
+    const filterParams = new URLSearchParams({ q: query });
     if (currentDesigner) filterParams.set('designer', currentDesigner);
     if (currentShow) filterParams.set('show', currentShow);
+    if (currentCity) filterParams.set('city', currentCity);
+
     fetch('/api/search?' + filterParams.toString())
       .then(r => r.json())
       .then(data => {
-        const results = Array.isArray(data) ? data : [];
-        const mode = results[0]?.mode === 'clip' ? 'AI semantic' :
-                     results[0]?.mode === 'color' ? 'Color match' :
-                     results[0]?.mode === 'random' ? 'Inspiration' : 'Text match';
+        const results = Array.isArray(data) ? data : (data.results || []);
+        const mode = results.length > 0 && results[0].mode === 'clip' ? 'AI semantic' :
+                     results.length > 0 && results[0].mode === 'color' ? 'Color match' :
+                     results.length > 0 && results[0].mode === 'random' ? 'Inspiration' : 'Text match';
         const header = document.getElementById('searchResultsHeader');
         header.style.display = 'block';
         header.textContent = `${mode} · "${query}" · ${results.length} results`;
@@ -267,12 +370,43 @@
             '<div class="searching-indicator">No results for "' + query + '"</div>';
         } else {
           renderLooks(results, false);
+          markPinned();
         }
       })
       .catch(err => {
         console.error('Search error:', err);
         document.getElementById('looksGrid').innerHTML =
-          '<div class="searching-indicator">Search error — try again</div>';
+          '<div class="searching-indicator">Search error — please try again</div>';
+      });
+  }
+
+  // ── Similar search ────────────────────────────────────────────────────────
+  function findSimilar(imageUrl, designer) {
+    isSearchMode = true;
+    document.getElementById('looksGrid').innerHTML =
+      '<div class="searching-indicator">Finding similar looks…</div>';
+    document.getElementById('loadMoreWrap').innerHTML = '';
+
+    fetch('/api/similar?url=' + encodeURIComponent(imageUrl))
+      .then(r => r.json())
+      .then(data => {
+        const results = Array.isArray(data) ? data : [];
+        const header = document.getElementById('searchResultsHeader');
+        header.style.display = 'block';
+        header.textContent = `Similar to ${designer} · ${results.length} results`;
+        document.getElementById('totalCount').textContent = results.length + ' results';
+        document.getElementById('contentTitle').textContent = 'Similar looks';
+        if (results.length === 0) {
+          document.getElementById('looksGrid').innerHTML =
+            '<div class="searching-indicator">No similar looks found</div>';
+        } else {
+          renderLooks(results, false);
+          markPinned();
+        }
+      })
+      .catch(() => {
+        document.getElementById('looksGrid').innerHTML =
+          '<div class="searching-indicator">Similar search unavailable</div>';
       });
   }
 
@@ -280,7 +414,10 @@
     document.getElementById('designerFilter').value = '';
     document.getElementById('showFilter').value = '';
     document.getElementById('searchInput').value = '';
+    currentCity = '';
     isSearchMode = false;
+    document.querySelectorAll('.city-pill').forEach(p => p.classList.remove('active'));
+    document.querySelector('.city-pill')?.classList.add('active');
     applyFilters();
   }
 
@@ -297,6 +434,10 @@
         <button class="pin-btn"
                 onclick="pinLook('${l.designer}', '${l.show}', '${l.look_number}', '${l.image_url}', this)">
           ☆
+        </button>
+        <button class="similar-btn"
+                onclick="findSimilar('${l.image_url}', '${l.designer}')">
+          Similar
         </button>
       </div>
     `).join('');

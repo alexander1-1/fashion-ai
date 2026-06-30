@@ -1,5 +1,5 @@
 """
-Fashion AI — Railway version (CLIP disabled, proxies to HF Spaces)
+Fashion AI — веб-приложение
 """
 
 import csv
@@ -13,7 +13,6 @@ app = Flask(__name__)
 app.secret_key = "fashion-ai-secret-2026"
 
 DATA_DIR = "./output"
-HF_SPACES_URL = "https://alexanderl12-fashion-ai.hf.space"
 
 # ─── City mapping ──────────────────────────────────────────────────────────────
 CITY_MAP = {
@@ -52,7 +51,7 @@ CITY_MAP = {
     "JW Anderson": "London", "Christopher Kane": "London",
     "Mary Katrantzou": "London", "Temperley London": "London",
     "Julien Macdonald": "London", "Amanda Wakeley": "London",
-    "Margaret Howell": "London",
+    "Stella Tennant": "London", "Margaret Howell": "London",
     # New York
     "Ralph Lauren": "New York", "Calvin Klein": "New York",
     "Marc Jacobs": "New York", "Tom Ford": "New York",
@@ -68,8 +67,10 @@ CITY_MAP = {
 }
 
 def get_city(designer):
+    """Map designer name to fashion week city."""
     if designer in CITY_MAP:
         return CITY_MAP[designer]
+    # Partial match
     for key, city in CITY_MAP.items():
         if key.lower() in designer.lower() or designer.lower() in key.lower():
             return city
@@ -77,6 +78,7 @@ def get_city(designer):
 
 
 PANTONE_RGB = {
+    # Neutrals & darks
     "Black":              (20,  20,  20),
     "Coffee Bean":        (72,  48,  35),
     "Charcoal Gray":      (78,  78,  76),
@@ -86,6 +88,7 @@ PANTONE_RGB = {
     "Silver":             (192, 192, 192),
     "Bright White":       (242, 240, 234),
     "Pearled Ivory":      (237, 229, 207),
+    # Warm neutrals
     "Warm Taupe":         (178, 152, 126),
     "Mushroom":           (196, 172, 152),
     "Warm Sand":          (210, 185, 155),
@@ -98,6 +101,7 @@ PANTONE_RGB = {
     "Wheat":              (224, 196, 148),
     "Sand Dollar":        (223, 200, 178),
     "Pale Gold":          (210, 183, 130),
+    # Pinks & lilacs
     "Pastel Lilac":       (211, 196, 221),
     "Powder Pink":        (237, 212, 207),
     "Flamingo Pink":      (226, 181, 177),
@@ -111,6 +115,7 @@ PANTONE_RGB = {
     "Hot Pink":           (215, 75,  120),
     "Fuchsia Rose":       (199, 67,  117),
     "Mauve Mist":         (196, 168, 178),
+    # Blues
     "Classic Blue":       (15,  76,  129),
     "Cerulean":           (154, 196, 215),
     "Pale Blue":          (188, 212, 230),
@@ -119,6 +124,7 @@ PANTONE_RGB = {
     "Blue Bell":          (162, 171, 208),
     "Little Boy Blue":    (108, 160, 220),
     "Placid Blue":        (131, 168, 202),
+    # Greens
     "Sage Mist":          (174, 185, 157),
     "Forest Green":       (46,  86,  50),
     "Olive Branch":       (110, 125, 70),
@@ -129,21 +135,25 @@ PANTONE_RGB = {
     "Basil":              (76,  100, 73),
     "Jade Green":         (0,   163, 104),
     "Pistachio Green":    (146, 188, 132),
+    # Reds & oranges
     "True Red":           (188, 28,  28),
     "Fiesta":             (221, 65,  36),
     "Living Coral":       (255, 111, 97),
     "Flame Orange":       (243, 118, 74),
     "Burnt Sienna":       (196, 88,  64),
     "Cinnamon Stick":     (157, 82,  50),
+    # Purples
     "Ultra Violet":       (92,  80,  148),
     "Amethyst Orchid":    (145, 117, 174),
     "Violet Tulip":       (178, 163, 201),
     "Deep Lavender":      (116, 100, 160),
+    # Yellows & golds
     "Gold Fusion":        (189, 157, 80),
     "Illuminating":       (245, 220, 80),
     "Saffron":            (224, 166, 48),
     "Amber Yellow":       (233, 185, 64),
     "Primrose Yellow":    (247, 216, 100),
+    # Metallics
     "Bronze Mist":        (165, 130, 90),
     "Champagne":          (230, 210, 175),
     "Rose Gold":          (220, 160, 140),
@@ -170,7 +180,7 @@ def get_insights():
     designer_counter = Counter()
     show_counter = Counter()
     city_counter = Counter()
-    city_designer_sets = {}
+    city_designer_sets = {}  # city → set of designers
 
     for row in rows:
         d = row["designer"]
@@ -235,7 +245,33 @@ def get_shows(designer=None):
     return sorted(set(r["show"] for r in rows), reverse=True)
 
 
-# ─── CLIP: DISABLED on Railway (OOM) — proxies to HF Spaces ───────────────────
+# ─── CLIP (загружаем один раз при старте) ─────────────────────────────────────
+
+_clip_model = None
+_clip_embeddings = None
+_clip_metadata = None
+
+
+def _load_clip():
+    global _clip_model, _clip_embeddings, _clip_metadata
+    try:
+        import numpy as np
+        from sentence_transformers import SentenceTransformer
+        index_path = f"{DATA_DIR}/clip_index.npy"
+        meta_path = f"{DATA_DIR}/clip_metadata.json"
+        if not (os.path.exists(index_path) and os.path.exists(meta_path)):
+            print("CLIP index files not found, using text search fallback")
+            return
+        _clip_embeddings = np.load(index_path)
+        with open(meta_path, "r") as f:
+            _clip_metadata = json.load(f)
+        _clip_model = SentenceTransformer("clip-ViT-B-32")
+        print(f"CLIP model loaded — {len(_clip_metadata)} looks indexed")
+    except Exception as e:
+        print(f"CLIP not available: {e}")
+
+
+_load_clip()
 
 # ─── Маршруты ─────────────────────────────────────────────────────────────────
 
@@ -270,63 +306,59 @@ def studio():
 
 @app.route("/moodboard")
 def moodboard():
-    return render_template("moodboard.html")
+    saved = session.get("moodboard", [])
+    return render_template("moodboard.html", saved=saved)
 
 
 # ─── API ──────────────────────────────────────────────────────────────────────
-
-def _wake_hf():
-    """Ping HF Spaces to wake it from sleep."""
-    try:
-        import requests as req
-        req.get(f"{HF_SPACES_URL}/", timeout=5)
-    except Exception:
-        pass
-
 
 @app.route("/api/search")
 def api_search():
     query = request.args.get("q", "").strip()
     if not query:
         return jsonify([])
-    designer = request.args.get("designer", "").strip()
-    show = request.args.get("show", "").strip()
+    designer = request.args.get("designer", "").strip().lower()
+    show = request.args.get("show", "").strip().lower()
     city = request.args.get("city", "").strip()
 
-    try:
-        import requests as req
-        params = {"q": query}
-        if designer: params["designer"] = designer
-        if show: params["show"] = show
-        if city: params["city"] = city
-        _wake_hf()
-        resp = req.get(f"{HF_SPACES_URL}/api/search", params=params, timeout=90)
-        if resp.status_code == 200:
-            return jsonify(resp.json())
-    except Exception as e:
-        print(f"HF proxy /api/search failed: {e}")
+    # CLIP поиск (если модель загружена при старте)
+    if _clip_model is not None and _clip_embeddings is not None:
+        try:
+            import numpy as np
+            text_feat = _clip_model.encode([query], convert_to_numpy=True)[0]
+            text_feat = text_feat / (np.linalg.norm(text_feat) + 1e-9)
+            scores = _clip_embeddings @ text_feat
+            # Retrieve top 500 then apply filters
+            top_idx = list(map(int, (-scores).argsort()[:500]))
+            results = []
+            for idx in top_idx:
+                m = _clip_metadata[idx]
+                if designer and designer not in m["designer"].lower():
+                    continue
+                if show and show not in m["show"].lower():
+                    continue
+                if city and get_city(m["designer"]) != city:
+                    continue
+                results.append({
+                    "designer": m["designer"],
+                    "show": m["show"],
+                    "look_number": m["look_number"],
+                    "image_url": m["image_url"],
+                    "score": float(scores[idx]),
+                    "mode": "clip",
+                })
+                if len(results) >= 96:
+                    break
+            return jsonify(results)
+        except Exception as e:
+            print(f"CLIP search error: {e}")
 
-    return jsonify(_text_search(query, designer=designer.lower(), show=show.lower(), city=city))
-
-
-@app.route("/api/similar")
-def api_similar():
-    url = request.args.get("url", "").strip()
-    if not url:
-        return jsonify([])
-    try:
-        import requests as req
-        _wake_hf()
-        resp = req.get(f"{HF_SPACES_URL}/api/similar", params={"url": url}, timeout=90)
-        if resp.status_code == 200:
-            return jsonify(resp.json())
-    except Exception as e:
-        print(f"HF proxy /api/similar failed: {e}")
-    return jsonify([])
+    # Фолбэк: цветовой + текстовый поиск
+    return jsonify(_text_search(query, designer=designer, show=show, city=city))
 
 
 def _text_search(query, designer="", show="", city=""):
-    """Fallback: color + text search. Returns list of dicts."""
+    """Возвращает список dict (не Response)."""
     q = query.lower()
 
     color_keywords = {
@@ -369,19 +401,23 @@ def _text_search(query, designer="", show="", city=""):
             for j in range(1, 4):
                 if row.get(f"color{j}_pantone", "") in target_colors:
                     results.append({
-                        "designer": row["designer"], "show": row["show"],
-                        "look_number": row["look_number"], "image_url": row["image_url"],
+                        "designer": row["designer"],
+                        "show": row["show"],
+                        "look_number": row["look_number"],
+                        "image_url": row["image_url"],
                         "mode": "color",
                     })
                     break
         if results:
             return results[:96]
 
+    # Поиск по дизайнеру/показу
     rows = apply_filters(load_csv(f"{DATA_DIR}/all_designers.csv"))
     results = [r for r in rows if q in r["designer"].lower() or q in r["show"].lower()]
     if results:
         return results[:96]
 
+    # Случайная выборка как вдохновение
     if rows:
         sample = random.sample(rows, min(24, len(rows)))
         for r in sample:
@@ -389,6 +425,36 @@ def _text_search(query, designer="", show="", city=""):
         return sample
 
     return []
+
+
+@app.route("/api/similar")
+def api_similar():
+    """Find visually similar looks using CLIP embeddings."""
+    url = request.args.get("url", "").strip()
+    if not url:
+        return jsonify([])
+    if _clip_model is not None and _clip_embeddings is not None and _clip_metadata:
+        try:
+            import numpy as np
+            # Find this look in metadata by image_url
+            idx = next((i for i, m in enumerate(_clip_metadata) if m["image_url"] == url), None)
+            if idx is not None:
+                look_vec = _clip_embeddings[idx]
+                scores = _clip_embeddings @ look_vec
+                scores[idx] = -1  # exclude self
+                top_idx = list(map(int, (-scores).argsort()[:96]))
+                results = []
+                for i in top_idx:
+                    m = _clip_metadata[i]
+                    results.append({
+                        "designer": m["designer"], "show": m["show"],
+                        "look_number": m["look_number"], "image_url": m["image_url"],
+                        "score": float(scores[i]), "mode": "similar",
+                    })
+                return jsonify(results)
+        except Exception as e:
+            print(f"Similar search error: {e}")
+    return jsonify([])
 
 
 @app.route("/api/looks")
@@ -403,17 +469,28 @@ def api_looks():
 
 @app.route("/api/moodboard/add", methods=["POST"])
 def moodboard_add():
-    # Legacy: moodboard now uses localStorage. Keep endpoint for compat.
-    return jsonify({"count": 0})
+    data = request.json
+    if "moodboard" not in session:
+        session["moodboard"] = []
+    board = session["moodboard"]
+    if data not in board:
+        board.append(data)
+        session["moodboard"] = board
+    return jsonify({"count": len(board)})
 
 
 @app.route("/api/moodboard/remove", methods=["POST"])
 def moodboard_remove():
-    return jsonify({"count": 0})
+    data = request.json
+    board = session.get("moodboard", [])
+    board = [item for item in board if item.get("image_url") != data.get("image_url")]
+    session["moodboard"] = board
+    return jsonify({"count": len(board)})
 
 
 @app.route("/api/moodboard/clear", methods=["POST"])
 def moodboard_clear():
+    session["moodboard"] = []
     return jsonify({"count": 0})
 
 
