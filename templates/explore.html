@@ -102,6 +102,18 @@
     opacity: 0; transition: opacity .2s;
   }
   .look-card:hover .similar-btn { opacity: 1; }
+
+  /* Item tag caption under each card */
+  .look-tags {
+    font-size: 10px; color: var(--text3); margin-top: 4px;
+    letter-spacing: 0.02em; line-height: 1.4;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .look-tags .tag-style { color: var(--text2); }
+
+  .enrichment-badge {
+    font-size: 10px; color: var(--text3); margin-top: 4px;
+  }
 </style>
 {% endblock %}
 
@@ -137,6 +149,42 @@
         {% endfor %}
       </select>
     </div>
+
+    {% if facets and (facets.styles or facets.categories or facets.materials) %}
+    <div class="sidebar-section">
+      <label>Style</label>
+      <select id="styleFilter" onchange="applyFilters()">
+        <option value="">All Styles</option>
+        {% for s in facets.styles %}
+        <option value="{{ s }}" {% if s == selected_style %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="sidebar-section">
+      <label>Category</label>
+      <select id="categoryFilter" onchange="applyFilters()">
+        <option value="">All Categories</option>
+        {% for c in facets.categories %}
+        <option value="{{ c }}" {% if c == selected_category %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="sidebar-section">
+      <label>Material</label>
+      <select id="materialFilter" onchange="applyFilters()">
+        <option value="">All Materials</option>
+        {% for m in facets.materials %}
+        <option value="{{ m }}" {% if m == selected_material %}selected{% endif %}>{{ m }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% else %}
+    <div class="sidebar-section">
+      <div class="enrichment-badge">Item-level filters appear once recognition finishes running.</div>
+    </div>
+    {% endif %}
 
     <div class="sidebar-section">
       <label>Season</label>
@@ -176,28 +224,40 @@
       <h2 id="contentTitle">
         {% if selected_city %}{{ selected_city }}{% elif selected_designer %}{{ selected_designer }}{% else %}All Looks{% endif %}
       </h2>
-      <div class="count" id="totalCount">{{ total }} looks</div>
+      <div style="text-align: right;">
+        <div class="count" id="totalCount">{{ total }} looks</div>
+        {% if enriched_count %}
+        <div class="enrichment-badge">{{ "{:,}".format(enriched_count) }} looks fully tagged</div>
+        {% endif %}
+      </div>
     </div>
 
     <div id="searchResultsHeader" class="search-results-header" style="display:none;"></div>
 
     <div class="looks-grid" id="looksGrid">
       {% for look in looks %}
-      <div class="look-card">
-        <img src="{{ look.image_url }}" alt="{{ look.designer }} look {{ look.look_number }}"
-             loading="lazy" onerror="this.parentElement.style.display='none'">
-        <div class="card-overlay">
-          <div class="card-designer">{{ look.designer }}</div>
-          <div class="card-show">{{ look.show }} · Look {{ look.look_number }}</div>
+      <div class="look-card-wrap">
+        <div class="look-card">
+          <img src="{{ look.image_url }}" alt="{{ look.designer }} look {{ look.look_number }}"
+               loading="lazy" onerror="this.parentElement.parentElement.style.display='none'">
+          <div class="card-overlay">
+            <div class="card-designer">{{ look.designer }}</div>
+            <div class="card-show">{{ look.show }} · Look {{ look.look_number }}</div>
+          </div>
+          <button class="pin-btn"
+                  onclick="pinLook('{{ look.designer }}', '{{ look.show }}', '{{ look.look_number }}', '{{ look.image_url }}', this)">
+            ☆
+          </button>
+          <button class="similar-btn"
+                  onclick="findSimilar('{{ look.image_url }}', '{{ look.designer }}')">
+            Similar
+          </button>
         </div>
-        <button class="pin-btn"
-                onclick="pinLook('{{ look.designer }}', '{{ look.show }}', '{{ look.look_number }}', '{{ look.image_url }}', this)">
-          ☆
-        </button>
-        <button class="similar-btn"
-                onclick="findSimilar('{{ look.image_url }}', '{{ look.designer }}')">
-          Similar
-        </button>
+        {% if look._categories %}
+        <div class="look-tags">
+          {% if look._style %}<span class="tag-style">{{ look._style }}</span> · {% endif %}{{ look._categories | join(', ') }}
+        </div>
+        {% endif %}
       </div>
       {% endfor %}
     </div>
@@ -218,7 +278,17 @@
   let currentDesigner = '{{ selected_designer }}';
   let currentShow = '{{ selected_show }}';
   let currentCity = '{{ selected_city }}';
+  let currentCategory = '{{ selected_category }}';
+  let currentMaterial = '{{ selected_material }}';
+  let currentStyle = '{{ selected_style }}';
   let isSearchMode = false;
+
+  function itemFilterParams(params) {
+    if (currentCategory) params.set('category', currentCategory);
+    if (currentMaterial) params.set('material', currentMaterial);
+    if (currentStyle) params.set('style', currentStyle);
+    return params;
+  }
 
   // ── Moodboard (localStorage) ─────────────────────────────────────────────
   function getActiveBoardId() {
@@ -288,12 +358,18 @@
   function applyFilters() {
     currentDesigner = document.getElementById('designerFilter').value;
     currentShow = document.getElementById('showFilter').value;
+    const styleEl = document.getElementById('styleFilter');
+    const categoryEl = document.getElementById('categoryFilter');
+    const materialEl = document.getElementById('materialFilter');
+    currentStyle = styleEl ? styleEl.value : '';
+    currentCategory = categoryEl ? categoryEl.value : '';
+    currentMaterial = materialEl ? materialEl.value : '';
     currentOffset = 0;
     isSearchMode = false;
     document.getElementById('searchResultsHeader').style.display = 'none';
     document.getElementById('searchInput').value = '';
 
-    const params = new URLSearchParams();
+    const params = itemFilterParams(new URLSearchParams());
     if (currentDesigner) params.set('designer', currentDesigner);
     if (currentShow) params.set('show', currentShow);
     if (currentCity) params.set('city', currentCity);
@@ -313,7 +389,7 @@
 
   function loadMore() {
     if (isSearchMode) return;
-    const params = new URLSearchParams();
+    const params = itemFilterParams(new URLSearchParams());
     if (currentDesigner) params.set('designer', currentDesigner);
     if (currentShow) params.set('show', currentShow);
     if (currentCity) params.set('city', currentCity);
@@ -414,6 +490,12 @@
     document.getElementById('designerFilter').value = '';
     document.getElementById('showFilter').value = '';
     document.getElementById('searchInput').value = '';
+    const styleEl = document.getElementById('styleFilter');
+    const categoryEl = document.getElementById('categoryFilter');
+    const materialEl = document.getElementById('materialFilter');
+    if (styleEl) styleEl.value = '';
+    if (categoryEl) categoryEl.value = '';
+    if (materialEl) materialEl.value = '';
     currentCity = '';
     isSearchMode = false;
     document.querySelectorAll('.city-pill').forEach(p => p.classList.remove('active'));
@@ -423,24 +505,35 @@
 
   function renderLooks(looks, append) {
     const grid = document.getElementById('looksGrid');
-    const html = looks.map(l => `
-      <div class="look-card">
-        <img src="${l.image_url}" alt="${l.designer} look ${l.look_number}"
-             loading="lazy" onerror="this.parentElement.style.display='none'">
-        <div class="card-overlay">
-          <div class="card-designer">${l.designer}</div>
-          <div class="card-show">${l.show} · Look ${l.look_number}</div>
+    const html = looks.map(l => {
+      const cats = l._categories || [];
+      const style = l._style || '';
+      const tagsHtml = cats.length ? `
+        <div class="look-tags">
+          ${style ? `<span class="tag-style">${style}</span> · ` : ''}${cats.join(', ')}
+        </div>` : '';
+      return `
+      <div class="look-card-wrap">
+        <div class="look-card">
+          <img src="${l.image_url}" alt="${l.designer} look ${l.look_number}"
+               loading="lazy" onerror="this.parentElement.parentElement.style.display='none'">
+          <div class="card-overlay">
+            <div class="card-designer">${l.designer}</div>
+            <div class="card-show">${l.show} · Look ${l.look_number}</div>
+          </div>
+          <button class="pin-btn"
+                  onclick="pinLook('${l.designer}', '${l.show}', '${l.look_number}', '${l.image_url}', this)">
+            ☆
+          </button>
+          <button class="similar-btn"
+                  onclick="findSimilar('${l.image_url}', '${l.designer}')">
+            Similar
+          </button>
         </div>
-        <button class="pin-btn"
-                onclick="pinLook('${l.designer}', '${l.show}', '${l.look_number}', '${l.image_url}', this)">
-          ☆
-        </button>
-        <button class="similar-btn"
-                onclick="findSimilar('${l.image_url}', '${l.designer}')">
-          Similar
-        </button>
+        ${tagsHtml}
       </div>
-    `).join('');
+    `;
+    }).join('');
     if (append) {
       grid.insertAdjacentHTML('beforeend', html);
     } else {

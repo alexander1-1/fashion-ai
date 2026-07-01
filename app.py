@@ -209,10 +209,13 @@ def get_insights():
         "total_designers": len(designer_counter),
         "total_shows": len(show_counter),
         "cities": cities,
+        "enrichment": _enrichment_insights,
+        "enriched_count": len(_enrichment_index) if _enrichment_index else 0,
     }
 
 
-def get_all_looks(designer=None, show=None, city=None, limit=60, offset=0):
+def get_all_looks(designer=None, show=None, city=None, category=None, material=None,
+                   style=None, silhouette=None, limit=60, offset=0):
     rows = load_csv(f"{DATA_DIR}/all_designers.csv")
     if designer:
         rows = [r for r in rows if r["designer"].lower() == designer.lower()]
@@ -220,7 +223,26 @@ def get_all_looks(designer=None, show=None, city=None, limit=60, offset=0):
         rows = [r for r in rows if r["show"].lower() == show.lower()]
     if city:
         rows = [r for r in rows if get_city(r["designer"]) == city]
-    return rows[offset:offset + limit], len(rows)
+    if category or material or style or silhouette:
+        filtered = []
+        for r in rows:
+            enr = _enrichment_index.get(r["image_url"]) if _enrichment_index else None
+            if not enr:
+                continue
+            if style and style not in enr["style_tags"]:
+                continue
+            items = enr["items"]
+            if category and not any(it.get("category") == category for it in items):
+                continue
+            if material and not any(material in (it.get("materials") or []) for it in items):
+                continue
+            if silhouette and not any(silhouette in (it.get("silhouette") or []) for it in items):
+                continue
+            filtered.append(r)
+        rows = filtered
+    total = len(rows)
+    page = [enrich_row(dict(r)) for r in rows[offset:offset + limit]]
+    return page, total
 
 
 def get_designers():
@@ -237,6 +259,65 @@ def get_shows(designer=None):
 
 # ─── CLIP: DISABLED on Railway (OOM) — proxies to HF Spaces ───────────────────
 
+# ─── Enrichment (item-level fabric/pattern/silhouette/construction/decoration/style) ──
+
+_enrichment_index = None      # image_url -> {"style_tags": [...], "items": [...]}
+_enrichment_insights = None   # parsed output/enriched_insights.json
+
+
+def load_enrichment():
+    global _enrichment_index, _enrichment_insights
+    idx = {}
+    path = f"{DATA_DIR}/enriched_looks.csv"
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            for r in csv.DictReader(f):
+                try:
+                    items = json.loads(r.get("items_json") or "[]")
+                except json.JSONDecodeError:
+                    items = []
+                style_tags = [s for s in (r.get("style_tags") or "").split(",") if s]
+                idx[r["image_url"]] = {"style_tags": style_tags, "items": items}
+    _enrichment_index = idx
+
+    insights_path = f"{DATA_DIR}/enriched_insights.json"
+    if os.path.exists(insights_path):
+        with open(insights_path, encoding="utf-8") as f:
+            _enrichment_insights = json.load(f)
+    else:
+        _enrichment_insights = None
+
+    print(f"Enrichment loaded: {len(idx)} looks tagged")
+
+
+load_enrichment()
+
+
+def enrich_row(row):
+    """Attach lightweight tag summary to a look row for card captions."""
+    enr = _enrichment_index.get(row.get("image_url")) if _enrichment_index else None
+    if enr:
+        cats = [it["category"] for it in enr["items"] if it.get("category") not in ("Other", None)]
+        row["_categories"] = cats[:4]
+        row["_style"] = enr["style_tags"][0] if enr["style_tags"] else ""
+    else:
+        row["_categories"] = []
+        row["_style"] = ""
+    return row
+
+
+def get_facets():
+    """Filter option lists for Explore sidebar, derived from enrichment insights."""
+    if not _enrichment_insights:
+        return {"styles": [], "categories": [], "materials": [], "silhouettes": []}
+    return {
+        "styles": [x["name"] for x in _enrichment_insights.get("styles", [])],
+        "categories": [x["name"] for x in _enrichment_insights.get("categories", [])],
+        "materials": [x["name"] for x in _enrichment_insights.get("materials", [])],
+        "silhouettes": [x["name"] for x in _enrichment_insights.get("silhouettes", [])],
+    }
+
+
 # ─── Маршруты ─────────────────────────────────────────────────────────────────
 
 @app.route("/")
@@ -251,16 +332,26 @@ def explore():
     designer = request.args.get("designer", "")
     show = request.args.get("show", "")
     city = request.args.get("city", "")
-    looks, total = get_all_looks(designer or None, show or None, city or None, limit=60)
+    category = request.args.get("category", "")
+    material = request.args.get("material", "")
+    style = request.args.get("style", "")
+    looks, total = get_all_looks(designer or None, show or None, city or None,
+                                  category or None, material or None, style or None,
+                                  limit=60)
     designers = get_designers()
     shows = get_shows(designer or None)
+    facets = get_facets()
     return render_template("explore.html",
                            looks=looks, total=total,
                            designers=designers, shows=shows,
-                           cities=CITIES,
+                           cities=CITIES, facets=facets,
+                           enriched_count=len(_enrichment_index) if _enrichment_index else 0,
                            selected_designer=designer,
                            selected_show=show,
-                           selected_city=city)
+                           selected_city=city,
+                           selected_category=category,
+                           selected_material=material,
+                           selected_style=style)
 
 
 @app.route("/studio")
@@ -396,9 +487,33 @@ def api_looks():
     designer = request.args.get("designer", "")
     show = request.args.get("show", "")
     city = request.args.get("city", "")
+    category = request.args.get("category", "")
+    material = request.args.get("material", "")
+    style = request.args.get("style", "")
     offset = int(request.args.get("offset", 0))
-    looks, total = get_all_looks(designer or None, show or None, city or None, limit=40, offset=offset)
+    looks, total = get_all_looks(designer or None, show or None, city or None,
+                                  category or None, material or None, style or None,
+                                  limit=40, offset=offset)
     return jsonify({"looks": looks, "total": total})
+
+
+@app.route("/api/facets")
+def api_facets():
+    return jsonify(get_facets())
+
+
+@app.route("/api/enrichment-status")
+def api_enrichment_status():
+    total = len(load_csv(f"{DATA_DIR}/all_designers.csv"))
+    enriched = len(_enrichment_index) if _enrichment_index else 0
+    return jsonify({"enriched": enriched, "total": total,
+                     "pct": round(enriched / total * 100, 1) if total else 0})
+
+
+@app.route("/api/reload-enrichment", methods=["POST"])
+def api_reload_enrichment():
+    load_enrichment()
+    return jsonify({"enriched": len(_enrichment_index) if _enrichment_index else 0})
 
 
 @app.route("/api/moodboard/add", methods=["POST"])

@@ -97,6 +97,30 @@
     transition: transform .2s;
   }
   .palette-dot:hover { transform: scale(1.15); }
+
+  /* TAG BARS (style/category/material/pattern/silhouette/construction/decoration) */
+  .tagbar-list { display: flex; flex-direction: column; gap: 2px; margin-top: 18px; }
+  .tagbar-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 0; border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: opacity .2s;
+  }
+  .tagbar-row:hover { opacity: 0.75; }
+  .tagbar-row:last-child { border-bottom: none; }
+  .tagbar-name { font-size: 11.5px; flex: 0 0 40%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tagbar-bar-wrap { flex: 1; height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+  .tagbar-bar { height: 100%; background: var(--text2); border-radius: 3px; }
+  .tagbar-pct { font-size: 10.5px; color: var(--text3); min-width: 36px; text-align: right; }
+
+  .dims-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border-top: 1px solid var(--border);
+  }
+  .dims-grid .panel:nth-child(2n) { border-right: none; }
+
+  .enrichment-progress {
+    font-size: 11px; color: var(--text3); margin-top: 6px;
+  }
 </style>
 {% endblock %}
 
@@ -122,7 +146,22 @@
       <div class="stat-num">{{ insights.cities | length }}</div>
       <div class="stat-lbl">Cities</div>
     </div>
+    {% if insights.enrichment %}
+    <div class="stat-item">
+      <div class="stat-num">{{ "{:,}".format(insights.enrichment.total_items) }}</div>
+      <div class="stat-lbl">Items Recognized</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">{{ (insights.enrichment.total_items / insights.enrichment.total_looks) | round(1) }}</div>
+      <div class="stat-lbl">Avg Items / Look</div>
+    </div>
+    {% endif %}
   </div>
+  {% if insights.enriched_count %}
+  <div class="enrichment-progress">
+    Full recognition: {{ "{:,}".format(insights.enriched_count) }} / {{ "{:,}".format(insights.total_looks) }} looks tagged (style, category, material, pattern, silhouette, construction, decoration)
+  </div>
+  {% endif %}
 </div>
 
 <div class="insights-grid">
@@ -241,6 +280,122 @@
   </div>
 
 </div>
+
+{% if insights.enrichment %}
+{% set enr = insights.enrichment %}
+<div class="dims-grid">
+
+  <div class="panel">
+    <div class="section-label">Style DNA</div>
+    <div class="tagbar-list">
+      {% set max_c = enr.styles[0].count if enr.styles else 1 %}
+      {% for t in enr.styles %}
+      <div class="tagbar-row" onclick="window.location='/explore?style={{ t.name | urlencode }}'">
+        <div class="tagbar-name">{{ t.name }}</div>
+        <div class="tagbar-bar-wrap"><div class="tagbar-bar" style="width: {{ (t.count / max_c * 100)|int }}%;"></div></div>
+        <div class="tagbar-pct">{{ t.pct }}%</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="section-label">Top Categories</div>
+    <div class="tagbar-list">
+      {% set max_c = enr.categories[0].count if enr.categories else 1 %}
+      {% for t in enr.categories %}
+      <div class="tagbar-row" onclick="window.location='/explore?category={{ t.name | urlencode }}'">
+        <div class="tagbar-name">{{ t.name }}</div>
+        <div class="tagbar-bar-wrap"><div class="tagbar-bar" style="width: {{ (t.count / max_c * 100)|int }}%;"></div></div>
+        <div class="tagbar-pct">{{ t.pct }}%</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="section-label">Top Materials</div>
+    <div class="tagbar-list">
+      {% set max_c = enr.materials[0].count if enr.materials else 1 %}
+      {% for t in enr.materials %}
+      <div class="tagbar-row" onclick="window.location='/explore?material={{ t.name | urlencode }}'">
+        <div class="tagbar-name">{{ t.name }}</div>
+        <div class="tagbar-bar-wrap"><div class="tagbar-bar" style="width: {{ (t.count / max_c * 100)|int }}%;"></div></div>
+        <div class="tagbar-pct">{{ t.pct }}%</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="section-label">Top Patterns</div>
+    <div class="tagbar-list">
+      {% set max_c = enr.patterns[0].count if enr.patterns else 1 %}
+      {% for t in enr.patterns %}
+      <div class="tagbar-row">
+        <div class="tagbar-name">{{ t.name }}</div>
+        <div class="tagbar-bar-wrap"><div class="tagbar-bar" style="width: {{ (t.count / max_c * 100)|int }}%;"></div></div>
+        <div class="tagbar-pct">{{ t.pct }}%</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="section-label">Top Silhouettes</div>
+    <div class="tagbar-list">
+      {% set max_c = enr.silhouettes[0].count if enr.silhouettes else 1 %}
+      {% for t in enr.silhouettes %}
+      <div class="tagbar-row">
+        <div class="tagbar-name">{{ t.name }}</div>
+        <div class="tagbar-bar-wrap"><div class="tagbar-bar" style="width: {{ (t.count / max_c * 100)|int }}%;"></div></div>
+        <div class="tagbar-pct">{{ t.pct }}%</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="section-label">Construction Details</div>
+    <div class="tagbar-list">
+      {% set max_c = enr.construction[0].count if enr.construction else 1 %}
+      {% for t in enr.construction %}
+      <div class="tagbar-row">
+        <div class="tagbar-name">{{ t.name }}</div>
+        <div class="tagbar-bar-wrap"><div class="tagbar-bar" style="width: {{ (t.count / max_c * 100)|int }}%;"></div></div>
+        <div class="tagbar-pct">{{ t.pct }}%</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="panel" style="border-bottom: none;">
+    <div class="section-label">Decoration</div>
+    <div class="tagbar-list">
+      {% set max_c = enr.decoration[0].count if enr.decoration else 1 %}
+      {% for t in enr.decoration %}
+      <div class="tagbar-row">
+        <div class="tagbar-name">{{ t.name }}</div>
+        <div class="tagbar-bar-wrap"><div class="tagbar-bar" style="width: {{ (t.count / max_c * 100)|int }}%;"></div></div>
+        <div class="tagbar-pct">{{ t.pct }}%</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="panel" style="border-bottom: none; display: flex; align-items: center; justify-content: center;">
+    <div style="text-align: center;">
+      <div class="section-label">Full Recognition</div>
+      <div class="enrichment-progress" style="margin-top: 10px;">
+        {{ "{:,}".format(insights.enriched_count) }} / {{ "{:,}".format(insights.total_looks) }} looks tagged<br>
+        {{ "{:,}".format(enr.total_items) }} items across style, category, material, pattern, silhouette, construction, decoration
+      </div>
+      <a href="/explore" class="btn" style="margin-top: 16px; display: inline-flex;">Explore tagged looks</a>
+    </div>
+  </div>
+
+</div>
+{% endif %}
 
 {% else %}
 <div style="padding: 80px 48px; text-align: center;">
