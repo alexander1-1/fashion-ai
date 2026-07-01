@@ -180,6 +180,36 @@
         {% endfor %}
       </select>
     </div>
+
+    <div class="sidebar-section">
+      <label>Silhouette</label>
+      <select id="silhouetteFilter" onchange="applyFilters()">
+        <option value="">All Silhouettes</option>
+        {% for s in facets.silhouettes %}
+        <option value="{{ s }}" {% if s == selected_silhouette %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="sidebar-section">
+      <label>Construction</label>
+      <select id="constructionFilter" onchange="applyFilters()">
+        <option value="">All Construction</option>
+        {% for c in facets.construction %}
+        <option value="{{ c }}" {% if c == selected_construction %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="sidebar-section">
+      <label>Decoration</label>
+      <select id="decorationFilter" onchange="applyFilters()">
+        <option value="">All Decoration</option>
+        {% for d in facets.decoration %}
+        <option value="{{ d }}" {% if d == selected_decoration %}selected{% endif %}>{{ d }}</option>
+        {% endfor %}
+      </select>
+    </div>
     {% else %}
     <div class="sidebar-section">
       <div class="enrichment-badge">Item-level filters appear once recognition finishes running.</div>
@@ -281,12 +311,18 @@
   let currentCategory = '{{ selected_category }}';
   let currentMaterial = '{{ selected_material }}';
   let currentStyle = '{{ selected_style }}';
+  let currentSilhouette = '{{ selected_silhouette }}';
+  let currentConstruction = '{{ selected_construction }}';
+  let currentDecoration = '{{ selected_decoration }}';
   let isSearchMode = false;
 
   function itemFilterParams(params) {
     if (currentCategory) params.set('category', currentCategory);
     if (currentMaterial) params.set('material', currentMaterial);
     if (currentStyle) params.set('style', currentStyle);
+    if (currentSilhouette) params.set('silhouette', currentSilhouette);
+    if (currentConstruction) params.set('construction', currentConstruction);
+    if (currentDecoration) params.set('decoration', currentDecoration);
     return params;
   }
 
@@ -361,9 +397,15 @@
     const styleEl = document.getElementById('styleFilter');
     const categoryEl = document.getElementById('categoryFilter');
     const materialEl = document.getElementById('materialFilter');
+    const silhouetteEl = document.getElementById('silhouetteFilter');
+    const constructionEl = document.getElementById('constructionFilter');
+    const decorationEl = document.getElementById('decorationFilter');
     currentStyle = styleEl ? styleEl.value : '';
     currentCategory = categoryEl ? categoryEl.value : '';
     currentMaterial = materialEl ? materialEl.value : '';
+    currentSilhouette = silhouetteEl ? silhouetteEl.value : '';
+    currentConstruction = constructionEl ? constructionEl.value : '';
+    currentDecoration = decorationEl ? decorationEl.value : '';
     currentOffset = 0;
     isSearchMode = false;
     document.getElementById('searchResultsHeader').style.display = 'none';
@@ -493,9 +535,15 @@
     const styleEl = document.getElementById('styleFilter');
     const categoryEl = document.getElementById('categoryFilter');
     const materialEl = document.getElementById('materialFilter');
+    const silhouetteEl = document.getElementById('silhouetteFilter');
+    const constructionEl = document.getElementById('constructionFilter');
+    const decorationEl = document.getElementById('decorationFilter');
     if (styleEl) styleEl.value = '';
     if (categoryEl) categoryEl.value = '';
     if (materialEl) materialEl.value = '';
+    if (silhouetteEl) silhouetteEl.value = '';
+    if (constructionEl) constructionEl.value = '';
+    if (decorationEl) decorationEl.value = '';
     currentCity = '';
     isSearchMode = false;
     document.querySelectorAll('.city-pill').forEach(p => p.classList.remove('active'));

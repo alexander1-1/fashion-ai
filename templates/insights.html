@@ -346,7 +346,7 @@
     <div class="tagbar-list">
       {% set max_c = enr.silhouettes[0].count if enr.silhouettes else 1 %}
       {% for t in enr.silhouettes %}
-      <div class="tagbar-row">
+      <div class="tagbar-row" onclick="window.location='/explore?silhouette={{ t.name | urlencode }}'">
         <div class="tagbar-name">{{ t.name }}</div>
         <div class="tagbar-bar-wrap"><div class="tagbar-bar" style="width: {{ (t.count / max_c * 100)|int }}%;"></div></div>
         <div class="tagbar-pct">{{ t.pct }}%</div>
@@ -360,7 +360,7 @@
     <div class="tagbar-list">
       {% set max_c = enr.construction[0].count if enr.construction else 1 %}
       {% for t in enr.construction %}
-      <div class="tagbar-row">
+      <div class="tagbar-row" onclick="window.location='/explore?construction={{ t.name | urlencode }}'">
         <div class="tagbar-name">{{ t.name }}</div>
         <div class="tagbar-bar-wrap"><div class="tagbar-bar" style="width: {{ (t.count / max_c * 100)|int }}%;"></div></div>
         <div class="tagbar-pct">{{ t.pct }}%</div>
@@ -374,7 +374,7 @@
     <div class="tagbar-list">
       {% set max_c = enr.decoration[0].count if enr.decoration else 1 %}
       {% for t in enr.decoration %}
-      <div class="tagbar-row">
+      <div class="tagbar-row" onclick="window.location='/explore?decoration={{ t.name | urlencode }}'">
         <div class="tagbar-name">{{ t.name }}</div>
         <div class="tagbar-bar-wrap"><div class="tagbar-bar" style="width: {{ (t.count / max_c * 100)|int }}%;"></div></div>
         <div class="tagbar-pct">{{ t.pct }}%</div>

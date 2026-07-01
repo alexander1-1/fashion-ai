@@ -215,7 +215,8 @@ def get_insights():
 
 
 def get_all_looks(designer=None, show=None, city=None, category=None, material=None,
-                   style=None, silhouette=None, limit=60, offset=0):
+                   style=None, silhouette=None, construction=None, decoration=None,
+                   limit=60, offset=0):
     rows = load_csv(f"{DATA_DIR}/all_designers.csv")
     if designer:
         rows = [r for r in rows if r["designer"].lower() == designer.lower()]
@@ -223,7 +224,7 @@ def get_all_looks(designer=None, show=None, city=None, category=None, material=N
         rows = [r for r in rows if r["show"].lower() == show.lower()]
     if city:
         rows = [r for r in rows if get_city(r["designer"]) == city]
-    if category or material or style or silhouette:
+    if category or material or style or silhouette or construction or decoration:
         filtered = []
         for r in rows:
             enr = _enrichment_index.get(r["image_url"]) if _enrichment_index else None
@@ -237,6 +238,10 @@ def get_all_looks(designer=None, show=None, city=None, category=None, material=N
             if material and not any(material in (it.get("materials") or []) for it in items):
                 continue
             if silhouette and not any(silhouette in (it.get("silhouette") or []) for it in items):
+                continue
+            if construction and not any(construction in (it.get("construction") or []) for it in items):
+                continue
+            if decoration and not any(decoration in (it.get("decoration") or []) for it in items):
                 continue
             filtered.append(r)
         rows = filtered
@@ -309,12 +314,15 @@ def enrich_row(row):
 def get_facets():
     """Filter option lists for Explore sidebar, derived from enrichment insights."""
     if not _enrichment_insights:
-        return {"styles": [], "categories": [], "materials": [], "silhouettes": []}
+        return {"styles": [], "categories": [], "materials": [], "silhouettes": [],
+                 "construction": [], "decoration": []}
     return {
         "styles": [x["name"] for x in _enrichment_insights.get("styles", [])],
         "categories": [x["name"] for x in _enrichment_insights.get("categories", [])],
         "materials": [x["name"] for x in _enrichment_insights.get("materials", [])],
         "silhouettes": [x["name"] for x in _enrichment_insights.get("silhouettes", [])],
+        "construction": [x["name"] for x in _enrichment_insights.get("construction", [])],
+        "decoration": [x["name"] for x in _enrichment_insights.get("decoration", [])],
     }
 
 
@@ -335,8 +343,12 @@ def explore():
     category = request.args.get("category", "")
     material = request.args.get("material", "")
     style = request.args.get("style", "")
+    silhouette = request.args.get("silhouette", "")
+    construction = request.args.get("construction", "")
+    decoration = request.args.get("decoration", "")
     looks, total = get_all_looks(designer or None, show or None, city or None,
                                   category or None, material or None, style or None,
+                                  silhouette or None, construction or None, decoration or None,
                                   limit=60)
     designers = get_designers()
     shows = get_shows(designer or None)
@@ -351,7 +363,10 @@ def explore():
                            selected_city=city,
                            selected_category=category,
                            selected_material=material,
-                           selected_style=style)
+                           selected_style=style,
+                           selected_silhouette=silhouette,
+                           selected_construction=construction,
+                           selected_decoration=decoration)
 
 
 @app.route("/studio")
@@ -490,9 +505,13 @@ def api_looks():
     category = request.args.get("category", "")
     material = request.args.get("material", "")
     style = request.args.get("style", "")
+    silhouette = request.args.get("silhouette", "")
+    construction = request.args.get("construction", "")
+    decoration = request.args.get("decoration", "")
     offset = int(request.args.get("offset", 0))
     looks, total = get_all_looks(designer or None, show or None, city or None,
                                   category or None, material or None, style or None,
+                                  silhouette or None, construction or None, decoration or None,
                                   limit=40, offset=offset)
     return jsonify({"looks": looks, "total": total})
 
