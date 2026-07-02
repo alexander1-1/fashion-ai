@@ -1,0 +1,1336 @@
+[
+ {
+  "image_url": "https://assets.vogue.com/photos/68e2e561a84aa62deab2fb7e/master/w_1024,c_limit/00051-mcqueen-spring-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Alexander McQueen",
+  "show": "Spring 2026 Ready-to-Wear",
+  "look_number": "51",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/6662ab88c05b08206a0c69ac/master/w_1024,c_limit/00035-helmut-lang-resort-2025-credit-brand.gif",
+  "designer": "Helmut Lang",
+  "show": "Resort 2025",
+  "look_number": "35",
+  "styles": [],
+  "items": [
+   {
+    "category": "Other",
+    "materials": [],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/67803579d804f22a3d3b27fa/master/w_1024,c_limit/00032-thom-browne-resort-2025-credit-brand.jpg",
+  "designer": "Thom Browne",
+  "show": "Resort 2025",
+  "look_number": "32",
+  "styles": [],
+  "items": [
+   {
+    "category": "Other",
+    "materials": [],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/69a8a3ce2ccd46c27aba82a9/master/w_1024,c_limit/00028-tom-ford-fall-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Tom Ford",
+  "show": "Fall 2026 Ready-to-Wear",
+  "look_number": "28",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/66dff725a92b75b4a069d3cf/master/w_1024,c_limit/00035-tory-burch-spring-2025-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Tory Burch",
+  "show": "Spring 2025 Ready-to-Wear",
+  "look_number": "35",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/69b418360d347938a224f4d6/master/w_1024,c_limit/00023-valentino-fall-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Valentino",
+  "show": "Fall 2026 Ready-to-Wear",
+  "look_number": "23",
+  "styles": [
+   "New Femininity",
+   "Romantic",
+   "Loud Luxury"
+  ],
+  "items": [
+   {
+    "category": "Jacket/Blazer",
+    "materials": [
+     "Lace"
+    ],
+    "pattern": "Solid",
+    "silhouette": [
+     "Fitted/Waisted",
+     "Cropped"
+    ],
+    "construction": [
+     "V-Neck"
+    ],
+    "decoration": []
+   },
+   {
+    "category": "Gown/Evening",
+    "materials": [
+     "Satin"
+    ],
+    "pattern": "Solid",
+    "silhouette": [
+     "High Rise",
+     "Slim Top + Volume Bottom"
+    ],
+    "construction": [
+     "Draping",
+     "Wrap Closure",
+     "Flounces"
+    ],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "Metallic Fabric"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "Other"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/668d0a82b48c4e7c8c369d57/master/w_1024,c_limit/00005-versace-resort-2025-credit-brand.jpg",
+  "designer": "Versace",
+  "show": "Resort 2025",
+  "look_number": "5",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/6800d3eae08bacf69dfff933/master/w_1024,c_limit/00017-vivienne-westwood-fall-2025-ready-to-wear-credit-brand.jpg",
+  "designer": "Vivienne Westwood",
+  "show": "Fall 2025 Ready-to-Wear",
+  "look_number": "17",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/69a94dc7b1b864c281c3cf30/master/w_1024,c_limit/00034-acne-studios-fall-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Acne Studios",
+  "show": "Fall 2026 Ready-to-Wear",
+  "look_number": "34",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/67be2aa5b0553e5330fe1b9b/master/w_1024,c_limit/00020-alberta-ferretti-fall-2025-ready-to-wear-credit-brand.jpg",
+  "designer": "Alberta Ferretti",
+  "show": "Fall 2025 Ready-to-Wear",
+  "look_number": "20",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/69adebabdc2a6ef7cfaca518/master/w_1024,c_limit/00014-mcqueen-fall-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Alexander McQueen",
+  "show": "Fall 2026 Ready-to-Wear",
+  "look_number": "14",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/671a9cbb4b0981084de8aaf8/master/w_1024,c_limit/00010-altuzarra-spring-2025-ready-to-wear-credit-brand.jpg",
+  "designer": "Altuzarra",
+  "show": "Spring 2025 Ready-to-Wear",
+  "look_number": "10",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/698fd08b767a9aa3fbdd7db3/master/w_1024,c_limit/00039-area-fall-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Area",
+  "show": "Fall 2026 Ready-to-Wear",
+  "look_number": "39",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/665892a7b808fb81f119fd19/master/w_1024,c_limit/00049-balenciaga-resort-2025-credit-gorunway.jpg",
+  "designer": "Balenciaga",
+  "show": "Resort 2025",
+  "look_number": "49",
+  "styles": [
+   "Quiet Luxury",
+   "Minimalism",
+   "Power Dressing"
+  ],
+  "items": [
+   {
+    "category": "Coat",
+    "materials": [
+     "Fur/Faux Fur"
+    ],
+    "pattern": "Solid",
+    "silhouette": [
+     "Oversized",
+     "Elongated"
+    ],
+    "construction": [
+     "Dropped Shoulder"
+    ],
+    "decoration": []
+   },
+   {
+    "category": "Top/Blouse",
+    "materials": [
+     "Other"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Pants/Trousers",
+    "materials": [
+     "Mesh",
+     "Sheer Fabric"
+    ],
+    "pattern": "Solid",
+    "silhouette": [
+     "Slim Leg",
+     "High Rise"
+    ],
+    "construction": [
+     "Slits"
+    ],
+    "decoration": []
+   },
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "Other"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Metallic Fabric"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Sequins"
+    ]
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Other"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/6751bfe19d7b31e377f515aa/master/w_1024,c_limit/00033-balmain-prefall-2025-credit-brand.jpg",
+  "designer": "Balmain",
+  "show": "Pre-Fall 2025",
+  "look_number": "33",
+  "styles": [
+   "Quiet Luxury",
+   "Ladylike",
+   "New Femininity"
+  ],
+  "items": [
+   {
+    "category": "Hat",
+    "materials": [
+     "Fur/Faux Fur"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Coat",
+    "materials": [
+     "Bouclé",
+     "Fur/Faux Fur"
+    ],
+    "pattern": "Solid",
+    "silhouette": [
+     "Straight",
+     "Elongated"
+    ],
+    "construction": [],
+    "decoration": [
+     "Statement Buttons",
+     "Contrast Stitching"
+    ]
+   },
+   {
+    "category": "Top/Blouse",
+    "materials": [
+     "Lace"
+    ],
+    "pattern": "Solid",
+    "silhouette": [
+     "Fitted/Waisted"
+    ],
+    "construction": [
+     "High Neck"
+    ],
+    "decoration": [
+     "Lace Trim"
+    ]
+   },
+   {
+    "category": "Skirt",
+    "materials": [
+     "Fine Knit"
+    ],
+    "pattern": "Solid",
+    "silhouette": [
+     "Fitted/Waisted"
+    ],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Belt",
+    "materials": [
+     "Metallic Fabric"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [
+     "Statement Closure"
+    ],
+    "decoration": [
+     "Metal Hardware"
+    ]
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Suede"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Metal Hardware"
+    ]
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Metal Hardware"
+    ]
+   }
+  ],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/66f060b63f50b7beee3be293/master/w_1024,c_limit/00071-bottega-veneta-spring-2025-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Bottega Veneta",
+  "show": "Spring 2025 Ready-to-Wear",
+  "look_number": "71",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/69b003d289c2f96b2b901955/master/w_1024,c_limit/00051-celine-fall-2026-ready-to-wear-credit-brand.jpg",
+  "designer": "Celine",
+  "show": "Fall 2026 Ready-to-Wear",
+  "look_number": "51",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/6930199d298a3ae9c1f1e991/master/w_1024,c_limit/00010-chanel-pre-fall-2026-credit-gorunway.jpg",
+  "designer": "Chanel",
+  "show": "Pre-Fall 2026",
+  "look_number": "10",
+  "styles": [
+   "Loud Luxury",
+   "Romantic"
+  ],
+  "items": [
+   {
+    "category": "Dress",
+    "materials": [
+     "Velvet",
+     "Metallic Fabric"
+    ],
+    "pattern": "Embroidery Print",
+    "silhouette": [
+     "Column",
+     "Elongated"
+    ],
+    "construction": [
+     "High Neck"
+    ],
+    "decoration": [
+     "Embroidery",
+     "Sequins",
+     "Metal Hardware"
+    ]
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Suede"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Metal Hardware",
+     "Rhinestones"
+    ]
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Metal Hardware",
+     "Monograms"
+    ]
+   }
+  ],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/6a056bbdfd1046792714df69/master/w_1024,c_limit/00048-christian-dior-resort-2027-credit-gorunway.jpg",
+  "designer": "Christian Dior",
+  "show": "Resort 2027",
+  "look_number": "48",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/67aa7e1fc60999c8401dc81c/master/w_1024,c_limit/00032-coach-fall-2025-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Coach",
+  "show": "Fall 2025 Ready-to-Wear",
+  "look_number": "32",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/68e1678edf95c6a1e4962a06/master/w_1024,c_limit/00004-comme-des-garcons-spring-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Comme des Garçons",
+  "show": "Spring 2026 Ready-to-Wear",
+  "look_number": "4",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/68d81b8acf8e39ca6504fd59/master/w_1024,c_limit/00042-dolce-and-gabbana-spring-2026-ready-to-wear-credit-gorunway.JPG",
+  "designer": "Dolce & Gabbana",
+  "show": "Spring 2026 Ready-to-Wear",
+  "look_number": "42",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/699b2dbaa5c46ae880c00488/master/w_1024,c_limit/00002-erdem-fall-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Erdem",
+  "show": "Fall 2026 Ready-to-Wear",
+  "look_number": "2",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/66eb3b7839c149468399a8dd/master/w_1024,c_limit/00028-etro-spring-2025-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Etro",
+  "show": "Spring 2025 Ready-to-Wear",
+  "look_number": "28",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/699f1a9ec1d40c993eff1ac3/master/w_1024,c_limit/00068-fendi-fall-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Fendi",
+  "show": "Fall 2026 Ready-to-Wear",
+  "look_number": "68",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/68dfea2ad404fcbd9b73c62e/master/w_1024,c_limit/00053-giambattista-valli-spring-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Giambattista Valli",
+  "show": "Spring 2026 Ready-to-Wear",
+  "look_number": "53",
+  "styles": [
+   "Minimalism",
+   "Quiet Luxury",
+   "Streetwear"
+  ],
+  "items": [
+   {
+    "category": "Knitwear/Cardigan",
+    "materials": [
+     "Soft Base Knit"
+    ],
+    "pattern": "Solid",
+    "silhouette": [
+     "Relaxed",
+     "Oversized"
+    ],
+    "construction": [
+     "Dropped Shoulder"
+    ],
+    "decoration": []
+   },
+   {
+    "category": "Pants/Trousers",
+    "materials": [
+     "Cotton"
+    ],
+    "pattern": "Solid",
+    "silhouette": [
+     "Relaxed"
+    ],
+    "construction": [
+     "Drawstrings"
+    ],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "Other"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "Other"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/68e03b6f38ec2a3065452aee/master/w_1024,c_limit/00003-givenchy-spring-2026-ready-to-wear-credit-brand.jpg",
+  "designer": "Givenchy",
+  "show": "Spring 2026 Ready-to-Wear",
+  "look_number": "3",
+  "styles": [
+   "Power Dressing",
+   "New Femininity",
+   "Loud Luxury"
+  ],
+  "items": [
+   {
+    "category": "Dress",
+    "materials": [
+     "Suiting Fabric"
+    ],
+    "pattern": "Solid",
+    "silhouette": [
+     "Fitted/Waisted",
+     "Cropped"
+    ],
+    "construction": [
+     "Off-Shoulder",
+     "Wrap Closure",
+     "Puff Sleeves"
+    ],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "Metallic Fabric"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/67bf048252d875843a7342ca/master/w_1024,c_limit/00002-gucci-fall-2025-menswear-credit-brand.jpg",
+  "designer": "Gucci",
+  "show": "Fall 2025 Menswear",
+  "look_number": "2",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/6662ab83c05b08206a0c69aa/master/w_1024,c_limit/00030-helmut-lang-resort-2025-credit-brand.gif",
+  "designer": "Helmut Lang",
+  "show": "Resort 2025",
+  "look_number": "30",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/66f6c1e7446c09d5c9611c9c/master/w_1024,c_limit/00007-issey-miyake-spring-2025-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Issey Miyake",
+  "show": "Spring 2025 Ready-to-Wear",
+  "look_number": "7",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/6862b0085716af41fbe493da/master/w_1024,c_limit/00023-jacquemus-spring-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Jacquemus",
+  "show": "Spring 2026 Ready-to-Wear",
+  "look_number": "23",
+  "styles": [
+   "New Classic",
+   "Quiet Luxury",
+   "Ladylike"
+  ],
+  "items": [
+   {
+    "category": "Top/Blouse",
+    "materials": [
+     "Chiffon"
+    ],
+    "pattern": "Stripes",
+    "silhouette": [
+     "Oversized",
+     "Relaxed"
+    ],
+    "construction": [
+     "V-Neck",
+     "Wrap Closure"
+    ],
+    "decoration": []
+   },
+   {
+    "category": "Skirt",
+    "materials": [
+     "Chiffon"
+    ],
+    "pattern": "Stripes",
+    "silhouette": [
+     "A-line",
+     "Elongated"
+    ],
+    "construction": [
+     "Pleats",
+     "Gathers"
+    ],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Satin"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/68d4354e672d0be51a525ac5/master/w_1024,c_limit/00020-jil-sander-spring-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Jil Sander",
+  "show": "Spring 2026 Ready-to-Wear",
+  "look_number": "20",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/68dc371806c2c8d697e18604/master/w_1024,c_limit/00023-lanvin-spring-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Lanvin",
+  "show": "Spring 2026 Ready-to-Wear",
+  "look_number": "23",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/68dfc8efc9f512f67a7f2b56/master/w_1024,c_limit/00026-loewe-spring-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Loewe",
+  "show": "Spring 2026 Ready-to-Wear",
+  "look_number": "26",
+  "styles": [
+   "New Femininity",
+   "Romantic",
+   "Body-conscious Basics"
+  ],
+  "items": [
+   {
+    "category": "Dress",
+    "materials": [
+     "Ribbed Knit"
+    ],
+    "pattern": "Solid",
+    "silhouette": [
+     "Fitted/Waisted",
+     "Relaxed"
+    ],
+    "construction": [
+     "V-Neck"
+    ],
+    "decoration": [
+     "Ruffles"
+    ]
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "Other"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/698b0e4413bd712daf124eb8/master/w_1024,c_limit/00028-marc-jacobs-spring-2026-ready-to-wear-credit-brand.JPG",
+  "designer": "Marc Jacobs",
+  "show": "Spring 2026 Ready-to-Wear",
+  "look_number": "28",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/67bf821ad80cc2aa5952cb32/master/w_1024,c_limit/00010-marni-fall-2025-ready-to-wear-credit-brand.jpg",
+  "designer": "Marni",
+  "show": "Fall 2025 Ready-to-Wear",
+  "look_number": "10",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/6668c8a64eb113a5ed2b8717/master/w_1024,c_limit/00010-max-mara-resort-2025-credit-gorunway.jpg",
+  "designer": "Max Mara",
+  "show": "Resort 2025",
+  "look_number": "10",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/6a35979bcc68b1e41520c217/master/w_1024,c_limit/00016-missoni-resort-2027-credit-brand.jpg",
+  "designer": "Missoni",
+  "show": "Resort 2027",
+  "look_number": "16",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/68e3dcaff40101ee495577d8/master/w_1024,c_limit/00022-miu-miu-spring-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Miu Miu",
+  "show": "Spring 2026 Ready-to-Wear",
+  "look_number": "22",
+  "styles": [
+   "Quiet Luxury",
+   "New Classic",
+   "Ladylike"
+  ],
+  "items": [
+   {
+    "category": "Dress",
+    "materials": [
+     "Lace"
+    ],
+    "pattern": "Geometric",
+    "silhouette": [
+     "Straight",
+     "A-line"
+    ],
+    "construction": [
+     "Shirt Collar"
+    ],
+    "decoration": [
+     "Statement Buttons"
+    ]
+   },
+   {
+    "category": "Scarf",
+    "materials": [
+     "Other"
+    ],
+    "pattern": "Abstract",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Metal Hardware"
+    ]
+   }
+  ],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/668d3800392073f8f27673c2/master/w_1024,c_limit/00052-moschino-spring-2025-menswear-credit-gorunway.jpg",
+  "designer": "Moschino",
+  "show": "Spring 2025 Menswear",
+  "look_number": "52",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/678d1d6d034acce5b88be235/master/w_1024,c_limit/00046-prada-fall-2025-menswear-credit-gorunway.jpg",
+  "designer": "Prada",
+  "show": "Fall 2025 Menswear",
+  "look_number": "46",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/68c1c22020e604b6393d0066/master/w_1024,c_limit/00022-proenza-schouler-spring-2026-ready-to-wear-credit-brand.jpg",
+  "designer": "Proenza Schouler",
+  "show": "Spring 2026 Ready-to-Wear",
+  "look_number": "22",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/698c637e87cfc9ce36b15f21/master/w_1024,c_limit/00059-ralph-lauren-fall-2026-ready-to-wear-credit-brand.jpg",
+  "designer": "Ralph Lauren",
+  "show": "Fall 2026 Ready-to-Wear",
+  "look_number": "59",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/685dbe43450be9e1937566ee/master/w_1024,c_limit/00031-rick-owens-spring-2026-menswear-credit-owenscorp.jpg",
+  "designer": "Rick Owens",
+  "show": "Spring 2026 Menswear",
+  "look_number": "31",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/68cf10a81efe9b5a949bdb59/master/w_1024,c_limit/00023-roksanda-spring-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Roksanda",
+  "show": "Spring 2026 Ready-to-Wear",
+  "look_number": "23",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/68db8d97ff1945fff1af40d5/master/w_1024,c_limit/00034-saint-laurent-spring-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Saint Laurent",
+  "show": "Spring 2026 Ready-to-Wear",
+  "look_number": "34",
+  "styles": [
+   "Loud Luxury",
+   "Power Dressing",
+   "Moto"
+  ],
+  "items": [
+   {
+    "category": "Jacket/Blazer",
+    "materials": [
+     "Nylon",
+     "Technical Fabric"
+    ],
+    "pattern": "Solid",
+    "silhouette": [
+     "Oversized",
+     "Shoulder Emphasis"
+    ],
+    "construction": [
+     "Puff Sleeves",
+     "Wide Shoulders",
+     "Structural Zipper"
+    ],
+    "decoration": [
+     "Metal Hardware",
+     "Decorative Zippers"
+    ]
+   },
+   {
+    "category": "Pants/Trousers",
+    "materials": [
+     "Nylon",
+     "Technical Fabric"
+    ],
+    "pattern": "Solid",
+    "silhouette": [
+     "Relaxed",
+     "High Rise"
+    ],
+    "construction": [
+     "Drawstrings"
+    ],
+    "decoration": [
+     "Metal Hardware"
+    ]
+   },
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "Other"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "Metallic Fabric"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Rhinestones"
+    ]
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/66e716afe0101ebc6c30f011/master/w_1024,c_limit/00012-simone-rocha-spring-2025-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Simone Rocha",
+  "show": "Spring 2025 Ready-to-Wear",
+  "look_number": "12",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/6888e257b4a9b6b232464ec3/master/w_1024,c_limit/00005-sportmax-resort-2026-credit-brand.jpg",
+  "designer": "Sportmax",
+  "show": "Resort 2026",
+  "look_number": "3",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/66fa8aa9dbbd906d5235c1b6/master/w_1024,c_limit/00047-stella-mccartney-spring-2025-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Stella McCartney",
+  "show": "Spring 2025 Ready-to-Wear",
+  "look_number": "47",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/6853c91740546b314eb756ff/master/w_1024,c_limit/00009-thom-browne-resort-2026-credit-brand.jpg",
+  "designer": "Thom Browne",
+  "show": "Resort 2026",
+  "look_number": "9",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/668517732f2740c8105b7583/master/w_1024,c_limit/00010-tom-ford-resort-2025-credit-brand.jpg",
+  "designer": "Tom Ford",
+  "show": "Resort 2025",
+  "look_number": "10",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/66dff70d060d1fecbb85008b/master/w_1024,c_limit/00025-tory-burch-spring-2025-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Tory Burch",
+  "show": "Spring 2025 Ready-to-Wear",
+  "look_number": "25",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/69b418498ec521c4f2843022/master/w_1024,c_limit/00050-valentino-fall-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Valentino",
+  "show": "Fall 2026 Ready-to-Wear",
+  "look_number": "50",
+  "styles": [
+   "Romantic",
+   "Old Money",
+   "Country Club"
+  ],
+  "items": [
+   {
+    "category": "Hat",
+    "materials": [
+     "Fur/Faux Fur"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jacket/Blazer",
+    "materials": [
+     "Suiting Fabric"
+    ],
+    "pattern": "Checks/Plaid",
+    "silhouette": [
+     "Fitted/Waisted",
+     "Cropped"
+    ],
+    "construction": [
+     "Statement Closure"
+    ],
+    "decoration": [
+     "Statement Buttons"
+    ]
+   },
+   {
+    "category": "Gloves",
+    "materials": [
+     "Fur/Faux Fur"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Skirt",
+    "materials": [
+     "Chiffon",
+     "Lace"
+    ],
+    "pattern": "Solid",
+    "silhouette": [
+     "A-line",
+     "Elongated"
+    ],
+    "construction": [
+     "Asymmetry"
+    ],
+    "decoration": [
+     "Lace Trim"
+    ]
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/67c2c5377776b2b845fc5936/master/w_1024,c_limit/00043-versace-fall-2025-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Versace",
+  "show": "Fall 2025 Ready-to-Wear",
+  "look_number": "43",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/6713a4496a331b4f083cdbd2/master/w_1024,c_limit/00037-vivienne-westwood-spring-2025-ready-to-wear-shanghai-credit-brand.jpg",
+  "designer": "Vivienne Westwood",
+  "show": "Shanghai Spring 2025",
+  "look_number": "37",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/6a3ad07e8236cf03d68a7f1f/master/w_1024,c_limit/00017-acne-studios-spring-2027-menswear-credit-brand.jpg",
+  "designer": "Acne Studios",
+  "show": "Spring 2027 Menswear",
+  "look_number": "17",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/683f12b5e67583166a008b98/master/w_1024,c_limit/00018-alberta-ferretti-resort-2026-brand.jpg",
+  "designer": "Alberta Ferretti",
+  "show": "Resort 2026",
+  "look_number": "18",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/66f870e67db5486392fecc65/master/w_1024,c_limit/00017-alexander-mcqueen-spring-2025-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Alexander McQueen",
+  "show": "Spring 2025 Ready-to-Wear",
+  "look_number": "17",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/68c674b7e930337857b835d2/master/w_1024,c_limit/00026-altuzarra-spring-2026-ready-to-wear-credit-brand.jpg",
+  "designer": "Altuzarra",
+  "show": "Spring 2026 Ready-to-Wear",
+  "look_number": "26",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/698fd070205814c064e3617a/master/w_1024,c_limit/00009-area-fall-2026-ready-to-wear-credit-gorunway.jpg",
+  "designer": "Area",
+  "show": "Fall 2026 Ready-to-Wear",
+  "look_number": "9",
+  "styles": [],
+  "items": [],
+  "verified": false
+ },
+ {
+  "image_url": "https://assets.vogue.com/photos/6967ac7704f1ff5b7cc22ce9/master/w_1024,c_limit/00055-balenciaga-pre-fall-2026-credit-brand.jpg",
+  "designer": "Balenciaga",
+  "show": "Pre-Fall 2026",
+  "look_number": "55",
+  "styles": [
+   "Preppy",
+   "90s Retro",
+   "Quiet Luxury"
+  ],
+  "items": [
+   {
+    "category": "Hat",
+    "materials": [
+     "Ribbed Knit"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jacket/Blazer",
+    "materials": [
+     "Suiting Fabric"
+    ],
+    "pattern": "Solid",
+    "silhouette": [
+     "Straight",
+     "Oversized"
+    ],
+    "construction": [
+     "Statement Closure"
+    ],
+    "decoration": [
+     "Statement Buttons"
+    ]
+   },
+   {
+    "category": "Top/Blouse",
+    "materials": [
+     "Cotton"
+    ],
+    "pattern": "Stripes",
+    "silhouette": [
+     "Fitted/Waisted"
+    ],
+    "construction": [
+     "High Neck"
+    ],
+    "decoration": []
+   },
+   {
+    "category": "Pants/Trousers",
+    "materials": [
+     "Denim"
+    ],
+    "pattern": "Solid",
+    "silhouette": [
+     "Wide Leg/Flare",
+     "High Rise"
+    ],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "Other"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ],
+  "verified": false
+ }
+]

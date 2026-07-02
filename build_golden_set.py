@@ -230,7 +230,7 @@ function exportJson(){
   const unv = DATA.filter(l => !l.verified).length;
   if (unv > 0 && !confirm(unv +
     ' луков не отмечены проверенными. Всё равно экспортировать?')) return;
-  const out = DATA.map(({verified, ...rest}) => rest);
+  const out = DATA;  // verified сохраняем — нужен для merge_golden_set.py
   const blob = new Blob([JSON.stringify(out, null, 1)],
     {type: 'application/json'});
   const a = document.createElement('a');
@@ -252,12 +252,22 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--n", type=int, default=100)
     p.add_argument("--input", default="output/all_designers.csv")
+    p.add_argument("--from-json", default=None,
+                   help="Собрать annotate.html из готового JSON со списком "
+                        "луков (вместо новой выборки), например для передачи "
+                        "оставшихся луков коллеге")
     args = p.parse_args()
 
-    looks = sample_looks(args.input, args.n)
-    draft = prefill(looks)
-    with open(DRAFT_PATH, "w", encoding="utf-8") as f:
-        json.dump(draft, f, ensure_ascii=False, indent=1)
+    if args.from_json:
+        with open(args.from_json, encoding="utf-8") as f:
+            draft = json.load(f)
+        for d in draft:
+            d.setdefault("verified", False)
+    else:
+        looks = sample_looks(args.input, args.n)
+        draft = prefill(looks)
+        with open(DRAFT_PATH, "w", encoding="utf-8") as f:
+            json.dump(draft, f, ensure_ascii=False, indent=1)
 
     tx_json = {
         "styles": tx.STYLES, "category": tx.CATEGORIES,
