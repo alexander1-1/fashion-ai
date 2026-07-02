@@ -1,170 +1,216 @@
 """
-Fashion AI — обогащение датасета через Claude Vision (v2: full recognition)
-============================================================================
-Читает output/all_designers.csv, для каждого лука распознаёт ВСЕ видимые
-предметы гардероба (жакет, юбка, обувь, сумка и т.д.) и тегирует каждый
-по 6 измерениям на основе контролируемого словаря "Тренд-копилка":
-  - category      (тип предмета)
-  - materials     (материал/фактура, может быть несколько)
-  - pattern       (принт/узор)
-  - silhouette    (силуэт — может быть несколько признаков)
-  - construction  (элементы кроя — несколько)
-  - decoration    (отделка — несколько)
-Плюс look-level стилистика (style_tags) — общая эстетика образа.
+Fashion AI — обогащение датасета через Claude Vision (v3: structured output)
+=============================================================================
+Изменения v3 (TREND_PLATFORM_INSTRUCTION.md, раздел 2):
+  - закрытая таксономия из taxonomy.py (Тренд-копилка), tool use со строгими
+    enum — никакого свободного текста и regex-парсинга
+  - двухпроходный анализ: проход A (полное фото: категории, силуэт, принт,
+    цвета, стили) + проход B (2 кропа: верх/низ — крой, отделка, материал)
+  - обязательное значение "not_visible" вместо угадывания
+  - confidence на каждый предмет; < 0.6 → очередь на пересмотр Sonnet 5
+  - модель claude-haiku-4-5, Batch API (−50%), prompt caching таксономии
+  - MOCK=1 — работа без API на фикстурах
 
 Запуск:
-    python3 enrich_looks.py                  # все луки
-    python3 enrich_looks.py --sample 50      # тест на первых 50
-    python3 enrich_looks.py --resume         # продолжить с места остановки
+    python3 enrich_looks.py --sample 20                # синхронно, 20 луков
+    python3 enrich_looks.py --full --confirm-full      # Batch API, все луки
+    python3 enrich_looks.py --collect                  # забрать результаты батча
+    python3 enrich_looks.py --review                   # пересмотр low-conf Sonnet 5
+    MOCK=1 python3 enrich_looks.py --sample 5          # без API (фикстуры)
 
-Результат: output/enriched_looks.csv
-Формат: designer, show, look_number, image_url, style_tags, items_json
-
-items_json — JSON-массив предметов, например:
-[{"category":"Jacket/Blazer","materials":["Tweed"],"pattern":"Checks/Plaid",
-  "silhouette":["Oversized"],"construction":["Wide Shoulders"],"decoration":["Piping"]},
- {"category":"Skirt","materials":["Tweed"],"pattern":"Solid",
-  "silhouette":["A-line"],"construction":[],"decoration":["Statement Buttons"]},
- {"category":"Shoes/Boots","materials":["Leather/Faux Leather"],"pattern":"Solid",
-  "silhouette":[],"construction":[],"decoration":[]}]
-
-Цена: ~$0.05-0.08 на 100 луков (claude-haiku vision, больше output-токенов чем в v1)
+Результат: output/enriched_looks_v3.csv
+Формат: designer, show, look_number, image_url, style_tags, items_json, confidence
 """
 
-import csv
-import json
-import os
-import sys
-import time
 import argparse
 import base64
+import csv
+import io
+import json
+import os
+import re
+import sys
+import time
 
-# ─── Контролируемый словарь (из "Тренд-копилка для AI-анализа коллекций") ────
-
-ITEM_CATEGORIES = [
-    "Coat", "Jacket/Blazer", "Suit", "Dress", "Gown/Evening",
-    "Jumpsuit/Romper", "Top/Blouse", "Shirt", "Knitwear/Cardigan",
-    "Pants/Trousers", "Skirt", "Shorts", "Vest", "Cape/Poncho",
-    "Swimwear", "Lingerie/Corset",
-    "Bag", "Shoes/Boots", "Belt", "Hat", "Scarf", "Gloves",
-    "Jewelry/Accessory", "Sunglasses", "Other",
-]
-
-MATERIALS = [
-    "Leather/Faux Leather", "Suede", "Denim", "Chunky Knit", "Fine Knit",
-    "Ribbed Knit", "Suiting Fabric", "Satin", "Chiffon", "Organza",
-    "Lace", "Mesh", "Velvet", "Tweed", "Bouclé", "Fur/Faux Fur",
-    "Nylon", "Cotton", "Linen", "Textured Knit", "Sheer Fabric",
-    "Metallic Fabric", "Technical Fabric", "Trench/Rain Fabric",
-    "Soft Base Knit", "Artisanal Texture Fabric", "Crinkled Texture",
-    "Other",
-]
-
-PATTERNS = [
-    "Solid", "Stripes", "Checks/Plaid", "Floral", "Animal Print",
-    "Abstract", "Geometric", "Polka Dots", "Paisley", "Camouflage",
-    "Houndstooth", "Tie-dye", "Ombre", "Patchwork", "Logo/Monogram",
-    "Embroidery Print", "Other",
-]
-
-SILHOUETTES = [
-    "Straight", "Fitted/Waisted", "Semi-Fitted", "Relaxed", "Oversized",
-    "Elongated", "Cropped", "A-line", "X-Silhouette", "Trapeze",
-    "Cocoon", "Column", "Hourglass", "Volume Top + Slim Bottom",
-    "Slim Top + Volume Bottom", "Shoulder Emphasis", "Waist Emphasis",
-    "Hip Emphasis", "Low Rise", "High Rise", "Wide Leg/Flare",
-    "Slim Leg", "Layered Silhouette", "Athletic Relaxed",
-]
-
-CONSTRUCTION = [
-    "Darts", "Princess Seams", "Draping", "Asymmetry", "Wrap Closure",
-    "Peplum", "Pleats", "Tucks", "Drawstrings", "Gathers", "Flounces",
-    "Puff Sleeves", "Extended Cuffs", "Wide Shoulders", "Dropped Shoulder",
-    "Stand Collar", "High Neck", "Polo Collar", "Shirt Collar", "Halter",
-    "Off-Shoulder", "Boat Neck", "Square Neckline", "V-Neck",
-    "Cutout Neckline", "Slits", "Patch Pockets", "Cargo Pockets",
-    "Waist Seam", "Layered Details", "Convertible Elements",
-    "Statement Closure", "Structural Zipper",
-]
-
-DECORATION = [
-    "Lace Trim", "Ruffles", "Frills", "Fringe", "Embroidery", "Appliqué",
-    "Contrast Stitching", "Piping", "Bows", "Ties", "Lacing",
-    "Decorative Zippers", "Metal Hardware", "Grommets",
-    "Statement Buttons", "Sequins", "Rhinestones", "Perforation",
-    "Textured Inserts", "Sheer Inserts", "Side Stripes", "Sport Stripes",
-    "Logos", "Monograms", "Decorative Pockets",
-]
-
-STYLES = [
-    "Minimalism", "Quiet Luxury", "New Classic", "Ladylike", "New Femininity",
-    "Power Dressing", "Office Aesthetic", "Soft Tailoring", "Preppy",
-    "Collegiate/Schoolgirl", "Old Money", "Country Aesthetic", "Country Club",
-    "Boho", "Romantic", "Boudoir", "Grunge", "Streetwear", "Sport as Status",
-    "Wellness", "Utilitarian", "Outdoor", "Moto", "70s Retro", "90s Retro",
-    "Y2K", "2010s Nostalgia", "Eclectic", "Loud Luxury", "Quiet Status",
-    "Body-conscious Basics", "Intellectual Fashion", "Artisanal/Craft", "Resort",
-]
-
-# ─── Промпт ───────────────────────────────────────────────────────────────────
-
-SYSTEM = (
-    "You are an expert fashion trend analyst working like tfashion.ai. "
-    "You analyze runway photos and extract EVERY visible garment and accessory "
-    "as a separate item, tagging each with precise, controlled-vocabulary labels. "
-    "You never invent labels outside the provided lists."
+from taxonomy import (
+    CATEGORIES, MATERIALS, PATTERNS, SILHOUETTES, CONSTRUCTION, DECORATION,
+    STYLES, COLORS, NOT_VISIBLE,
+    tool_schema_full, tool_schema_details,
 )
 
-PROMPT = f"""Analyze this runway look photo in FULL detail. Identify EVERY distinct visible garment and accessory (not just the main piece) — typically this includes: main top/dress, bottom (if separate), outerwear (if layered), shoes, bag (if visible), and any notable accessory (belt, hat, scarf, gloves, jewelry, sunglasses).
+# ─── Константы ────────────────────────────────────────────────────────────────
 
-Return ONLY valid JSON with this exact structure:
+MODEL_BULK = "claude-haiku-4-5"      # массовое тегирование
+MODEL_REVIEW = "claude-sonnet-5"     # контроль качества / low-confidence
+CONFIDENCE_THRESHOLD = 0.6
 
-{{
-  "style_tags": ["<0-3 values from: {', '.join(STYLES)}>"],
-  "items": [
-    {{
-      "category": "<one of: {', '.join(ITEM_CATEGORIES)}>",
-      "materials": ["<1-2 values from: {', '.join(MATERIALS)}>"],
-      "pattern": "<one of: {', '.join(PATTERNS)}>",
-      "silhouette": ["<0-2 values from: {', '.join(SILHOUETTES)}> (leave empty [] for bags/shoes/accessories)"],
-      "construction": ["<0-3 values from: {', '.join(CONSTRUCTION)}> (leave empty [] if none clearly visible)"],
-      "decoration": ["<0-3 values from: {', '.join(DECORATION)}> (leave empty [] if none clearly visible)"]
-    }}
-  ]
-}}
+FULL_MAX_SIDE = 1200                 # px, полное фото
+CROP_MAX_SIDE = 800                  # px, кропы
+JPEG_QUALITY = 85
 
-Rules:
-- Detect ALL distinct garment/accessory pieces visible in the photo (usually 3-6 items). Do not merge separate pieces into one entry.
-- style_tags describes the OVERALL look's aesthetic (look-level), not per item.
-- Use ONLY values from the provided lists — never invent new terms. If nothing fits well, use "Other" (for category/materials/pattern) or an empty list (for silhouette/construction/decoration/style_tags).
-- silhouette/construction/decoration apply mainly to garments, not accessories — use empty lists for bags, shoes, jewelry, sunglasses unless a construction/decoration detail is clearly visible on them.
-- Return ONLY the JSON object, no markdown fences, no other text."""
+MAX_TOKENS_A = 1500
+MAX_TOKENS_B = 1200
 
-MAX_TOKENS = 1400
+MOCK = os.environ.get("MOCK", "") == "1"
+FIXTURES_PATH = "tests/fixtures/vision_fixtures.json"
 
-# ─── Загрузка изображения (base64) ───────────────────────────────────────────
+# ─── Промпты ──────────────────────────────────────────────────────────────────
+# Таксономия в системном промпте кэшируется (prompt caching): при массовом
+# прогоне чтение кэша стоит 10% от обычной цены input-токенов.
 
-def fetch_image_b64(url: str) -> tuple[str, str]:
-    """Download image and return (base64_data, media_type)."""
+
+def _fmt(name, values):
+    return f"{name}: {', '.join(values)}"
+
+
+SYSTEM_TAXONOMY = f"""You are an expert fashion trend analyst. You tag runway \
+photos using a CLOSED controlled vocabulary ("Тренд-копилка" taxonomy). \
+Strict rules:
+1. Use ONLY values from the enums of the tool you are given. Never invent, \
+translate or paraphrase labels.
+2. If an attribute is not clearly visible in the photo, answer "{NOT_VISIBLE}" \
+(where allowed) or leave the array empty. NEVER guess small details you \
+cannot actually see.
+3. Report every distinct garment and accessory as a separate item.
+4. confidence is your honest estimate (0-1) that the tags for that item are \
+correct; low confidence is acceptable and expected for ambiguous photos.
+
+Reference taxonomy:
+{_fmt("STYLES", STYLES)}
+{_fmt("CATEGORIES", CATEGORIES)}
+{_fmt("MATERIALS", MATERIALS)}
+{_fmt("PATTERNS", PATTERNS)}
+{_fmt("SILHOUETTES", SILHOUETTES)}
+{_fmt("CONSTRUCTION", CONSTRUCTION)}
+{_fmt("DECORATION", DECORATION)}
+{_fmt("COLORS", COLORS)}"""
+
+PROMPT_A = """Full-body runway photo. Pass A — overall reading.
+Identify EVERY distinct visible garment and accessory (typically 3-6 items: \
+main top/dress, bottom, outerwear, shoes, bag, notable accessories).
+For each item: category, pattern, silhouette (garments only, [] for \
+accessories), dominant colors. Plus 0-3 look-level styles.
+Call the tag_look tool."""
+
+PROMPT_B = """Two close-up crops of the SAME runway look.
+Image 1 = upper half: collars, necklines, shoulders, sleeves, cuffs, \
+closures, buttons.
+Image 2 = lower half: waistline, rise, pockets, hem, slits, skirt/trouser \
+construction.
+Pass B — fine details only. For each garment where you can clearly see \
+details, report: material, construction elements, decoration. Use \
+"not_visible" for material you cannot determine; empty arrays when no \
+construction/decoration detail is clearly visible. Do NOT report silhouettes \
+or styles. Call the tag_details tool."""
+
+
+# ─── Изображения ──────────────────────────────────────────────────────────────
+
+def upgrade_url(url: str) -> str:
+    """Vogue отдаёт большие размеры — поднимаем w_1024 до w_1920."""
+    return re.sub(r"/w_\d+,", "/w_1920,", url)
+
+
+def fetch_image(url: str, timeout: int = 20) -> bytes:
     import urllib.request
-    headers = {"User-Agent": "Mozilla/5.0 (compatible; FashionAI/1.0)"}
-    req = urllib.request.Request(url, headers=headers)
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        data = resp.read()
-        content_type = resp.headers.get("Content-Type", "image/jpeg").split(";")[0].strip()
-        if content_type not in ("image/jpeg", "image/png", "image/webp", "image/gif"):
-            content_type = "image/jpeg"
-        return base64.standard_b64encode(data).decode("utf-8"), content_type
+    req = urllib.request.Request(
+        url, headers={"User-Agent": "Mozilla/5.0 (compatible; FashionAI/1.0)"})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return resp.read()
 
 
-# ─── Валидация / очистка ответа модели ───────────────────────────────────────
+def _resize_jpeg(img, max_side: int) -> bytes:
+    from PIL import Image
+    if max(img.size) > max_side:
+        ratio = max_side / max(img.size)
+        img = img.resize(
+            (round(img.width * ratio), round(img.height * ratio)),
+            Image.LANCZOS)
+    buf = io.BytesIO()
+    img.convert("RGB").save(buf, "JPEG", quality=JPEG_QUALITY)
+    return buf.getvalue()
 
-def _coerce_list(values, allowed, max_n):
-    if not isinstance(values, list):
-        return []
+
+def prepare_images(url: str) -> dict:
+    """→ {'full': b64, 'top': b64, 'bottom': b64} (JPEG)."""
+    from PIL import Image
+    try:
+        raw = fetch_image(upgrade_url(url))
+    except Exception:
+        raw = fetch_image(url)  # fallback на исходный размер
+    img = Image.open(io.BytesIO(raw))
+    w, h = img.size
+    # кропы с перекрытием 10% — линия талии попадает в оба
+    top = img.crop((0, 0, w, int(h * 0.55)))
+    bottom = img.crop((0, int(h * 0.45), w, h))
+    return {
+        "full": base64.standard_b64encode(
+            _resize_jpeg(img, FULL_MAX_SIDE)).decode(),
+        "top": base64.standard_b64encode(
+            _resize_jpeg(top, CROP_MAX_SIDE)).decode(),
+        "bottom": base64.standard_b64encode(
+            _resize_jpeg(bottom, CROP_MAX_SIDE)).decode(),
+    }
+
+
+def _img_block(b64: str) -> dict:
+    return {"type": "image",
+            "source": {"type": "base64", "media_type": "image/jpeg",
+                       "data": b64}}
+
+
+# ─── Параметры запросов (общие для sync и batch) ─────────────────────────────
+
+def _system_blocks():
+    return [{"type": "text", "text": SYSTEM_TAXONOMY,
+             "cache_control": {"type": "ephemeral"}}]
+
+
+def request_params_a(images: dict, model: str) -> dict:
+    return {
+        "model": model,
+        "max_tokens": MAX_TOKENS_A,
+        "system": _system_blocks(),
+        "tools": [tool_schema_full()],
+        "tool_choice": {"type": "tool", "name": "tag_look"},
+        "messages": [{"role": "user", "content": [
+            _img_block(images["full"]),
+            {"type": "text", "text": PROMPT_A},
+        ]}],
+    }
+
+
+def request_params_b(images: dict, model: str) -> dict:
+    return {
+        "model": model,
+        "max_tokens": MAX_TOKENS_B,
+        "system": _system_blocks(),
+        "tools": [tool_schema_details()],
+        "tool_choice": {"type": "tool", "name": "tag_details"},
+        "messages": [{"role": "user", "content": [
+            _img_block(images["top"]),
+            _img_block(images["bottom"]),
+            {"type": "text", "text": PROMPT_B},
+        ]}],
+    }
+
+
+def extract_tool_input(message) -> dict:
+    """Достать input tool_use блока из ответа (объект SDK или dict батча)."""
+    content = message.content if hasattr(message, "content") else message["content"]
+    for block in content:
+        btype = block.type if hasattr(block, "type") else block.get("type")
+        if btype == "tool_use":
+            return block.input if hasattr(block, "input") else block["input"]
+    raise ValueError("No tool_use block in response")
+
+
+# ─── Валидация против таксономии (защита в глубину) ──────────────────────────
+
+def _keep(values, allowed, max_n):
+    allowed_set = set(allowed) | {NOT_VISIBLE}
     out = []
-    allowed_set = set(allowed)
-    for v in values:
+    for v in values or []:
         if isinstance(v, str) and v in allowed_set and v not in out:
             out.append(v)
         if len(out) >= max_n:
@@ -172,208 +218,446 @@ def _coerce_list(values, allowed, max_n):
     return out
 
 
-def _coerce_single(value, allowed, default="Other"):
-    if isinstance(value, str) and value in allowed:
+def _one(value, allowed, default):
+    if isinstance(value, str) and value in set(allowed) | {NOT_VISIBLE}:
         return value
     return default
 
 
-def validate_result(raw: dict) -> dict:
-    """Clean/validate raw parsed JSON against controlled vocabulary."""
-    style_tags = _coerce_list(raw.get("style_tags"), STYLES, 3)
+def _conf(value):
+    try:
+        return max(0.0, min(1.0, float(value)))
+    except (TypeError, ValueError):
+        return 0.0
 
-    items_in = raw.get("items")
-    if not isinstance(items_in, list):
-        items_in = []
 
-    items_out = []
-    for it in items_in[:8]:  # hard cap
+def validate_a(raw: dict) -> dict:
+    items = []
+    for it in (raw.get("items") or [])[:8]:
         if not isinstance(it, dict):
             continue
-        category = _coerce_single(it.get("category"), ITEM_CATEGORIES, "Other")
-        materials = _coerce_list(it.get("materials"), MATERIALS, 2)
-        if not materials:
-            materials = ["Other"]
-        pattern = _coerce_single(it.get("pattern"), PATTERNS, "Solid")
-        silhouette = _coerce_list(it.get("silhouette"), SILHOUETTES, 2)
-        construction = _coerce_list(it.get("construction"), CONSTRUCTION, 3)
-        decoration = _coerce_list(it.get("decoration"), DECORATION, 3)
-        items_out.append({
-            "category": category,
-            "materials": materials,
-            "pattern": pattern,
-            "silhouette": silhouette,
-            "construction": construction,
-            "decoration": decoration,
+        items.append({
+            "category": _one(it.get("category"), CATEGORIES, "Other"),
+            "pattern": _one(it.get("pattern"), PATTERNS, NOT_VISIBLE),
+            "silhouette": _keep(it.get("silhouette"), SILHOUETTES, 2),
+            "colors": _keep(it.get("colors"), COLORS, 3),
+            "confidence": _conf(it.get("confidence")),
+        })
+    return {"styles": _keep(raw.get("styles"), STYLES, 3), "items": items}
+
+
+def validate_b(raw: dict) -> dict:
+    items = []
+    for it in (raw.get("items") or [])[:8]:
+        if not isinstance(it, dict):
+            continue
+        items.append({
+            "category": _one(it.get("category"), CATEGORIES, "Other"),
+            "materials": _keep(it.get("materials"), MATERIALS, 2),
+            "construction": _keep(it.get("construction"), CONSTRUCTION, 4),
+            "decoration": _keep(it.get("decoration"), DECORATION, 4),
+            "confidence": _conf(it.get("confidence")),
+        })
+    return {"items": items}
+
+
+# ─── Merge проходов A и B ─────────────────────────────────────────────────────
+
+def merge_passes(a: dict, b: dict) -> dict:
+    """A — база (категории/силуэт/принт/цвета/стили), B перезаписывает
+    material/construction/decoration. Матчинг предметов по category.
+    Конфликт двух кроп-ответов по одному предмету → больший confidence."""
+    items = []
+    for it in a["items"]:
+        items.append({
+            "category": it["category"],
+            "materials": [NOT_VISIBLE],
+            "pattern": it["pattern"],
+            "silhouette": it["silhouette"],
+            "construction": [],
+            "decoration": [],
+            "colors": it["colors"],
+            "confidence": it["confidence"],
         })
 
-    if not items_out:
-        items_out = [{
-            "category": "Other", "materials": ["Other"], "pattern": "Other",
-            "silhouette": [], "construction": [], "decoration": [],
-        }]
+    by_cat = {}
+    for det in b["items"]:
+        cat = det["category"]
+        if cat not in by_cat or det["confidence"] > by_cat[cat]["confidence"]:
+            # объединяем массивы обоих кропов, материал — от более уверенного
+            if cat in by_cat:
+                prev = by_cat[cat]
+                det = dict(det)
+                det["construction"] = list(dict.fromkeys(
+                    prev["construction"] + det["construction"]))[:4]
+                det["decoration"] = list(dict.fromkeys(
+                    prev["decoration"] + det["decoration"]))[:4]
+            by_cat[cat] = det
+        else:
+            prev = by_cat[cat]
+            prev["construction"] = list(dict.fromkeys(
+                prev["construction"] + det["construction"]))[:4]
+            prev["decoration"] = list(dict.fromkeys(
+                prev["decoration"] + det["decoration"]))[:4]
 
-    return {"style_tags": style_tags, "items": items_out}
+    matched = set()
+    for it in items:
+        det = by_cat.get(it["category"])
+        if det and it["category"] not in matched:
+            matched.add(it["category"])
+            if det["materials"]:
+                it["materials"] = det["materials"]
+            it["construction"] = det["construction"]
+            it["decoration"] = det["decoration"]
+            it["confidence"] = min(it["confidence"], det["confidence"]) \
+                if det["confidence"] else it["confidence"]
+
+    styles = a["styles"]
+    confs = [it["confidence"] for it in items] or [0.0]
+    return {"styles": styles, "items": items, "confidence": min(confs)}
 
 
-FALLBACK = {"style_tags": [], "items": [{
-    "category": "Other", "materials": ["Other"], "pattern": "Other",
-    "silhouette": [], "construction": [], "decoration": [],
-}]}
+# ─── Клиент (реальный / mock) ────────────────────────────────────────────────
+
+class MockClient:
+    """MOCK=1: переигрывает записанные фикстуры, API не тратится."""
+
+    def __init__(self, path=FIXTURES_PATH):
+        self.fixtures = {}
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as f:
+                self.fixtures = json.load(f)
+
+    def call(self, params: dict, key: str) -> dict:
+        if key in self.fixtures:
+            return self.fixtures[key]
+        tool = params["tools"][0]["name"]
+        if tool == "tag_look":  # детерминированная заглушка
+            return {"styles": ["Minimalism"], "items": [{
+                "category": "Dress", "pattern": "Solid",
+                "silhouette": ["Straight"], "colors": ["Black"],
+                "confidence": 0.9}]}
+        return {"items": [{
+            "category": "Dress", "materials": ["Satin"],
+            "construction": ["Stand Collar"], "decoration": [],
+            "confidence": 0.9}]}
 
 
-# ─── Анализ одного лука ───────────────────────────────────────────────────────
+class LiveClient:
+    def __init__(self):
+        import anthropic
+        api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+        if not api_key:
+            sys.exit("❌ Set ANTHROPIC_API_KEY (или MOCK=1 для работы без API)")
+        self.client = anthropic.Anthropic(api_key=api_key)
+        self._fixtures = {}
+        if os.path.exists(FIXTURES_PATH):
+            with open(FIXTURES_PATH, encoding="utf-8") as f:
+                self._fixtures = json.load(f)
 
-def analyze_look(client, image_url: str, retries: int = 3) -> dict:
-    """Call Claude Haiku Vision and return validated tags."""
-    for attempt in range(retries):
+    def call(self, params: dict, key: str, retries: int = 3) -> dict:
+        for attempt in range(retries):
+            try:
+                msg = self.client.messages.create(**params)
+                result = extract_tool_input(msg)
+                self._record(key, result)
+                return result
+            except Exception as e:
+                print(f"    API error: {e} (attempt {attempt + 1})")
+                time.sleep(5 * (attempt + 1))
+        raise RuntimeError(f"API failed after {retries} retries: {key}")
+
+    def _record(self, key: str, result: dict):
+        """Пишем фикстуру один раз — потом тесты гоняются бесплатно (MOCK=1)."""
+        self._fixtures[key] = result
+        os.makedirs(os.path.dirname(FIXTURES_PATH), exist_ok=True)
+        with open(FIXTURES_PATH, "w", encoding="utf-8") as f:
+            json.dump(self._fixtures, f, ensure_ascii=False, indent=1)
+
+
+# ─── Обработка одного лука (sync) ─────────────────────────────────────────────
+
+def analyze_look(client, url: str, model: str = MODEL_BULK) -> dict:
+    images = prepare_images(url) if not MOCK else \
+        {"full": "", "top": "", "bottom": ""}
+    a = validate_a(client.call(request_params_a(images, model), f"A:{url}"))
+    b = validate_b(client.call(request_params_b(images, model), f"B:{url}"))
+    return merge_passes(a, b)
+
+
+# ─── CSV I/O ──────────────────────────────────────────────────────────────────
+
+FIELDNAMES = ["designer", "show", "look_number", "image_url",
+              "style_tags", "items_json", "confidence"]
+
+
+def result_row(row: dict, tags: dict) -> dict:
+    return {
+        "designer": row["designer"], "show": row["show"],
+        "look_number": row["look_number"], "image_url": row["image_url"],
+        "style_tags": ",".join(tags["styles"]),
+        "items_json": json.dumps(tags["items"], ensure_ascii=False),
+        "confidence": f"{tags['confidence']:.2f}",
+    }
+
+
+def load_rows(input_csv: str, sample: int) -> list:
+    with open(input_csv, encoding="utf-8") as f:
+        rows = [r for r in csv.DictReader(f) if r.get("image_url")]
+    return rows[:sample] if sample else rows
+
+
+def load_processed(output_csv: str) -> set:
+    if not os.path.exists(output_csv):
+        return set()
+    with open(output_csv, encoding="utf-8") as f:
+        return {r["image_url"] for r in csv.DictReader(f)}
+
+
+def append_review_queue(data_dir: str, row: dict, tags: dict):
+    path = f"{data_dir}/review_queue.jsonl"
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(json.dumps({
+            "image_url": row["image_url"], "designer": row["designer"],
+            "show": row["show"], "look_number": row["look_number"],
+            "confidence": tags["confidence"],
+        }, ensure_ascii=False) + "\n")
+
+
+# ─── Batch API ────────────────────────────────────────────────────────────────
+
+def batch_submit(client, rows, processed, data_dir):
+    """Собрать все запросы (2 на лук: A и B) и отправить одним батчем."""
+    from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
+    from anthropic.types.messages.batch_create_params import Request
+
+    requests, index = [], {}
+    print(f"⏳ Подготовка изображений ({len(rows)} луков, full + 2 кропа)…")
+    for i, row in enumerate(rows):
+        url = row["image_url"]
+        if url in processed:
+            continue
         try:
-            b64, media_type = fetch_image_b64(image_url)
-            response = client.messages.create(
-                model="claude-haiku-4-5-20251001",
-                max_tokens=MAX_TOKENS,
-                system=SYSTEM,
-                messages=[{
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image",
-                            "source": {
-                                "type": "base64",
-                                "media_type": media_type,
-                                "data": b64,
-                            },
-                        },
-                        {"type": "text", "text": PROMPT},
-                    ],
-                }],
-            )
-            text = response.content[0].text.strip()
-            if "```" in text:
-                text = text.split("```")[1]
-                if text.startswith("json"):
-                    text = text[4:]
-            raw = json.loads(text)
-            return validate_result(raw)
-        except json.JSONDecodeError:
-            print(f"    JSON parse error, attempt {attempt+1}")
-            time.sleep(2)
+            images = prepare_images(url)
         except Exception as e:
-            print(f"    Error: {e}, attempt {attempt+1}")
-            time.sleep(5 * (attempt + 1))
-    return FALLBACK
+            print(f"  ⚠️  skip {url}: {e}")
+            continue
+        index[str(i)] = row
+        requests.append(Request(
+            custom_id=f"{i}-A",
+            params=MessageCreateParamsNonStreaming(
+                **request_params_a(images, MODEL_BULK))))
+        requests.append(Request(
+            custom_id=f"{i}-B",
+            params=MessageCreateParamsNonStreaming(
+                **request_params_b(images, MODEL_BULK))))
+        if (i + 1) % 100 == 0:
+            print(f"  … {i + 1}/{len(rows)}")
+
+    if not requests:
+        print("Нечего отправлять — всё уже обработано.")
+        return
+
+    batch = client.client.messages.batches.create(requests=requests)
+    state = {"batch_id": batch.id, "index": index}
+    with open(f"{data_dir}/batch_state.json", "w", encoding="utf-8") as f:
+        json.dump(state, f, ensure_ascii=False)
+    print(f"✅ Батч отправлен: {batch.id} ({len(requests)} запросов, "
+          f"{len(index)} луков)")
+    print("   Статус/сбор: python3 enrich_looks.py --collect")
 
 
-def summarize(tags: dict) -> str:
-    cats = [it["category"] for it in tags["items"]]
-    styles = ", ".join(tags["style_tags"][:2]) or "—"
-    return f"{len(tags['items'])} items ({', '.join(cats[:4])}{'…' if len(cats) > 4 else ''}) · style: {styles}"
+def batch_collect(client, data_dir, output_csv):
+    state_path = f"{data_dir}/batch_state.json"
+    if not os.path.exists(state_path):
+        sys.exit("❌ Нет batch_state.json — сначала --full --confirm-full")
+    with open(state_path, encoding="utf-8") as f:
+        state = json.load(f)
+    batch_id, index = state["batch_id"], state["index"]
+
+    batch = client.client.messages.batches.retrieve(batch_id)
+    print(f"Батч {batch_id}: {batch.processing_status}")
+    if batch.processing_status != "ended":
+        c = batch.request_counts
+        print(f"  processing={c.processing} succeeded={c.succeeded} "
+              f"errored={c.errored}")
+        return
+
+    results_a, results_b = {}, {}
+    for res in client.client.messages.batches.results(batch_id):
+        if res.result.type != "succeeded":
+            print(f"  ⚠️  {res.custom_id}: {res.result.type}")
+            continue
+        idx, which = res.custom_id.rsplit("-", 1)
+        parsed = extract_tool_input(res.result.message)
+        (results_a if which == "A" else results_b)[idx] = parsed
+
+    processed = load_processed(output_csv)
+    mode = "a" if os.path.exists(output_csv) else "w"
+    n_done = n_review = 0
+    with open(output_csv, mode, newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
+        if mode == "w":
+            writer.writeheader()
+        for idx, row in index.items():
+            if row["image_url"] in processed or idx not in results_a:
+                continue
+            a = validate_a(results_a[idx])
+            b = validate_b(results_b.get(idx, {"items": []}))
+            tags = merge_passes(a, b)
+            writer.writerow(result_row(row, tags))
+            n_done += 1
+            if tags["confidence"] < CONFIDENCE_THRESHOLD:
+                append_review_queue(os.path.dirname(output_csv), row, tags)
+                n_review += 1
+    print(f"✅ Собрано: {n_done} луков → {output_csv}")
+    print(f"   На пересмотр Sonnet (conf < {CONFIDENCE_THRESHOLD}): "
+          f"{n_review} → --review")
 
 
-# ─── Основной код ─────────────────────────────────────────────────────────────
+# ─── Review low-confidence (Sonnet 5) ────────────────────────────────────────
+
+def run_review(client, data_dir, output_csv):
+    queue_path = f"{data_dir}/review_queue.jsonl"
+    if not os.path.exists(queue_path):
+        print("Очередь пересмотра пуста.")
+        return
+    with open(queue_path, encoding="utf-8") as f:
+        queue = [json.loads(line) for line in f if line.strip()]
+    # дедуп по url
+    queue = list({q["image_url"]: q for q in queue}.values())
+    print(f"🔍 Пересмотр {len(queue)} луков моделью {MODEL_REVIEW}")
+
+    with open(output_csv, encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    by_url = {r["image_url"]: r for r in rows}
+
+    for i, q in enumerate(queue):
+        url = q["image_url"]
+        print(f"[{i + 1}/{len(queue)}] {q['designer']} · Look "
+              f"{q['look_number']}", end=" ")
+        try:
+            tags = analyze_look(client, url, model=MODEL_REVIEW)
+        except Exception as e:
+            print(f"→ ошибка: {e}")
+            continue
+        print(f"→ conf {tags['confidence']:.2f}")
+        if url in by_url:
+            by_url[url].update(result_row(
+                {k: by_url[url][k] for k in
+                 ("designer", "show", "look_number", "image_url")}, tags))
+        time.sleep(0.3)
+
+    with open(output_csv, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
+        writer.writeheader()
+        writer.writerows(rows)
+    os.rename(queue_path, queue_path + ".done")
+    print(f"✅ Пересмотр завершён → {output_csv}")
+
+
+# ─── Оценка стоимости ─────────────────────────────────────────────────────────
+
+def estimate_cost(n_looks: int) -> str:
+    # vision-токены ≈ w*h/750; full 1200×800 ≈ 1280, кропы 800×530 ≈ 570×2
+    img_tok = 1280 + 570 * 2
+    sys_tok = 2000 * 0.1        # кэш таксономии: чтение = 10% цены
+    out_tok = 700 * 2
+    in_total = n_looks * (img_tok + sys_tok + 200)
+    out_total = n_looks * out_tok
+    # Haiku 4.5 batch: $0.50 / $2.50 за Мток
+    cost = in_total / 1e6 * 0.50 + out_total / 1e6 * 2.50
+    return f"~${cost:.0f} (Haiku 4.5 + Batch −50%)"
+
+
+# ─── main ─────────────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--sample", type=int, default=0,
-                        help="Process only first N looks (0 = all)")
-    parser.add_argument("--resume", action="store_true",
-                        help="Skip already processed looks")
-    parser.add_argument("--batch-delay", type=float, default=0.5,
-                        help="Seconds to wait between API calls")
-    parser.add_argument("--data-dir", default="./output",
-                        help="Path to output/ directory with CSVs")
-    args = parser.parse_args()
+    p = argparse.ArgumentParser(description=__doc__.splitlines()[1])
+    p.add_argument("--sample", type=int, default=0,
+                   help="Обработать только первые N луков (sync)")
+    p.add_argument("--full", action="store_true",
+                   help="Полный прогон через Batch API")
+    p.add_argument("--confirm-full", action="store_true",
+                   help="Подтверждение полного прогона (обязательно с --full)")
+    p.add_argument("--collect", action="store_true",
+                   help="Забрать результаты отправленного батча")
+    p.add_argument("--review", action="store_true",
+                   help="Пересмотреть low-confidence луки Sonnet 5")
+    p.add_argument("--resume", action="store_true",
+                   help="Пропустить уже обработанные")
+    p.add_argument("--data-dir", default="./output")
+    args = p.parse_args()
 
-    DATA_DIR = args.data_dir
-    INPUT_CSV = f"{DATA_DIR}/all_designers.csv"
-    OUTPUT_CSV = f"{DATA_DIR}/enriched_looks.csv"
+    data_dir = args.data_dir
+    input_csv = f"{data_dir}/all_designers.csv"
+    output_csv = f"{data_dir}/enriched_looks_v3.csv"
 
-    if not os.path.exists(INPUT_CSV):
-        print(f"❌ {INPUT_CSV} not found. Run the scraper first.")
-        sys.exit(1)
+    def get_client():
+        if MOCK:
+            print("🧪 MOCK=1 — API не используется, фикстуры из",
+                  FIXTURES_PATH)
+            return MockClient()
+        return LiveClient()
 
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    if not api_key:
-        print("❌ Set ANTHROPIC_API_KEY environment variable")
-        sys.exit(1)
+    if args.collect:
+        return batch_collect(get_client(), data_dir, output_csv)
+    if args.review:
+        return run_review(get_client(), data_dir, output_csv)
 
-    try:
-        import anthropic
-        client = anthropic.Anthropic(api_key=api_key)
-    except ImportError:
-        print("❌ pip install anthropic")
-        sys.exit(1)
+    if not os.path.exists(input_csv):
+        sys.exit(f"❌ {input_csv} не найден. Сначала запусти скрапер.")
+    rows = load_rows(input_csv, args.sample)
+    processed = load_processed(output_csv) if args.resume else set()
 
-    with open(INPUT_CSV, encoding="utf-8") as f:
-        rows = list(csv.DictReader(f))
-    if args.sample:
-        rows = rows[:args.sample]
-    print(f"📊 Total looks to process: {len(rows)}")
+    if args.full:
+        if not args.confirm_full:
+            sys.exit(f"⛔ Полный прогон {len(rows)} луков ≈ "
+                     f"{estimate_cost(len(rows))}.\n"
+                     f"   Добавь --confirm-full для подтверждения "
+                     f"(сначала golden set! см. eval_tagging.py)")
+        if MOCK:
+            sys.exit("⛔ Batch API недоступен в MOCK-режиме")
+        return batch_submit(get_client(), rows, processed, data_dir)
 
-    processed = {}
-    if args.resume and os.path.exists(OUTPUT_CSV):
-        with open(OUTPUT_CSV, encoding="utf-8") as f:
-            for r in csv.DictReader(f):
-                processed[r["image_url"]] = r
-        print(f"✓ Already processed: {len(processed)}")
+    if not args.sample:
+        sys.exit("⛔ Без --sample N только --full (Batch API). "
+                 "Для теста: --sample 20")
 
-    fieldnames = [
-        "designer", "show", "look_number", "image_url",
-        "style_tags", "items_json",
-    ]
-    mode = "a" if args.resume and os.path.exists(OUTPUT_CSV) else "w"
-    out_f = open(OUTPUT_CSV, mode, newline="", encoding="utf-8")
-    writer = csv.DictWriter(out_f, fieldnames=fieldnames)
-    if mode == "w":
-        writer.writeheader()
+    # sync-режим для маленьких выборок
+    client = get_client()
+    print(f"📊 Sync-обработка {len(rows)} луков, модель {MODEL_BULK}")
+    mode = "a" if args.resume and os.path.exists(output_csv) else "w"
+    n_review = 0
+    with open(output_csv, mode, newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
+        if mode == "w":
+            writer.writeheader()
+        for i, row in enumerate(rows):
+            url = row["image_url"]
+            if url in processed:
+                continue
+            print(f"[{i + 1}/{len(rows)}] {row['designer']} · "
+                  f"Look {row['look_number']}", end=" ")
+            try:
+                tags = analyze_look(client, url)
+            except Exception as e:
+                print(f"→ ошибка: {e}")
+                continue
+            cats = [it["category"] for it in tags["items"]]
+            print(f"→ {len(cats)} items ({', '.join(cats[:4])}) "
+                  f"· conf {tags['confidence']:.2f}")
+            writer.writerow(result_row(row, tags))
+            f.flush()
+            if tags["confidence"] < CONFIDENCE_THRESHOLD:
+                append_review_queue(data_dir, row, tags)
+                n_review += 1
+            if not MOCK:
+                time.sleep(0.4)
 
-    total = len(rows)
-    done = 0
-    skipped = 0
-    errors = 0
-
-    for i, row in enumerate(rows):
-        url = row.get("image_url", "")
-        if not url:
-            continue
-
-        if args.resume and url in processed:
-            skipped += 1
-            continue
-
-        print(f"[{i+1}/{total}] {row['designer']} · {row['show']} · Look {row['look_number']}", end=" ")
-
-        tags = analyze_look(client, url)
-        print(f"→ {summarize(tags)}")
-
-        out_row = {
-            "designer": row["designer"],
-            "show": row["show"],
-            "look_number": row["look_number"],
-            "image_url": url,
-            "style_tags": ",".join(tags["style_tags"]),
-            "items_json": json.dumps(tags["items"], ensure_ascii=False),
-        }
-        writer.writerow(out_row)
-        out_f.flush()
-
-        done += 1
-        if tags["items"][0]["category"] == "Other" and len(tags["items"]) == 1:
-            errors += 1
-
-        time.sleep(args.batch_delay)
-
-        if done % 100 == 0:
-            print(f"\n── Checkpoint: {done} processed, {skipped} skipped, {errors} errors ──\n")
-
-    out_f.close()
-
-    print(f"\n✅ Done!")
-    print(f"   Processed: {done}")
-    print(f"   Skipped:   {skipped}")
-    print(f"   Errors:    {errors}")
-    print(f"   Output:    {OUTPUT_CSV}")
-    print(f"\nNext: run python3 update_insights.py to rebuild analytics")
+    print(f"\n✅ Готово → {output_csv}")
+    if n_review:
+        print(f"   Low-confidence: {n_review} → python3 enrich_looks.py --review")
 
 
 if __name__ == "__main__":
