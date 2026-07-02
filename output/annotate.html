@@ -39,8 +39,6 @@
  </div>
  <div class="progress" id="progress"></div>
  <h3 id="title"></h3>
- <details open><summary><b>Стили лука (0–3)</b></summary>
-   <div class="chips" id="styles"></div></details>
  <div id="items"></div>
  <button onclick="addItem()">+ Добавить предмет</button>
 </div>
@@ -59,20 +57,6 @@ function save(){ try{ localStorage.setItem(LSKEY, JSON.stringify(DATA)); }
   catch(e){} }
 
 function ruName(dim, v){ return (RU[dim] && RU[dim][v]) ? RU[dim][v] : v; }
-
-function chips(containerId, dim, values, selected, onchange){
-  const el = document.getElementById(containerId);
-  el.innerHTML = '';
-  values.forEach(v => {
-    const l = document.createElement('label');
-    const cb = document.createElement('input');
-    cb.type = 'checkbox'; cb.checked = selected.includes(v);
-    cb.onchange = () => onchange(v, cb.checked);
-    const s = document.createElement('span');
-    s.textContent = ruName(dim, v);
-    l.appendChild(cb); l.appendChild(s); el.appendChild(l);
-  });
-}
 
 function multiSelect(dim, values, selected, onchange, withNV){
   const sel = document.createElement('select');
@@ -149,10 +133,6 @@ function render(){
   const done = DATA.filter(l => l.verified).length;
   document.getElementById('progress').textContent =
     'Проверено: ' + done + ' из ' + DATA.length;
-  chips('styles', 'styles', TX.styles, look.styles, (v, on) => {
-    if (on) { if (!look.styles.includes(v)) look.styles.push(v); }
-    else look.styles = look.styles.filter(x => x !== v);
-    save(); });
   renderItems();
 }
 
