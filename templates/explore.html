@@ -124,26 +124,26 @@
   <aside class="sidebar">
 
     <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Describe a look…"
+      <input type="text" id="searchInput" placeholder="Опиши образ…"
              value="" autocomplete="off">
       <button class="search-icon" onclick="runSearch()">⌕</button>
-      <div class="search-mode" id="searchMode">AI semantic search</div>
+      <div class="search-mode" id="searchMode">ИИ-поиск по смыслу</div>
     </div>
 
     <div class="sidebar-section">
-      <label>City</label>
+      <label>Город</label>
       <div class="city-pills">
-        <div class="city-pill {% if not selected_city %}active{% endif %}" onclick="setCity('')">All</div>
+        <div class="city-pill {% if not selected_city %}active{% endif %}" onclick="setCity('')">Все</div>
         {% for c in cities %}
-        <div class="city-pill {% if c == selected_city %}active{% endif %}" onclick="setCity('{{ c }}')">{{ c }}</div>
+        <div class="city-pill {% if c == selected_city %}active{% endif %}" onclick="setCity('{{ c }}')">{{ c | ru }}</div>
         {% endfor %}
       </div>
     </div>
 
     <div class="sidebar-section">
-      <label>Designer</label>
+      <label>Бренд</label>
       <select id="designerFilter" onchange="applyFilters()">
-        <option value="">All Designers</option>
+        <option value="">Все бренды</option>
         {% for d in designers %}
         <option value="{{ d }}" {% if d == selected_designer %}selected{% endif %}>{{ d }}</option>
         {% endfor %}
@@ -152,74 +152,74 @@
 
     {% if facets and (facets.styles or facets.categories or facets.materials) %}
     <div class="sidebar-section">
-      <label>Style</label>
+      <label>Стилистика</label>
       <select id="styleFilter" onchange="applyFilters()">
-        <option value="">All Styles</option>
+        <option value="">Все стили</option>
         {% for s in facets.styles %}
-        <option value="{{ s }}" {% if s == selected_style %}selected{% endif %}>{{ s }}</option>
+        <option value="{{ s }}" {% if s == selected_style %}selected{% endif %}>{{ s | ru }}</option>
         {% endfor %}
       </select>
     </div>
 
     <div class="sidebar-section">
-      <label>Category</label>
+      <label>Категория</label>
       <select id="categoryFilter" onchange="applyFilters()">
-        <option value="">All Categories</option>
+        <option value="">Все категории</option>
         {% for c in facets.categories %}
-        <option value="{{ c }}" {% if c == selected_category %}selected{% endif %}>{{ c }}</option>
+        <option value="{{ c }}" {% if c == selected_category %}selected{% endif %}>{{ c | ru }}</option>
         {% endfor %}
       </select>
     </div>
 
     <div class="sidebar-section">
-      <label>Material</label>
+      <label>Материал</label>
       <select id="materialFilter" onchange="applyFilters()">
-        <option value="">All Materials</option>
+        <option value="">Все материалы</option>
         {% for m in facets.materials %}
-        <option value="{{ m }}" {% if m == selected_material %}selected{% endif %}>{{ m }}</option>
+        <option value="{{ m }}" {% if m == selected_material %}selected{% endif %}>{{ m | ru }}</option>
         {% endfor %}
       </select>
     </div>
 
     <div class="sidebar-section">
-      <label>Silhouette</label>
+      <label>Силуэт</label>
       <select id="silhouetteFilter" onchange="applyFilters()">
-        <option value="">All Silhouettes</option>
+        <option value="">Все силуэты</option>
         {% for s in facets.silhouettes %}
-        <option value="{{ s }}" {% if s == selected_silhouette %}selected{% endif %}>{{ s }}</option>
+        <option value="{{ s }}" {% if s == selected_silhouette %}selected{% endif %}>{{ s | ru }}</option>
         {% endfor %}
       </select>
     </div>
 
     <div class="sidebar-section">
-      <label>Construction</label>
+      <label>Крой</label>
       <select id="constructionFilter" onchange="applyFilters()">
-        <option value="">All Construction</option>
+        <option value="">Все элементы кроя</option>
         {% for c in facets.construction %}
-        <option value="{{ c }}" {% if c == selected_construction %}selected{% endif %}>{{ c }}</option>
+        <option value="{{ c }}" {% if c == selected_construction %}selected{% endif %}>{{ c | ru }}</option>
         {% endfor %}
       </select>
     </div>
 
     <div class="sidebar-section">
-      <label>Decoration</label>
+      <label>Отделка</label>
       <select id="decorationFilter" onchange="applyFilters()">
-        <option value="">All Decoration</option>
+        <option value="">Вся отделка</option>
         {% for d in facets.decoration %}
-        <option value="{{ d }}" {% if d == selected_decoration %}selected{% endif %}>{{ d }}</option>
+        <option value="{{ d }}" {% if d == selected_decoration %}selected{% endif %}>{{ d | ru }}</option>
         {% endfor %}
       </select>
     </div>
     {% else %}
     <div class="sidebar-section">
-      <div class="enrichment-badge">Item-level filters appear once recognition finishes running.</div>
+      <div class="enrichment-badge">Фильтры по предметам появятся, когда распознавание завершится.</div>
     </div>
     {% endif %}
 
     <div class="sidebar-section">
-      <label>Season</label>
+      <label>Коллекция</label>
       <select id="showFilter" onchange="applyFilters()">
-        <option value="">All Seasons</option>
+        <option value="">Все коллекции</option>
         {% for s in shows %}
         <option value="{{ s }}" {% if s == selected_show %}selected{% endif %}>{{ s }}</option>
         {% endfor %}
@@ -227,7 +227,7 @@
     </div>
 
     <div class="sidebar-section">
-      <label>Quick filters</label>
+      <label>Быстрые фильтры</label>
       <div style="display: flex; flex-direction: column; gap: 6px;">
         {% for label, designer in [("Chanel", "Chanel"), ("Gucci", "Gucci"), ("Prada", "Prada"), ("Balenciaga", "Balenciaga"), ("Saint Laurent", "Saint Laurent")] %}
         <button onclick="setDesigner('{{ designer }}')"
@@ -243,7 +243,7 @@
     </div>
 
     <button onclick="clearFilters()" class="btn" style="width: 100%; justify-content: center; margin-top: 8px;">
-      Clear filters
+      Сбросить фильтры
     </button>
 
   </aside>
@@ -252,12 +252,12 @@
   <div class="content">
     <div class="content-header">
       <h2 id="contentTitle">
-        {% if selected_city %}{{ selected_city }}{% elif selected_designer %}{{ selected_designer }}{% else %}All Looks{% endif %}
+        {% if selected_city %}{{ selected_city | ru }}{% elif selected_designer %}{{ selected_designer }}{% else %}Все луки{% endif %}
       </h2>
       <div style="text-align: right;">
-        <div class="count" id="totalCount">{{ total }} looks</div>
+        <div class="count" id="totalCount">{{ total }} луков</div>
         {% if enriched_count %}
-        <div class="enrichment-badge">{{ "{:,}".format(enriched_count) }} looks fully tagged</div>
+        <div class="enrichment-badge">{{ "{:,}".format(enriched_count) }} луков полностью размечено</div>
         {% endif %}
       </div>
     </div>
@@ -272,7 +272,7 @@
                loading="lazy" onerror="this.parentElement.parentElement.style.display='none'">
           <div class="card-overlay">
             <div class="card-designer">{{ look.designer }}</div>
-            <div class="card-show">{{ look.show }} · Look {{ look.look_number }}</div>
+            <div class="card-show">{{ look.show }} · Образ {{ look.look_number }}</div>
           </div>
           <button class="pin-btn"
                   onclick="pinLook('{{ look.designer }}', '{{ look.show }}', '{{ look.look_number }}', '{{ look.image_url }}', this)">
@@ -280,12 +280,12 @@
           </button>
           <button class="similar-btn"
                   onclick="findSimilar('{{ look.image_url }}', '{{ look.designer }}')">
-            Similar
+            Похожие
           </button>
         </div>
         {% if look._categories %}
         <div class="look-tags">
-          {% if look._style %}<span class="tag-style">{{ look._style }}</span> · {% endif %}{{ look._categories | join(', ') }}
+          {% if look._style %}<span class="tag-style">{{ look._style | ru }}</span> · {% endif %}{{ look._categories | map('ru') | join(', ') }}
         </div>
         {% endif %}
       </div>
@@ -294,7 +294,7 @@
 
     <div class="load-more" id="loadMoreWrap">
       {% if total > 60 %}
-      <button class="btn" onclick="loadMore()">Load more ({{ total - 60 }} remaining)</button>
+      <button class="btn" onclick="loadMore()">Показать ещё (осталось {{ total - 60 }})</button>
       {% endif %}
     </div>
   </div>
@@ -345,7 +345,7 @@
   function pinLook(designer, show, lookNum, imageUrl, btn) {
     const boards = getBoards();
     const id = getActiveBoardId();
-    if (!boards[id]) boards[id] = { name: 'My Board', looks: [] };
+    if (!boards[id]) boards[id] = { name: 'Моя доска', looks: [] };
     const look = { designer, show, look_number: lookNum, image_url: imageUrl };
     const already = boards[id].looks.some(l => l.image_url === imageUrl);
     if (!already) {
@@ -353,13 +353,13 @@
       saveBoards(boards);
       btn.textContent = '★';
       btn.style.color = '#fff';
-      showToast('Pinned to ' + boards[id].name);
+      showToast('Добавлено на доску «' + boards[id].name + '»');
     } else {
       boards[id].looks = boards[id].looks.filter(l => l.image_url !== imageUrl);
       saveBoards(boards);
       btn.textContent = '☆';
       btn.style.color = '';
-      showToast('Removed from board');
+      showToast('Убрано с доски');
     }
   }
 
@@ -378,11 +378,14 @@
   document.addEventListener('DOMContentLoaded', markPinned);
 
   // ── Filters ──────────────────────────────────────────────────────────────
+  const CITY_RU = {'Paris': 'Париж', 'Milan': 'Милан', 'New York': 'Нью-Йорк', 'London': 'Лондон'};
+
   function setCity(city) {
     currentCity = city;
     document.querySelectorAll('.city-pill').forEach(p => p.classList.remove('active'));
     const pills = document.querySelectorAll('.city-pill');
-    pills.forEach(p => { if (p.textContent.trim() === (city || 'All')) p.classList.add('active'); });
+    const label = city ? (CITY_RU[city] || city) : 'Все';
+    pills.forEach(p => { if (p.textContent.trim() === label) p.classList.add('active'); });
     applyFilters();
   }
 
@@ -420,9 +423,9 @@
       .then(r => r.json())
       .then(data => {
         renderLooks(data.looks, false);
-        document.getElementById('totalCount').textContent = data.total + ' looks';
+        document.getElementById('totalCount').textContent = data.total + ' луков';
         document.getElementById('contentTitle').textContent =
-          currentCity || currentDesigner || 'All Looks';
+          (currentCity ? (CITY_RU[currentCity] || currentCity) : '') || currentDesigner || 'Все луки';
         currentOffset = data.looks.length;
         updateLoadMore(data.total);
         markPinned();
@@ -451,7 +454,7 @@
     const remaining = total - currentOffset;
     const wrap = document.getElementById('loadMoreWrap');
     if (remaining > 0 && !isSearchMode) {
-      wrap.innerHTML = `<button class="btn" onclick="loadMore()">Load more (${remaining} remaining)</button>`;
+      wrap.innerHTML = `<button class="btn" onclick="loadMore()">Показать ещё (осталось ${remaining})</button>`;
     } else {
       wrap.innerHTML = '';
     }
@@ -464,7 +467,7 @@
 
     isSearchMode = true;
     document.getElementById('looksGrid').innerHTML =
-      '<div class="searching-indicator">Searching runway for "' + query + '"…</div>';
+      '<div class="searching-indicator">Ищем на подиуме «' + query + '»…</div>';
     document.getElementById('loadMoreWrap').innerHTML = '';
 
     const filterParams = new URLSearchParams({ q: query });
@@ -476,16 +479,16 @@
       .then(r => r.json())
       .then(data => {
         const results = Array.isArray(data) ? data : (data.results || []);
-        const mode = results.length > 0 && results[0].mode === 'clip' ? 'AI semantic' :
-                     results.length > 0 && results[0].mode === 'color' ? 'Color match' :
-                     results.length > 0 && results[0].mode === 'random' ? 'Inspiration' : 'Text match';
+        const mode = results.length > 0 && results[0].mode === 'clip' ? 'ИИ-поиск' :
+                     results.length > 0 && results[0].mode === 'color' ? 'По цвету' :
+                     results.length > 0 && results[0].mode === 'random' ? 'Вдохновение' : 'По тексту';
         const header = document.getElementById('searchResultsHeader');
         header.style.display = 'block';
-        header.textContent = `${mode} · "${query}" · ${results.length} results`;
-        document.getElementById('totalCount').textContent = results.length + ' results';
+        header.textContent = `${mode} · «${query}» · ${results.length} результатов`;
+        document.getElementById('totalCount').textContent = results.length + ' результатов';
         if (results.length === 0) {
           document.getElementById('looksGrid').innerHTML =
-            '<div class="searching-indicator">No results for "' + query + '"</div>';
+            '<div class="searching-indicator">Нет результатов по «' + query + '»</div>';
         } else {
           renderLooks(results, false);
           markPinned();
@@ -494,7 +497,7 @@
       .catch(err => {
         console.error('Search error:', err);
         document.getElementById('looksGrid').innerHTML =
-          '<div class="searching-indicator">Search error — please try again</div>';
+          '<div class="searching-indicator">Ошибка поиска — попробуй ещё раз</div>';
       });
   }
 
@@ -502,7 +505,7 @@
   function findSimilar(imageUrl, designer) {
     isSearchMode = true;
     document.getElementById('looksGrid').innerHTML =
-      '<div class="searching-indicator">Finding similar looks…</div>';
+      '<div class="searching-indicator">Ищем похожие образы…</div>';
     document.getElementById('loadMoreWrap').innerHTML = '';
 
     fetch('/api/similar?url=' + encodeURIComponent(imageUrl))
@@ -511,12 +514,12 @@
         const results = Array.isArray(data) ? data : [];
         const header = document.getElementById('searchResultsHeader');
         header.style.display = 'block';
-        header.textContent = `Similar to ${designer} · ${results.length} results`;
-        document.getElementById('totalCount').textContent = results.length + ' results';
-        document.getElementById('contentTitle').textContent = 'Similar looks';
+        header.textContent = `Похоже на ${designer} · ${results.length} результатов`;
+        document.getElementById('totalCount').textContent = results.length + ' результатов';
+        document.getElementById('contentTitle').textContent = 'Похожие образы';
         if (results.length === 0) {
           document.getElementById('looksGrid').innerHTML =
-            '<div class="searching-indicator">No similar looks found</div>';
+            '<div class="searching-indicator">Похожих образов не найдено</div>';
         } else {
           renderLooks(results, false);
           markPinned();
@@ -524,7 +527,7 @@
       })
       .catch(() => {
         document.getElementById('looksGrid').innerHTML =
-          '<div class="searching-indicator">Similar search unavailable</div>';
+          '<div class="searching-indicator">Поиск похожих недоступен</div>';
       });
   }
 
@@ -567,7 +570,7 @@
                loading="lazy" onerror="this.parentElement.parentElement.style.display='none'">
           <div class="card-overlay">
             <div class="card-designer">${l.designer}</div>
-            <div class="card-show">${l.show} · Look ${l.look_number}</div>
+            <div class="card-show">${l.show} · Образ ${l.look_number}</div>
           </div>
           <button class="pin-btn"
                   onclick="pinLook('${l.designer}', '${l.show}', '${l.look_number}', '${l.image_url}', this)">
@@ -575,7 +578,7 @@
           </button>
           <button class="similar-btn"
                   onclick="findSimilar('${l.image_url}', '${l.designer}')">
-            Similar
+            Похожие
           </button>
         </div>
         ${tagsHtml}

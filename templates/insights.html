@@ -121,54 +121,90 @@
   .enrichment-progress {
     font-size: 11px; color: var(--text3); margin-top: 6px;
   }
+
+  /* FILTER BAR */
+  .insights-filters {
+    display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap; align-items: center;
+  }
+  .insights-filters select {
+    background: var(--bg2); border: 1px solid var(--border); color: var(--text);
+    padding: 8px 12px; border-radius: 4px; font-size: 12px; outline: none;
+    appearance: none; min-width: 180px;
+  }
+  .insights-filters select:focus { border-color: var(--text3); }
+  .insights-filters .clear-link {
+    font-size: 11px; color: var(--text3); text-decoration: none; padding: 8px 4px;
+  }
+  .insights-filters .clear-link:hover { color: var(--text2); }
 </style>
 {% endblock %}
 
 {% block content %}
-{% if insights %}
 <div class="hero">
-  <div class="hero-label">Fashion Week Insights</div>
-  <h1 class="hero-title">FW26 · <span>Trend Intelligence</span></h1>
+  <div class="hero-label">Инсайты Fashion Week</div>
+  <h1 class="hero-title">FW26 · <span>Аналитика трендов</span></h1>
+
+  <div class="insights-filters">
+    <select id="insDesigner" onchange="applyInsightsFilters()">
+      <option value="">Все бренды</option>
+      {% for d in designers %}
+      <option value="{{ d }}" {% if d == selected_designer %}selected{% endif %}>{{ d }}</option>
+      {% endfor %}
+    </select>
+    <select id="insShow" onchange="applyInsightsFilters()">
+      <option value="">Все коллекции</option>
+      {% for s in shows %}
+      <option value="{{ s }}" {% if s == selected_show %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+    {% if selected_designer or selected_show %}
+    <a href="/" class="clear-link">Сбросить фильтры ✕</a>
+    {% endif %}
+  </div>
+
+  {% if insights %}
   <div class="hero-stats">
     <div class="stat-item">
       <div class="stat-num">{{ "{:,}".format(insights.total_looks) }}</div>
-      <div class="stat-lbl">Runway Looks</div>
+      <div class="stat-lbl">Луков подиума</div>
     </div>
     <div class="stat-item">
       <div class="stat-num">{{ insights.total_designers }}</div>
-      <div class="stat-lbl">Designers</div>
+      <div class="stat-lbl">Брендов</div>
     </div>
     <div class="stat-item">
       <div class="stat-num">{{ insights.total_shows }}</div>
-      <div class="stat-lbl">Shows</div>
+      <div class="stat-lbl">Коллекций</div>
     </div>
     <div class="stat-item">
       <div class="stat-num">{{ insights.cities | length }}</div>
-      <div class="stat-lbl">Cities</div>
+      <div class="stat-lbl">Городов</div>
     </div>
     {% if insights.enrichment %}
     <div class="stat-item">
       <div class="stat-num">{{ "{:,}".format(insights.enrichment.total_items) }}</div>
-      <div class="stat-lbl">Items Recognized</div>
+      <div class="stat-lbl">Предметов распознано</div>
     </div>
     <div class="stat-item">
       <div class="stat-num">{{ (insights.enrichment.total_items / insights.enrichment.total_looks) | round(1) }}</div>
-      <div class="stat-lbl">Avg Items / Look</div>
+      <div class="stat-lbl">В среднем предметов/look</div>
     </div>
     {% endif %}
   </div>
-  {% if insights.enriched_count %}
+  {% if insights.enriched_count and not (selected_designer or selected_show) %}
   <div class="enrichment-progress">
-    Full recognition: {{ "{:,}".format(insights.enriched_count) }} / {{ "{:,}".format(insights.total_looks) }} looks tagged (style, category, material, pattern, silhouette, construction, decoration)
+    Полное распознавание: {{ "{:,}".format(insights.enriched_count) }} / {{ "{:,}".format(insights.total_looks) }} луков размечено (стилистика, категория, материал, принт, силуэт, крой, отделка)
   </div>
+  {% endif %}
   {% endif %}
 </div>
 
+{% if insights %}
 <div class="insights-grid">
 
   <!-- KEY COLORS -->
   <div class="panel">
-    <div class="section-label">Key Colors · FW26</div>
+    <div class="section-label">Ключевые цвета · FW26</div>
     {% set max_count = insights.top_colors[0].count %}
     <div class="colors-list">
       {% for c in insights.top_colors %}
@@ -189,7 +225,7 @@
 
   <!-- TOP DESIGNERS -->
   <div class="panel">
-    <div class="section-label">Top Designers · FW26</div>
+    <div class="section-label">Топ брендов · FW26</div>
     <div class="designer-list">
       {% for d in insights.top_designers %}
       <div class="designer-row">
@@ -200,13 +236,13 @@
             {{ d.name }}
           </a>
         </div>
-        <div class="designer-looks">{{ d.looks }} looks</div>
+        <div class="designer-looks">{{ d.looks }} луков</div>
       </div>
       {% endfor %}
     </div>
 
     <div style="margin-top: 36px;">
-      <div class="section-label">Season Palette</div>
+      <div class="section-label">Палитра сезона</div>
       <div class="palette-dots">
         {% for c in insights.top_colors %}
         <div class="palette-dot" title="{{ c.name }} · {{ c.code }}"
@@ -220,14 +256,14 @@
 
   <!-- KEY SIGNALS -->
   <div class="panel">
-    <div class="section-label">Key Signals · FW26</div>
+    <div class="section-label">Ключевые сигналы · FW26</div>
     <div style="margin-top: 20px;">
       {% set signals = [
-        ("Dark Palette Dominance", "Black, Charcoal, Coffee Bean account for 50%+ of looks", "+12% vs FW25"),
-        ("Soft Pink Rising", "Powder Pink and Flamingo Pink gaining momentum", "+28% vs FW25"),
-        ("Earth Tones Return", "Warm Taupe, Mushroom, Sage Mist trending up", "+18% vs FW25"),
-        ("Lilac Emergence", "Pastel Lilac unexpectedly strong for FW season", "+45% vs FW25"),
-        ("Metallic Accent", "Gold Fusion and Bronze Mist appear in 14% of looks", "New entry"),
+        ("Доминирование тёмной палитры", "Black, Charcoal, Coffee Bean — 50%+ всех луков", "+12% к FW25"),
+        ("Рост нежно-розового", "Powder Pink и Flamingo Pink набирают силу", "+28% к FW25"),
+        ("Возврат земляных оттенков", "Warm Taupe, Mushroom, Sage Mist в тренде", "+18% к FW25"),
+        ("Всплеск лилового", "Pastel Lilac неожиданно силён в этом сезоне", "+45% к FW25"),
+        ("Металлик-акцент", "Gold Fusion и Bronze Mist встречаются в 14% луков", "Новый сигнал"),
       ] %}
       {% for title, desc, growth in signals %}
       <div class="signal-card">
@@ -243,24 +279,24 @@
 
   <!-- EXPLORE BY CITY -->
   <div class="panel">
-    <div class="section-label">Explore by City</div>
+    <div class="section-label">По городам</div>
     <div style="margin-top: 20px;">
       {% for city in insights.cities %}
       {% if city.name != 'Other' %}
       <a href="/explore?city={{ city.name }}" class="city-card">
         <div class="city-card-left">
-          <div class="city-name">{{ city.name }} Womenswear</div>
-          <div class="city-sub">{{ city.designers }} designer{% if city.designers != 1 %}s{% endif %} · {{ "{:,}".format(city.looks) }} looks</div>
+          <div class="city-name">{{ city.name | ru }} · женская одежда</div>
+          <div class="city-sub">{{ city.designers }} брендов · {{ "{:,}".format(city.looks) }} луков</div>
         </div>
         <div class="city-card-right">→</div>
       </a>
       {% endif %}
       {% endfor %}
       {% if not insights.cities %}
-      {% for city, count in [("Paris", "20 designers"), ("Milan", "15 designers"), ("New York", "12 designers"), ("London", "7 designers")] %}
+      {% for city, count in [("Paris", "20 брендов"), ("Milan", "15 брендов"), ("New York", "12 брендов"), ("London", "7 брендов")] %}
       <a href="/explore?city={{ city }}" class="city-card">
         <div class="city-card-left">
-          <div class="city-name">{{ city }} Womenswear</div>
+          <div class="city-name">{{ city | ru }} · женская одежда</div>
           <div class="city-sub">{{ count }}</div>
         </div>
         <div class="city-card-right">→</div>
@@ -270,11 +306,11 @@
     </div>
 
     <div style="margin-top: 28px;">
-      <div class="section-label">Quick Actions</div>
+      <div class="section-label">Быстрые действия</div>
       <div style="display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap;">
-        <a href="/explore" class="btn">Browse Gallery</a>
-        <a href="/studio" class="btn">Open Studio</a>
-        <a href="/moodboard" class="btn">Moodboard</a>
+        <a href="/explore" class="btn">Открыть каталог</a>
+        <a href="/studio" class="btn">Открыть Студию</a>
+        <a href="/moodboard" class="btn">Мудборд</a>
       </div>
     </div>
   </div>
@@ -286,12 +322,12 @@
 <div class="dims-grid">
 
   <div class="panel">
-    <div class="section-label">Style DNA</div>
+    <div class="section-label">ДНК стиля</div>
     <div class="tagbar-list">
       {% set max_c = enr.styles[0].count if enr.styles else 1 %}
       {% for t in enr.styles %}
       <div class="tagbar-row" onclick="window.location='/explore?style={{ t.name | urlencode }}'">
-        <div class="tagbar-name">{{ t.name }}</div>
+        <div class="tagbar-name">{{ t.name | ru }}</div>
         <div class="tagbar-bar-wrap"><div class="tagbar-bar" style="width: {{ (t.count / max_c * 100)|int }}%;"></div></div>
         <div class="tagbar-pct">{{ t.pct }}%</div>
       </div>
@@ -300,12 +336,12 @@
   </div>
 
   <div class="panel">
-    <div class="section-label">Top Categories</div>
+    <div class="section-label">Топ категорий</div>
     <div class="tagbar-list">
       {% set max_c = enr.categories[0].count if enr.categories else 1 %}
       {% for t in enr.categories %}
       <div class="tagbar-row" onclick="window.location='/explore?category={{ t.name | urlencode }}'">
-        <div class="tagbar-name">{{ t.name }}</div>
+        <div class="tagbar-name">{{ t.name | ru }}</div>
         <div class="tagbar-bar-wrap"><div class="tagbar-bar" style="width: {{ (t.count / max_c * 100)|int }}%;"></div></div>
         <div class="tagbar-pct">{{ t.pct }}%</div>
       </div>
@@ -314,12 +350,12 @@
   </div>
 
   <div class="panel">
-    <div class="section-label">Top Materials</div>
+    <div class="section-label">Топ материалов</div>
     <div class="tagbar-list">
       {% set max_c = enr.materials[0].count if enr.materials else 1 %}
       {% for t in enr.materials %}
       <div class="tagbar-row" onclick="window.location='/explore?material={{ t.name | urlencode }}'">
-        <div class="tagbar-name">{{ t.name }}</div>
+        <div class="tagbar-name">{{ t.name | ru }}</div>
         <div class="tagbar-bar-wrap"><div class="tagbar-bar" style="width: {{ (t.count / max_c * 100)|int }}%;"></div></div>
         <div class="tagbar-pct">{{ t.pct }}%</div>
       </div>
@@ -328,12 +364,12 @@
   </div>
 
   <div class="panel">
-    <div class="section-label">Top Patterns</div>
+    <div class="section-label">Топ принтов</div>
     <div class="tagbar-list">
       {% set max_c = enr.patterns[0].count if enr.patterns else 1 %}
       {% for t in enr.patterns %}
       <div class="tagbar-row">
-        <div class="tagbar-name">{{ t.name }}</div>
+        <div class="tagbar-name">{{ t.name | ru }}</div>
         <div class="tagbar-bar-wrap"><div class="tagbar-bar" style="width: {{ (t.count / max_c * 100)|int }}%;"></div></div>
         <div class="tagbar-pct">{{ t.pct }}%</div>
       </div>
@@ -342,12 +378,12 @@
   </div>
 
   <div class="panel">
-    <div class="section-label">Top Silhouettes</div>
+    <div class="section-label">Топ силуэтов</div>
     <div class="tagbar-list">
       {% set max_c = enr.silhouettes[0].count if enr.silhouettes else 1 %}
       {% for t in enr.silhouettes %}
       <div class="tagbar-row" onclick="window.location='/explore?silhouette={{ t.name | urlencode }}'">
-        <div class="tagbar-name">{{ t.name }}</div>
+        <div class="tagbar-name">{{ t.name | ru }}</div>
         <div class="tagbar-bar-wrap"><div class="tagbar-bar" style="width: {{ (t.count / max_c * 100)|int }}%;"></div></div>
         <div class="tagbar-pct">{{ t.pct }}%</div>
       </div>
@@ -356,12 +392,12 @@
   </div>
 
   <div class="panel">
-    <div class="section-label">Construction Details</div>
+    <div class="section-label">Элементы кроя</div>
     <div class="tagbar-list">
       {% set max_c = enr.construction[0].count if enr.construction else 1 %}
       {% for t in enr.construction %}
       <div class="tagbar-row" onclick="window.location='/explore?construction={{ t.name | urlencode }}'">
-        <div class="tagbar-name">{{ t.name }}</div>
+        <div class="tagbar-name">{{ t.name | ru }}</div>
         <div class="tagbar-bar-wrap"><div class="tagbar-bar" style="width: {{ (t.count / max_c * 100)|int }}%;"></div></div>
         <div class="tagbar-pct">{{ t.pct }}%</div>
       </div>
@@ -370,12 +406,12 @@
   </div>
 
   <div class="panel" style="border-bottom: none;">
-    <div class="section-label">Decoration</div>
+    <div class="section-label">Отделка</div>
     <div class="tagbar-list">
       {% set max_c = enr.decoration[0].count if enr.decoration else 1 %}
       {% for t in enr.decoration %}
       <div class="tagbar-row" onclick="window.location='/explore?decoration={{ t.name | urlencode }}'">
-        <div class="tagbar-name">{{ t.name }}</div>
+        <div class="tagbar-name">{{ t.name | ru }}</div>
         <div class="tagbar-bar-wrap"><div class="tagbar-bar" style="width: {{ (t.count / max_c * 100)|int }}%;"></div></div>
         <div class="tagbar-pct">{{ t.pct }}%</div>
       </div>
@@ -385,12 +421,16 @@
 
   <div class="panel" style="border-bottom: none; display: flex; align-items: center; justify-content: center;">
     <div style="text-align: center;">
-      <div class="section-label">Full Recognition</div>
+      <div class="section-label">Полное распознавание</div>
       <div class="enrichment-progress" style="margin-top: 10px;">
-        {{ "{:,}".format(insights.enriched_count) }} / {{ "{:,}".format(insights.total_looks) }} looks tagged<br>
-        {{ "{:,}".format(enr.total_items) }} items across style, category, material, pattern, silhouette, construction, decoration
+        {% if selected_designer or selected_show %}
+        {{ "{:,}".format(enr.total_looks) }} луков в выборке<br>
+        {% else %}
+        {{ "{:,}".format(insights.enriched_count) }} / {{ "{:,}".format(insights.total_looks) }} луков размечено<br>
+        {% endif %}
+        {{ "{:,}".format(enr.total_items) }} предметов по 7 измерениям: стилистика, категория, материал, принт, силуэт, крой, отделка
       </div>
-      <a href="/explore" class="btn" style="margin-top: 16px; display: inline-flex;">Explore tagged looks</a>
+      <a href="/explore{% if selected_designer %}?designer={{ selected_designer }}{% endif %}" class="btn" style="margin-top: 16px; display: inline-flex;">Смотреть в каталоге</a>
     </div>
   </div>
 
@@ -400,9 +440,27 @@
 {% else %}
 <div style="padding: 80px 48px; text-align: center;">
   <div style="font-size: 14px; color: var(--text2);">
+    {% if selected_designer or selected_show %}
+    Нет данных по выбранному фильтру.<br><br>
+    <a href="/" class="btn">Сбросить фильтры</a>
+    {% else %}
     Данные не найдены.<br><br>
     Запусти <code style="background: var(--bg3); padding: 2px 6px; border-radius: 3px;">python3 color_analysis.py</code> для генерации аналитики.
+    {% endif %}
   </div>
 </div>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function applyInsightsFilters() {
+    const designer = document.getElementById('insDesigner').value;
+    const show = document.getElementById('insShow').value;
+    const params = new URLSearchParams();
+    if (designer) params.set('designer', designer);
+    if (show) params.set('show', show);
+    window.location = '/' + (params.toString() ? '?' + params.toString() : '');
+  }
+</script>
 {% endblock %}

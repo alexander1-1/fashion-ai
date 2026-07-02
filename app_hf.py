@@ -14,6 +14,108 @@ app.secret_key = "fashion-ai-secret-2026"
 
 DATA_DIR = "./output"
 
+# ─── Русские переводы тегов (для отображения; фильтрация идёт по англ. значению) ──
+TAG_RU = {
+    # Style
+    "Minimalism": "Минимализм", "Quiet Luxury": "Дорогая простота",
+    "New Classic": "Новая классика", "Ladylike": "Ladylike / собранная женственность",
+    "New Femininity": "Новая женственность", "Power Dressing": "Power dressing",
+    "Office Aesthetic": "Офисная эстетика", "Soft Tailoring": "Мягкий костюмный стиль",
+    "Preppy": "Преппи", "Collegiate/Schoolgirl": "Школьные и университетские коды",
+    "Old Money": "Old money", "Country Aesthetic": "Загородная эстетика",
+    "Country Club": "Эстетика закрытых клубов", "Boho": "Бохо",
+    "Romantic": "Романтический стиль", "Boudoir": "Будуарные элементы",
+    "Grunge": "Гранж", "Streetwear": "Уличная эстетика",
+    "Sport as Status": "Спорт как статус", "Wellness": "Wellness-эстетика",
+    "Utilitarian": "Утилитарность", "Outdoor": "Outdoor-коды",
+    "Moto": "Мото-эстетика", "70s Retro": "Ретро 70-х", "90s Retro": "Ретро 90-х",
+    "Y2K": "2000-е", "2010s Nostalgia": "Ностальгия по 2010-м",
+    "Eclectic": "Эклектика", "Loud Luxury": "Заметный статус",
+    "Quiet Status": "Сдержанный статус", "Body-conscious Basics": "Телесная база",
+    "Intellectual Fashion": "Интеллектуальная мода", "Artisanal/Craft": "Ремесленная эстетика",
+    "Resort": "Курортная эстетика",
+    # Silhouette
+    "Straight": "Прямой", "Fitted/Waisted": "Приталенный", "Semi-Fitted": "Полуприлегающий",
+    "Relaxed": "Свободный", "Oversized": "Оверсайз", "Elongated": "Вытянутый",
+    "Cropped": "Укороченный", "A-line": "А-силуэт", "X-Silhouette": "Х-силуэт",
+    "Trapeze": "Трапеция", "Cocoon": "Кокон", "Column": "Колонна",
+    "Hourglass": "Песочные часы", "Volume Top + Slim Bottom": "Объёмный верх + узкий низ",
+    "Slim Top + Volume Bottom": "Узкий верх + объёмный низ",
+    "Shoulder Emphasis": "Акцент на плечи", "Waist Emphasis": "Акцент на талии",
+    "Hip Emphasis": "Акцент на бёдра", "Low Rise": "Заниженная посадка",
+    "High Rise": "Высокая посадка", "Wide Leg/Flare": "Широкий низ",
+    "Slim Leg": "Узкий низ", "Layered Silhouette": "Многослойный силуэт",
+    "Athletic Relaxed": "Спортивный расслабленный",
+    # Construction
+    "Darts": "Вытачки", "Princess Seams": "Рельефы", "Draping": "Драпировки",
+    "Asymmetry": "Асимметрия", "Wrap Closure": "Запах", "Peplum": "Баска",
+    "Pleats": "Складки", "Tucks": "Защипы", "Drawstrings": "Кулиски",
+    "Gathers": "Сборки", "Flounces": "Воланы", "Puff Sleeves": "Рукава-фонарики",
+    "Extended Cuffs": "Удлинённые манжеты", "Wide Shoulders": "Широкие плечи",
+    "Dropped Shoulder": "Спущенное плечо", "Stand Collar": "Воротник-стойка",
+    "High Neck": "Высокий ворот", "Polo Collar": "Воротник поло",
+    "Shirt Collar": "Отложной воротник", "Halter": "Халтер",
+    "Off-Shoulder": "Открытые плечи", "Boat Neck": "Вырез лодочка",
+    "Square Neckline": "Квадратный вырез", "V-Neck": "V-вырез",
+    "Cutout Neckline": "Фигурные вырезы", "Slits": "Разрезы",
+    "Patch Pockets": "Накладные карманы", "Cargo Pockets": "Карманы карго",
+    "Waist Seam": "Отрезная талия", "Layered Details": "Многослойные детали",
+    "Convertible Elements": "Трансформируемые элементы",
+    "Statement Closure": "Акцентная застёжка", "Structural Zipper": "Молния как конструкция",
+    # Decoration
+    "Lace Trim": "Кружево (отделка)", "Ruffles": "Оборки", "Frills": "Рюши",
+    "Fringe": "Бахрома", "Embroidery": "Вышивка", "Appliqué": "Аппликации",
+    "Contrast Stitching": "Контрастная строчка", "Piping": "Канты", "Bows": "Банты",
+    "Ties": "Завязки", "Lacing": "Шнуровка", "Decorative Zippers": "Молнии",
+    "Metal Hardware": "Металлическая фурнитура", "Grommets": "Люверсы",
+    "Statement Buttons": "Декоративные пуговицы", "Sequins": "Пайетки",
+    "Rhinestones": "Стразы", "Perforation": "Перфорация",
+    "Textured Inserts": "Фактурные вставки", "Sheer Inserts": "Прозрачные вставки",
+    "Side Stripes": "Лампасы", "Sport Stripes": "Спортивные полосы",
+    "Logos": "Логотипы", "Monograms": "Монограммы",
+    "Decorative Pockets": "Декоративные карманы",
+    # Materials
+    "Leather/Faux Leather": "Кожа и экокожа", "Suede": "Замша", "Denim": "Деним",
+    "Chunky Knit": "Плотный трикотаж", "Fine Knit": "Тонкий трикотаж",
+    "Ribbed Knit": "Рубчик", "Suiting Fabric": "Костюмная ткань", "Satin": "Сатин",
+    "Chiffon": "Шифон", "Organza": "Органза", "Lace": "Кружево", "Mesh": "Сетка",
+    "Velvet": "Бархат", "Tweed": "Твид", "Bouclé": "Букле",
+    "Fur/Faux Fur": "Мех и экомех", "Nylon": "Нейлон", "Cotton": "Хлопок",
+    "Linen": "Лён", "Textured Knit": "Фактурная вязка",
+    "Sheer Fabric": "Прозрачные материалы", "Metallic Fabric": "Металлизированные ткани",
+    "Technical Fabric": "Технические ткани", "Trench/Rain Fabric": "Плащевые материалы",
+    "Soft Base Knit": "Мягкий трикотаж для базы",
+    "Artisanal Texture Fabric": "Ткани с ремесленным эффектом",
+    "Crinkled Texture": "Жатая фактура",
+    # Category
+    "Coat": "Пальто", "Jacket/Blazer": "Жакет/Блейзер", "Suit": "Костюм",
+    "Dress": "Платье", "Gown/Evening": "Вечернее платье",
+    "Jumpsuit/Romper": "Комбинезон", "Top/Blouse": "Топ/Блуза", "Shirt": "Рубашка",
+    "Knitwear/Cardigan": "Трикотаж/Кардиган", "Pants/Trousers": "Брюки",
+    "Skirt": "Юбка", "Shorts": "Шорты", "Vest": "Жилет",
+    "Cape/Poncho": "Накидка/Пончо", "Swimwear": "Купальник",
+    "Lingerie/Corset": "Бельё/Корсет", "Bag": "Сумка", "Shoes/Boots": "Обувь",
+    "Belt": "Ремень", "Hat": "Головной убор", "Scarf": "Шарф",
+    "Gloves": "Перчатки", "Jewelry/Accessory": "Украшения", "Sunglasses": "Очки",
+    # Pattern
+    "Solid": "Однотонный", "Stripes": "Полоска", "Checks/Plaid": "Клетка",
+    "Floral": "Цветочный принт", "Animal Print": "Анималистичный принт",
+    "Abstract": "Абстрактный", "Geometric": "Геометрический", "Polka Dots": "Горох",
+    "Paisley": "Пейсли", "Camouflage": "Камуфляж", "Houndstooth": "Гусиная лапка",
+    "Tie-dye": "Тай-дай", "Ombre": "Омбре", "Patchwork": "Пэчворк",
+    "Logo/Monogram": "Логотип/Монограмма", "Embroidery Print": "Вышитый принт",
+    # Misc
+    "Other": "Другое", "Paris": "Париж", "Milan": "Милан",
+    "New York": "Нью-Йорк", "London": "Лондон",
+}
+
+
+def tag_ru(value):
+    return TAG_RU.get(value, value)
+
+
+app.jinja_env.filters["ru"] = tag_ru
+
 # ─── City mapping ──────────────────────────────────────────────────────────────
 CITY_MAP = {
     # Paris
@@ -171,8 +273,12 @@ def load_csv(path):
         return list(csv.DictReader(f))
 
 
-def get_insights():
+def get_insights(designer=None, show=None):
     rows = load_csv(f"{DATA_DIR}/color_results.csv")
+    if designer:
+        rows = [r for r in rows if r["designer"].lower() == designer.lower()]
+    if show:
+        rows = [r for r in rows if r["show"].lower() == show.lower()]
     if not rows:
         return None
 
@@ -219,7 +325,7 @@ def get_insights():
         "total_designers": len(designer_counter),
         "total_shows": len(show_counter),
         "cities": cities,
-        "enrichment": _enrichment_insights,
+        "enrichment": compute_enrichment(designer, show) if (designer or show) else _enrichment_insights,
         "enriched_count": len(_enrichment_index) if _enrichment_index else 0,
     }
 
@@ -306,9 +412,13 @@ _enrichment_index = None      # image_url -> {"style_tags": [...], "items": [...
 _enrichment_insights = None   # parsed output/enriched_insights.json
 
 
+_enrichment_rows = []  # [{"designer","show","style_tags":[...],"items":[...]}] for filterable Insights
+
+
 def load_enrichment():
-    global _enrichment_index, _enrichment_insights
+    global _enrichment_index, _enrichment_insights, _enrichment_rows
     idx = {}
+    rows_list = []
     path = f"{DATA_DIR}/enriched_looks.csv"
     if os.path.exists(path):
         with open(path, encoding="utf-8") as f:
@@ -319,7 +429,14 @@ def load_enrichment():
                     items = []
                 style_tags = [s for s in (r.get("style_tags") or "").split(",") if s]
                 idx[r["image_url"]] = {"style_tags": style_tags, "items": items}
+                rows_list.append({
+                    "designer": r.get("designer", ""),
+                    "show": r.get("show", ""),
+                    "style_tags": style_tags,
+                    "items": items,
+                })
     _enrichment_index = idx
+    _enrichment_rows = rows_list
 
     insights_path = f"{DATA_DIR}/enriched_insights.json"
     if os.path.exists(insights_path):
@@ -335,13 +452,76 @@ def load_enrichment():
 load_enrichment()
 
 
+def _pct(count, total):
+    return round(count / total * 100, 1) if total else 0
+
+
+def compute_enrichment(designer=None, show=None):
+    """Recompute the 7-dimension enrichment stats, optionally filtered by designer/show."""
+    if not _enrichment_rows:
+        return None
+    rows = _enrichment_rows
+    if designer:
+        rows = [r for r in rows if r["designer"].lower() == designer.lower()]
+    if show:
+        rows = [r for r in rows if r["show"].lower() == show.lower()]
+    if not rows:
+        return None
+
+    style_c = Counter()
+    category_c = Counter()
+    material_c = Counter()
+    pattern_c = Counter()
+    silhouette_c = Counter()
+    construction_c = Counter()
+    decoration_c = Counter()
+    total_items = 0
+
+    for r in rows:
+        for s in r["style_tags"]:
+            style_c[s] += 1
+        for it in r["items"]:
+            total_items += 1
+            category_c[it.get("category", "Other") or "Other"] += 1
+            for m in it.get("materials", []) or []:
+                material_c[m] += 1
+            pattern_c[it.get("pattern", "Other") or "Other"] += 1
+            for s in it.get("silhouette", []) or []:
+                silhouette_c[s] += 1
+            for c in it.get("construction", []) or []:
+                construction_c[c] += 1
+            for d in it.get("decoration", []) or []:
+                decoration_c[d] += 1
+
+    total_looks = len(rows)
+
+    def top(counter, base, n=14):
+        return [
+            {"name": name, "count": count, "pct": _pct(count, base)}
+            for name, count in counter.most_common(n + 1)
+            if name not in ("Other", "")
+        ][:n]
+
+    return {
+        "total_looks": total_looks,
+        "total_items": total_items,
+        "styles": top(style_c, total_looks, 12),
+        "categories": top(category_c, total_items, 14),
+        "materials": top(material_c, total_items, 14),
+        "patterns": top(pattern_c, total_items, 10),
+        "silhouettes": top(silhouette_c, total_items, 12),
+        "construction": top(construction_c, total_items, 12),
+        "decoration": top(decoration_c, total_items, 12),
+    }
+
+
 def enrich_row(row):
-    """Attach lightweight tag summary to a look row for card captions."""
+    """Attach lightweight (Russian-translated) tag summary to a look row for card captions."""
     enr = _enrichment_index.get(row.get("image_url")) if _enrichment_index else None
     if enr:
         cats = [it["category"] for it in enr["items"] if it.get("category") not in ("Other", None)]
-        row["_categories"] = cats[:4]
-        row["_style"] = enr["style_tags"][0] if enr["style_tags"] else ""
+        row["_categories"] = [tag_ru(c) for c in cats[:4]]
+        row["_style"] = tag_ru(enr["style_tags"][0]) if enr["style_tags"] else ""
     else:
         row["_categories"] = []
         row["_style"] = ""
@@ -367,7 +547,14 @@ def get_facets():
 
 @app.route("/")
 def index():
-    return render_template("insights.html", insights=get_insights())
+    designer = request.args.get("designer", "")
+    show = request.args.get("show", "")
+    return render_template("insights.html",
+                           insights=get_insights(designer or None, show or None),
+                           designers=get_designers(),
+                           shows=get_shows(),
+                           selected_designer=designer,
+                           selected_show=show)
 
 
 CITIES = ["Paris", "Milan", "New York", "London"]
