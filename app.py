@@ -508,6 +508,18 @@ def get_facets():
 
 # ─── Маршруты ─────────────────────────────────────────────────────────────────
 
+@app.route("/annotate")
+def annotate():
+    """Разметчик golden set (генерируется build_golden_set.py).
+    Прогресс хранится в localStorage браузера разметчика; результат
+    экспортируется кнопкой в golden_set.json."""
+    from flask import send_file, abort
+    path = os.path.abspath(f"{DATA_DIR}/annotate.html")
+    if not os.path.exists(path):
+        abort(404, "annotate.html не найден — запусти build_golden_set.py")
+    return send_file(path)
+
+
 @app.route("/")
 def index():
     designer = request.args.get("designer", "")
