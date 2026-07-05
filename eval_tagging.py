@@ -166,6 +166,10 @@ def main():
 
     rows, missing = evaluate(golden, preds)
 
+    if len(missing) == len(golden):
+        sys.exit("❌ Ни одного предсказания для луков golden set.\n"
+                 "   Прогони именно их: python3 enrich_looks.py --golden")
+
     print(f"\n📏 Golden set: {len(golden)} луков, "
           f"предсказаний: {len(golden) - len(missing)}")
     if missing:

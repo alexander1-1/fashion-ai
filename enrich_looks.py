@@ -576,6 +576,8 @@ def main():
     p = argparse.ArgumentParser(description=__doc__.splitlines()[1])
     p.add_argument("--sample", type=int, default=0,
                    help="Обработать только первые N луков (sync)")
+    p.add_argument("--golden", action="store_true",
+                   help="Обработать луки из output/golden_set.json (sync)")
     p.add_argument("--full", action="store_true",
                    help="Полный прогон через Batch API")
     p.add_argument("--confirm-full", action="store_true",
@@ -605,9 +607,18 @@ def main():
     if args.review:
         return run_review(get_client(), data_dir, output_csv)
 
-    if not os.path.exists(input_csv):
-        sys.exit(f"❌ {input_csv} не найден. Сначала запусти скрапер.")
-    rows = load_rows(input_csv, args.sample)
+    if args.golden:
+        golden_path = f"{data_dir}/golden_set.json"
+        if not os.path.exists(golden_path):
+            sys.exit(f"❌ {golden_path} не найден.")
+        with open(golden_path, encoding="utf-8") as f:
+            rows = [{k: str(g[k]) for k in
+                     ("designer", "show", "look_number", "image_url")}
+                    for g in json.load(f)]
+    else:
+        if not os.path.exists(input_csv):
+            sys.exit(f"❌ {input_csv} не найден. Сначала запусти скрапер.")
+        rows = load_rows(input_csv, args.sample)
     processed = load_processed(output_csv) if args.resume else set()
 
     if args.full:
@@ -620,8 +631,8 @@ def main():
             sys.exit("⛔ Batch API недоступен в MOCK-режиме")
         return batch_submit(get_client(), rows, processed, data_dir)
 
-    if not args.sample:
-        sys.exit("⛔ Без --sample N только --full (Batch API). "
+    if not args.sample and not args.golden:
+        sys.exit("⛔ Без --sample N / --golden только --full (Batch API). "
                  "Для теста: --sample 20")
 
     # sync-режим для маленьких выборок
