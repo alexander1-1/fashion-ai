@@ -508,6 +508,16 @@ def get_facets():
 
 # ─── Маршруты ─────────────────────────────────────────────────────────────────
 
+@app.route("/gallery")
+def gallery():
+    """Галерея луков golden set (статусы: готов / у коллеги)."""
+    from flask import send_file, abort
+    path = os.path.abspath(f"{DATA_DIR}/gallery.html")
+    if not os.path.exists(path):
+        abort(404, "gallery.html не найден")
+    return send_file(path)
+
+
 @app.route("/annotate")
 def annotate():
     """Разметчик golden set (генерируется build_golden_set.py).
