@@ -321,15 +321,15 @@ def tool_schema_full() -> dict:
 
 
 def tool_schema_details() -> dict:
-    """Проход B (кропы): только material / construction / decoration."""
+    """Проход B (кропы): material / construction / decoration по НОМЕРУ
+    предмета из списка прохода A (item_index, 1-based)."""
     return {
         "name": "tag_details",
         "description": (
-            "Record close-up construction and finishing details visible in "
-            "the crops. Use ONLY the enum values provided. Report an item "
-            "only if you can attribute details to it; use "
-            f"\"{NOT_VISIBLE}\" for material you cannot determine. "
-            "Never guess."
+            "Record construction and finishing details for the NUMBERED "
+            "garment list given in the prompt. Reference items strictly by "
+            "item_index. Use ONLY the enum values provided; use "
+            f"\"{NOT_VISIBLE}\" for material you truly cannot judge."
         ),
         "input_schema": {
             "type": "object",
@@ -340,7 +340,10 @@ def tool_schema_details() -> dict:
                     "items": {
                         "type": "object",
                         "properties": {
-                            "category": _enum(CATEGORIES),
+                            "item_index": {
+                                "type": "integer", "minimum": 1,
+                                "description": "Number from the item list",
+                            },
                             "materials": _enum_array(
                                 MATERIALS, 2, with_not_visible=True),
                             "construction": _enum_array(CONSTRUCTION, 4),
@@ -350,7 +353,7 @@ def tool_schema_details() -> dict:
                                 "minimum": 0, "maximum": 1,
                             },
                         },
-                        "required": ["category", "confidence"],
+                        "required": ["item_index", "confidence"],
                     },
                 },
             },

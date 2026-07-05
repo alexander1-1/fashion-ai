@@ -87,21 +87,58 @@ Reference taxonomy:
 
 PROMPT_A = """Full-body runway photo. Pass A — overall reading.
 Identify EVERY distinct visible garment and accessory (typically 3-6 items: \
-main top/dress, bottom, outerwear, shoes, bag, notable accessories).
+main top/dress, bottom, outerwear, shoes, bag, notable accessories). Report \
+every visible LAYER as a separate item (a coat worn over a dress = 2 items).
+
+Category disambiguation rules (follow strictly):
+- Coat = outerwear at mid-thigh length or longer (incl. trench, puffer). \
+Jacket/Blazer = outerwear/tailoring ending at hip or above.
+- Gown/Evening = floor-length or clearly formal evening dress. \
+Dress = any other dress.
+- Shirt = woven button-up with shirt collar. Top/Blouse = other woven tops. \
+Knitwear/Cardigan = visibly knitted sweaters, cardigans, knit tops.
+- Suit = matching jacket + trousers/skirt presented as one set; otherwise \
+tag the pieces separately.
+- Lingerie/Corset = corsets, bras, slip-like underwear worn as clothing.
+
 For each item: category, pattern, silhouette (garments only, [] for \
 accessories), dominant colors. Plus 0-3 look-level styles.
 Call the tag_look tool."""
 
-PROMPT_B = """Two close-up crops of the SAME runway look.
-Image 1 = upper half: collars, necklines, shoulders, sleeves, cuffs, \
-closures, buttons.
-Image 2 = lower half: waistline, rise, pockets, hem, slits, skirt/trouser \
-construction.
-Pass B — fine details only. For each garment where you can clearly see \
-details, report: material, construction elements, decoration. Use \
-"not_visible" for material you cannot determine; empty arrays when no \
-construction/decoration detail is clearly visible. Do NOT report silhouettes \
-or styles. Call the tag_details tool."""
+
+def build_prompt_b(a_items: list) -> str:
+    listing = "\n".join(
+        f"{i + 1}. {it['category']}" for i, it in enumerate(a_items))
+    return f"""Two close-up crops of the SAME runway look.
+Image 1 = upper half (collars, necklines, shoulders, sleeves, cuffs, \
+closures). Image 2 = lower half (waist, rise, pockets, hem, slits).
+
+The look contains these items (from the full-photo pass):
+{listing}
+
+Pass B — for EACH numbered item report material, construction, decoration \
+(reference by item_index). Work through this checklist per garment:
+- neckline/collar: Stand Collar? Shirt Collar? Polo Collar? High Neck? \
+V-Neck? Boat Neck? Square Neckline? Halter? Off-Shoulder? Cutout Neckline?
+- shoulders/sleeves: Wide Shoulders? Dropped Shoulder? Puff Sleeves? \
+Extended Cuffs?
+- body: Draping? Asymmetry? Wrap Closure? Peplum? Pleats? Tucks? Gathers? \
+Drawstrings? Waist Seam? Layered Details? Slits? Darts? Princess Seams?
+- pockets/closures: Patch Pockets? Cargo Pockets? Statement Closure? \
+Structural Zipper?
+- decoration: Ruffles? Frills? Lace Trim? Fringe? Piping? Contrast \
+Stitching? Bows? Ties? Statement Buttons? Metal Hardware? Sequins? \
+Embroidery? Sheer Inserts?
+
+Material: commit to the closest enum by visible texture. Typical mappings: \
+tailored blazer/trousers/pencil skirt → Suiting Fabric; jeans → Denim; \
+shiny fluid drape → Satin; sheer floaty → Chiffon or Sheer Fabric; ribbed \
+knit → Ribbed Knit; chunky sweater → Chunky Knit; fine sweater → Fine Knit; \
+leather shoes/bags/jackets → Leather/Faux Leather; fuzzy pile → Fur/Faux \
+Fur. Use "not_visible" ONLY when texture is truly impossible to judge.
+
+Empty arrays only when NO construction/decoration detail is visible for \
+that item. Do NOT report silhouettes or styles. Call the tag_details tool."""
 
 
 # ─── Изображения ──────────────────────────────────────────────────────────────
@@ -180,7 +217,7 @@ def request_params_a(images: dict, model: str) -> dict:
     }
 
 
-def request_params_b(images: dict, model: str) -> dict:
+def request_params_b(images: dict, model: str, a_items: list) -> dict:
     return {
         "model": model,
         "max_tokens": MAX_TOKENS_B,
@@ -190,7 +227,7 @@ def request_params_b(images: dict, model: str) -> dict:
         "messages": [{"role": "user", "content": [
             _img_block(images["top"]),
             _img_block(images["bottom"]),
-            {"type": "text", "text": PROMPT_B},
+            {"type": "text", "text": build_prompt_b(a_items)},
         ]}],
     }
 
@@ -251,8 +288,12 @@ def validate_b(raw: dict) -> dict:
     for it in (raw.get("items") or [])[:8]:
         if not isinstance(it, dict):
             continue
+        try:
+            idx = int(it.get("item_index"))
+        except (TypeError, ValueError):
+            continue
         items.append({
-            "category": _one(it.get("category"), CATEGORIES, "Other"),
+            "item_index": idx,
             "materials": _keep(it.get("materials"), MATERIALS, 2),
             "construction": _keep(it.get("construction"), CONSTRUCTION, 4),
             "decoration": _keep(it.get("decoration"), DECORATION, 4),
@@ -264,9 +305,10 @@ def validate_b(raw: dict) -> dict:
 # ─── Merge проходов A и B ─────────────────────────────────────────────────────
 
 def merge_passes(a: dict, b: dict) -> dict:
-    """A — база (категории/силуэт/принт/цвета/стили), B перезаписывает
-    material/construction/decoration. Матчинг предметов по category.
-    Конфликт двух кроп-ответов по одному предмету → больший confidence."""
+    """A — база (категории/силуэт/принт/цвета/стили), B добавляет
+    material/construction/decoration по item_index (1-based, порядок A).
+    Дубликат индекса от двух кропов → объединение, материал от более
+    уверенного ответа."""
     items = []
     for it in a["items"]:
         items.append({
@@ -280,37 +322,20 @@ def merge_passes(a: dict, b: dict) -> dict:
             "confidence": it["confidence"],
         })
 
-    by_cat = {}
     for det in b["items"]:
-        cat = det["category"]
-        if cat not in by_cat or det["confidence"] > by_cat[cat]["confidence"]:
-            # объединяем массивы обоих кропов, материал — от более уверенного
-            if cat in by_cat:
-                prev = by_cat[cat]
-                det = dict(det)
-                det["construction"] = list(dict.fromkeys(
-                    prev["construction"] + det["construction"]))[:4]
-                det["decoration"] = list(dict.fromkeys(
-                    prev["decoration"] + det["decoration"]))[:4]
-            by_cat[cat] = det
-        else:
-            prev = by_cat[cat]
-            prev["construction"] = list(dict.fromkeys(
-                prev["construction"] + det["construction"]))[:4]
-            prev["decoration"] = list(dict.fromkeys(
-                prev["decoration"] + det["decoration"]))[:4]
-
-    matched = set()
-    for it in items:
-        det = by_cat.get(it["category"])
-        if det and it["category"] not in matched:
-            matched.add(it["category"])
-            if det["materials"]:
-                it["materials"] = det["materials"]
-            it["construction"] = det["construction"]
-            it["decoration"] = det["decoration"]
-            it["confidence"] = min(it["confidence"], det["confidence"]) \
-                if det["confidence"] else it["confidence"]
+        i = det["item_index"] - 1
+        if not 0 <= i < len(items):
+            continue
+        it = items[i]
+        it["construction"] = list(dict.fromkeys(
+            it["construction"] + det["construction"]))[:4]
+        it["decoration"] = list(dict.fromkeys(
+            it["decoration"] + det["decoration"]))[:4]
+        if det["materials"] and (it["materials"] == [NOT_VISIBLE]
+                                 or det["confidence"] > it["confidence"]):
+            it["materials"] = det["materials"]
+        if det["confidence"]:
+            it["confidence"] = min(it["confidence"], det["confidence"])
 
     styles = a["styles"]
     confs = [it["confidence"] for it in items] or [0.0]
@@ -338,7 +363,7 @@ class MockClient:
                 "silhouette": ["Straight"], "colors": ["Black"],
                 "confidence": 0.9}]}
         return {"items": [{
-            "category": "Dress", "materials": ["Satin"],
+            "item_index": 1, "materials": ["Satin"],
             "construction": ["Stand Collar"], "decoration": [],
             "confidence": 0.9}]}
 
@@ -381,7 +406,10 @@ def analyze_look(client, url: str, model: str = MODEL_BULK) -> dict:
     images = prepare_images(url) if not MOCK else \
         {"full": "", "top": "", "bottom": ""}
     a = validate_a(client.call(request_params_a(images, model), f"A:{url}"))
-    b = validate_b(client.call(request_params_b(images, model), f"B:{url}"))
+    if not a["items"]:
+        return merge_passes(a, {"items": []})
+    b = validate_b(client.call(
+        request_params_b(images, model, a["items"]), f"B:{url}"))
     return merge_passes(a, b)
 
 
@@ -426,13 +454,24 @@ def append_review_queue(data_dir: str, row: dict, tags: dict):
 
 # ─── Batch API ────────────────────────────────────────────────────────────────
 
-def batch_submit(client, rows, processed, data_dir):
-    """Собрать все запросы (2 на лук: A и B) и отправить одним батчем."""
+def _batch_request(custom_id, params):
     from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
     from anthropic.types.messages.batch_create_params import Request
+    return Request(custom_id=custom_id,
+                   params=MessageCreateParamsNonStreaming(**params))
 
+
+def _save_state(data_dir, state):
+    with open(f"{data_dir}/batch_state.json", "w", encoding="utf-8") as f:
+        json.dump(state, f, ensure_ascii=False)
+
+
+def batch_submit(client, rows, processed, data_dir):
+    """Фаза A: полное фото для всех луков одним батчем.
+    Фаза B (детали по списку предметов из A) отправляется автоматически
+    при --collect, когда фаза A готова."""
     requests, index = [], {}
-    print(f"⏳ Подготовка изображений ({len(rows)} луков, full + 2 кропа)…")
+    print(f"⏳ Подготовка изображений, фаза A ({len(rows)} луков)…")
     for i, row in enumerate(rows):
         url = row["image_url"]
         if url in processed:
@@ -443,14 +482,8 @@ def batch_submit(client, rows, processed, data_dir):
             print(f"  ⚠️  skip {url}: {e}")
             continue
         index[str(i)] = row
-        requests.append(Request(
-            custom_id=f"{i}-A",
-            params=MessageCreateParamsNonStreaming(
-                **request_params_a(images, MODEL_BULK))))
-        requests.append(Request(
-            custom_id=f"{i}-B",
-            params=MessageCreateParamsNonStreaming(
-                **request_params_b(images, MODEL_BULK))))
+        requests.append(_batch_request(
+            f"{i}-A", request_params_a(images, MODEL_BULK)))
         if (i + 1) % 100 == 0:
             print(f"  … {i + 1}/{len(rows)}")
 
@@ -459,12 +492,22 @@ def batch_submit(client, rows, processed, data_dir):
         return
 
     batch = client.client.messages.batches.create(requests=requests)
-    state = {"batch_id": batch.id, "index": index}
-    with open(f"{data_dir}/batch_state.json", "w", encoding="utf-8") as f:
-        json.dump(state, f, ensure_ascii=False)
-    print(f"✅ Батч отправлен: {batch.id} ({len(requests)} запросов, "
-          f"{len(index)} луков)")
-    print("   Статус/сбор: python3 enrich_looks.py --collect")
+    _save_state(data_dir, {"phase": "A", "batch_id": batch.id,
+                           "index": index})
+    print(f"✅ Батч фазы A отправлен: {batch.id} ({len(requests)} запросов)")
+    print("   Дальше: python3 enrich_looks.py --collect "
+          "(соберёт A и отправит фазу B)")
+
+
+def _retrieve_results(client, batch_id):
+    results = {}
+    for res in client.client.messages.batches.results(batch_id):
+        if res.result.type != "succeeded":
+            print(f"  ⚠️  {res.custom_id}: {res.result.type}")
+            continue
+        idx = res.custom_id.rsplit("-", 1)[0]
+        results[idx] = extract_tool_input(res.result.message)
+    return results
 
 
 def batch_collect(client, data_dir, output_csv):
@@ -476,22 +519,47 @@ def batch_collect(client, data_dir, output_csv):
     batch_id, index = state["batch_id"], state["index"]
 
     batch = client.client.messages.batches.retrieve(batch_id)
-    print(f"Батч {batch_id}: {batch.processing_status}")
+    print(f"Батч {batch_id} (фаза {state['phase']}): "
+          f"{batch.processing_status}")
     if batch.processing_status != "ended":
         c = batch.request_counts
         print(f"  processing={c.processing} succeeded={c.succeeded} "
               f"errored={c.errored}")
         return
 
-    results_a, results_b = {}, {}
-    for res in client.client.messages.batches.results(batch_id):
-        if res.result.type != "succeeded":
-            print(f"  ⚠️  {res.custom_id}: {res.result.type}")
-            continue
-        idx, which = res.custom_id.rsplit("-", 1)
-        parsed = extract_tool_input(res.result.message)
-        (results_a if which == "A" else results_b)[idx] = parsed
+    if state["phase"] == "A":
+        # собрать A → подготовить и отправить B
+        results_a = {i: validate_a(r) for i, r in
+                     _retrieve_results(client, batch_id).items()}
+        requests = []
+        print(f"⏳ Фаза B: подготовка кропов ({len(results_a)} луков)…")
+        for n, (idx, a) in enumerate(results_a.items()):
+            if not a["items"]:
+                continue
+            url = index[idx]["image_url"]
+            try:
+                images = prepare_images(url)
+            except Exception as e:
+                print(f"  ⚠️  skip {url}: {e}")
+                continue
+            requests.append(_batch_request(
+                f"{idx}-B",
+                request_params_b(images, MODEL_BULK, a["items"])))
+            if (n + 1) % 100 == 0:
+                print(f"  … {n + 1}/{len(results_a)}")
+        batch_b = client.client.messages.batches.create(requests=requests)
+        _save_state(data_dir, {"phase": "B", "batch_id": batch_b.id,
+                               "index": index,
+                               "results_a": {i: a for i, a in
+                                             results_a.items()}})
+        print(f"✅ Батч фазы B отправлен: {batch_b.id} "
+              f"({len(requests)} запросов)")
+        print("   Когда завершится: python3 enrich_looks.py --collect")
+        return
 
+    # фаза B → финальный merge
+    results_b = _retrieve_results(client, batch_id)
+    results_a = state["results_a"]
     processed = load_processed(output_csv)
     mode = "a" if os.path.exists(output_csv) else "w"
     n_done = n_review = 0
@@ -502,7 +570,7 @@ def batch_collect(client, data_dir, output_csv):
         for idx, row in index.items():
             if row["image_url"] in processed or idx not in results_a:
                 continue
-            a = validate_a(results_a[idx])
+            a = results_a[idx]
             b = validate_b(results_b.get(idx, {"items": []}))
             tags = merge_passes(a, b)
             writer.writerow(result_row(row, tags))
