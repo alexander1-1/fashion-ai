@@ -6,3 +6,4 @@ PYEOF
 for
 output/batch_state.json
 output/review_queue.jsonl
+golden_photos/
