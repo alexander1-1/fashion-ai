@@ -90,16 +90,27 @@ Identify EVERY distinct visible garment and accessory (typically 3-6 items: \
 main top/dress, bottom, outerwear, shoes, bag, notable accessories). Report \
 every visible LAYER as a separate item (a coat worn over a dress = 2 items).
 
+The second image is a close-up of the upper half — use it to verify small \
+accessories, collar types and knit texture.
+
 Category disambiguation rules (follow strictly):
 - Coat = outerwear at mid-thigh length or longer (incl. trench, puffer). \
 Jacket/Blazer = outerwear/tailoring ending at hip or above.
 - Gown/Evening = floor-length or clearly formal evening dress. \
 Dress = any other dress.
-- Shirt = woven button-up with shirt collar. Top/Blouse = other woven tops. \
-Knitwear/Cardigan = visibly knitted sweaters, cardigans, knit tops.
+- Knitted texture visible (ribs, stitches, fuzzy yarn) → \
+Knitwear/Cardigan, even for simple tops and turtlenecks.
+- Shirt = woven button-up with shirt collar. Top/Blouse = other woven \
+tops (incl. t-shirts, bodysuits, camisoles).
 - Suit = matching jacket + trousers/skirt presented as one set; otherwise \
 tag the pieces separately.
 - Lingerie/Corset = corsets, bras, slip-like underwear worn as clothing.
+
+Accessory checklist — scan the close-up and tag EACH if visible: earrings/\
+necklace/choker/bracelet (Jewelry/Accessory), scarf or neckerchief (Scarf), \
+belt (Belt), hat/cap/headpiece (Hat), gloves (Gloves), sunglasses \
+(Sunglasses), bag (Bag), shoes (Shoes/Boots). Do NOT invent accessories \
+you cannot actually see.
 
 For each item: category, pattern, silhouette (garments only, [] for \
 accessories), dominant colors. Plus 0-3 look-level styles.
@@ -117,7 +128,10 @@ The look contains these items (from the full-photo pass):
 {listing}
 
 Pass B — for EACH numbered item report material, construction, decoration \
-(reference by item_index). Work through this checklist per garment:
+(reference by item_index). Tag a detail ONLY when you can point to it in \
+the crop — a checklist item you cannot clearly see is simply omitted. \
+Never tag Slits, Statement Closure or Shirt Collar "by default". \
+Work through this checklist per garment:
 - neckline/collar: Stand Collar? Shirt Collar? Polo Collar? High Neck? \
 V-Neck? Boat Neck? Square Neckline? Halter? Off-Shoulder? Cutout Neckline?
 - shoulders/sleeves: Wide Shoulders? Dropped Shoulder? Puff Sleeves? \
@@ -135,7 +149,10 @@ tailored blazer/trousers/pencil skirt → Suiting Fabric; jeans → Denim; \
 shiny fluid drape → Satin; sheer floaty → Chiffon or Sheer Fabric; ribbed \
 knit → Ribbed Knit; chunky sweater → Chunky Knit; fine sweater → Fine Knit; \
 leather shoes/bags/jackets → Leather/Faux Leather; fuzzy pile → Fur/Faux \
-Fur. Use "not_visible" ONLY when texture is truly impossible to judge.
+Fur. Distinguish carefully: matte napped surface → Suede (not Leather); \
+smooth glossy → Leather/Faux Leather; all-over metallic foil shimmer → \
+Metallic Fabric (not Satin); soft directional sheen on fluid cloth → Satin. \
+Use "not_visible" ONLY when texture is truly impossible to judge.
 
 Empty arrays only when NO construction/decoration detail is visible for \
 that item. Do NOT report silhouettes or styles. Call the tag_details tool."""
@@ -212,6 +229,7 @@ def request_params_a(images: dict, model: str) -> dict:
         "tool_choice": {"type": "tool", "name": "tag_look"},
         "messages": [{"role": "user", "content": [
             _img_block(images["full"]),
+            _img_block(images["top"]),
             {"type": "text", "text": PROMPT_A},
         ]}],
     }
@@ -646,6 +664,8 @@ def main():
                    help="Обработать только первые N луков (sync)")
     p.add_argument("--golden", action="store_true",
                    help="Обработать луки из output/golden_set.json (sync)")
+    p.add_argument("--model", choices=["haiku", "sonnet"], default="haiku",
+                   help="Модель для sync-режима (sonnet — замер потолка)")
     p.add_argument("--full", action="store_true",
                    help="Полный прогон через Batch API")
     p.add_argument("--confirm-full", action="store_true",
@@ -705,7 +725,8 @@ def main():
 
     # sync-режим для маленьких выборок
     client = get_client()
-    print(f"📊 Sync-обработка {len(rows)} луков, модель {MODEL_BULK}")
+    model = MODEL_REVIEW if args.model == "sonnet" else MODEL_BULK
+    print(f"📊 Sync-обработка {len(rows)} луков, модель {model}")
     mode = "a" if args.resume and os.path.exists(output_csv) else "w"
     n_review = 0
     with open(output_csv, mode, newline="", encoding="utf-8") as f:
@@ -719,7 +740,7 @@ def main():
             print(f"[{i + 1}/{len(rows)}] {row['designer']} · "
                   f"Look {row['look_number']}", end=" ")
             try:
-                tags = analyze_look(client, url)
+                tags = analyze_look(client, url, model=model)
             except Exception as e:
                 print(f"→ ошибка: {e}")
                 continue
