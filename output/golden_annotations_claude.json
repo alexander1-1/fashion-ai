@@ -1,0 +1,3040 @@
+{
+ "1": [
+  [
+   "Soft Tailoring",
+   "Office Aesthetic",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Gloves",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Animal Print",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Belt",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "2": [
+  [
+   "Romantic",
+   "Boudoir",
+   "New Femininity"
+  ],
+  []
+ ],
+ "3": [
+  [
+   "Streetwear",
+   "Grunge",
+   "90s Retro"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "4": [
+  [
+   "Minimalism",
+   "Quiet Luxury",
+   "Boho"
+  ],
+  [
+   {
+    "category": "Scarf",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "5": [
+  [
+   "Loud Luxury",
+   "Eclectic",
+   "New Femininity"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "6": [
+  [
+   "Moto",
+   "Streetwear",
+   "Power Dressing"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "7": [
+  [
+   "New Femininity",
+   "Romantic"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Gloves",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "8": [
+  [
+   "Soft Tailoring",
+   "Minimalism",
+   "Intellectual Fashion"
+  ],
+  [
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "9": [
+  [
+   "Power Dressing",
+   "Intellectual Fashion",
+   "90s Retro"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "10": [
+  [
+   "Ladylike",
+   "Romantic",
+   "Resort"
+  ],
+  [
+   {
+    "category": "Hat",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Gloves",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "11": [
+  [
+   "Romantic",
+   "Boudoir",
+   "New Femininity"
+  ],
+  [
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "12": [
+  [
+   "Streetwear",
+   "90s Retro",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Bag",
+    "materials": [
+     "Fur/Faux Fur"
+    ],
+    "pattern": "Animal Print",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "13": [
+  [
+   "Intellectual Fashion",
+   "Artisanal/Craft",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Belt",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Bows"
+    ]
+   },
+   {
+    "category": "Hat",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "14": [
+  [
+   "Sport as Status",
+   "Preppy",
+   "Streetwear"
+  ],
+  [
+   {
+    "category": "Hat",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "15": [
+  [
+   "New Femininity",
+   "Romantic"
+  ],
+  []
+ ],
+ "16": [
+  [
+   "Boho",
+   "70s Retro",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Scarf",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Paisley",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "17": [
+  [
+   "Power Dressing",
+   "Intellectual Fashion"
+  ],
+  [
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "18": [
+  [
+   "Ladylike",
+   "New Classic",
+   "Resort"
+  ],
+  [
+   {
+    "category": "Scarf",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Satin"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Rhinestones"
+    ]
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Velvet"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "19": [
+  [
+   "Romantic",
+   "New Femininity"
+  ],
+  [
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "20": [
+  [
+   "Loud Luxury",
+   "New Femininity"
+  ],
+  [
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Metal Hardware"
+    ]
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "21": [
+  [
+   "Minimalism",
+   "90s Retro",
+   "Utilitarian"
+  ],
+  [
+   {
+    "category": "Belt",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "22": [
+  [
+   "Intellectual Fashion",
+   "Minimalism",
+   "Artisanal/Craft"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "23": [
+  [
+   "Power Dressing",
+   "Minimalism"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Fringe"
+    ]
+   }
+  ]
+ ],
+ "24": [
+  [
+   "Romantic",
+   "Intellectual Fashion",
+   "Artisanal/Craft"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "25": [
+  [
+   "Ladylike",
+   "New Femininity",
+   "Loud Luxury"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "26": [
+  [
+   "Intellectual Fashion",
+   "New Femininity"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "27": [
+  [
+   "Office Aesthetic",
+   "New Classic",
+   "Ladylike"
+  ],
+  [
+   {
+    "category": "Belt",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "28": [
+  [
+   "70s Retro",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Lacing"
+    ]
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "29": [
+  [
+   "Quiet Luxury",
+   "New Classic",
+   "Resort"
+  ],
+  [
+   {
+    "category": "Belt",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Ties"
+    ]
+   }
+  ]
+ ],
+ "30": [
+  [
+   "New Femininity",
+   "Quiet Status"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "31": [
+  [
+   "Preppy",
+   "Eclectic",
+   "90s Retro"
+  ],
+  [
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "32": [
+  [
+   "Streetwear",
+   "Y2K"
+  ],
+  [
+   {
+    "category": "Bag",
+    "materials": [
+     "Denim"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Belt",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "33": [
+  [
+   "Intellectual Fashion",
+   "Office Aesthetic",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Gloves",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Lacing"
+    ]
+   }
+  ]
+ ],
+ "34": [
+  [
+   "Boho",
+   "Romantic",
+   "New Femininity"
+  ],
+  [
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "35": [
+  [
+   "Old Money",
+   "New Classic",
+   "Resort"
+  ],
+  [
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Velvet"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Monograms"
+    ]
+   }
+  ]
+ ],
+ "36": [
+  [
+   "Utilitarian",
+   "Intellectual Fashion",
+   "Grunge"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "37": [
+  [
+   "Intellectual Fashion",
+   "New Femininity"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "38": [
+  [
+   "Ladylike",
+   "Boudoir"
+  ],
+  [
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "39": [
+  [
+   "Romantic",
+   "Grunge",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Belt",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Bows"
+    ]
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Metal Hardware"
+    ]
+   },
+   {
+    "category": "Hat",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "40": [
+  [
+   "Quiet Luxury",
+   "Artisanal/Craft",
+   "Minimalism"
+  ],
+  [
+   {
+    "category": "Gloves",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "41": [
+  [
+   "New Femininity",
+   "Romantic"
+  ],
+  [
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "42": [
+  [
+   "Preppy",
+   "Collegiate/Schoolgirl",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "43": [
+  [
+   "Power Dressing",
+   "90s Retro"
+  ],
+  [
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Gloves",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "44": [
+  [
+   "Intellectual Fashion",
+   "Minimalism",
+   "Office Aesthetic"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "45": [
+  [
+   "Boudoir",
+   "Romantic",
+   "Loud Luxury"
+  ],
+  [
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Scarf",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "46": [
+  [
+   "Mob Wife",
+   "Loud Luxury"
+  ],
+  [
+   {
+    "category": "Gloves",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Metal Hardware"
+    ]
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Animal Print",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "47": [
+  [
+   "Grunge",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Animal Print",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "48": [
+  [
+   "Eclectic",
+   "70s Retro"
+  ],
+  [
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Suede",
+     "Fur/Faux Fur"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "49": [
+  [
+   "New Femininity",
+   "Ladylike"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "50": [
+  [
+   "New Classic",
+   "Power Dressing"
+  ],
+  [
+   {
+    "category": "Scarf",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "51": [
+  [
+   "Intellectual Fashion",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Hat",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "52": [
+  [
+   "Loud Luxury",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "53": [
+  [
+   "Mob Wife",
+   "Loud Luxury"
+  ],
+  [
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Sequins"
+    ]
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "54": [
+  [
+   "Ladylike",
+   "Loud Luxury",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Hat",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Belt",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Metal Hardware"
+    ]
+   }
+  ]
+ ],
+ "55": [
+  [
+   "Artisanal/Craft",
+   "Eclectic",
+   "Intellectual Fashion"
+  ],
+  [
+   {
+    "category": "Hat",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Fringe"
+    ]
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "56": [
+  [
+   "New Classic",
+   "Power Dressing"
+  ],
+  [
+   {
+    "category": "Belt",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "57": [
+  [
+   "Romantic",
+   "Boudoir"
+  ],
+  [
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Metal Hardware",
+     "Ties"
+    ]
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "58": [
+  [
+   "Intellectual Fashion",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Bag",
+    "materials": [
+     "Fur/Faux Fur"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "59": [
+  [
+   "Streetwear",
+   "90s Retro",
+   "Utilitarian"
+  ],
+  [
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Belt",
+    "materials": [
+     "Suede"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "60": [
+  [
+   "Artisanal/Craft",
+   "Intellectual Fashion",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Hat",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "61": [
+  [
+   "Soft Tailoring",
+   "Boudoir",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Belt",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Fur/Faux Fur"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "62": [
+  [
+   "Romantic",
+   "Ladylike",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Fringe"
+    ]
+   }
+  ]
+ ],
+ "63": [
+  [
+   "Boho",
+   "70s Retro"
+  ],
+  [
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Grommets"
+    ]
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "64": [
+  [
+   "New Classic",
+   "Quiet Status"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "65": [
+  [
+   "Streetwear",
+   "Minimalism"
+  ],
+  [
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "66": [
+  [
+   "New Femininity",
+   "Intellectual Fashion"
+  ],
+  [
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "67": [
+  [
+   "Minimalism",
+   "Intellectual Fashion",
+   "Quiet Status"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "68": [
+  [
+   "Minimalism",
+   "90s Retro",
+   "Body-conscious Basics"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "69": [
+  [
+   "Minimalism",
+   "Intellectual Fashion",
+   "Artisanal/Craft"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "70": [
+  [
+   "Resort",
+   "Intellectual Fashion"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "71": [
+  [
+   "Minimalism",
+   "Power Dressing",
+   "90s Retro"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "72": [
+  [
+   "Intellectual Fashion",
+   "Minimalism",
+   "Streetwear"
+  ],
+  [
+   {
+    "category": "Hat",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "73": [
+  [
+   "Artisanal/Craft",
+   "Intellectual Fashion",
+   "Minimalism"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "74": [
+  [
+   "Minimalism",
+   "90s Retro"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "75": [
+  [
+   "Eclectic",
+   "Intellectual Fashion"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "76": [
+  [
+   "Quiet Luxury",
+   "Minimalism",
+   "New Classic"
+  ],
+  [
+   {
+    "category": "Belt",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Ties"
+    ]
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "77": [
+  [
+   "Minimalism",
+   "Streetwear",
+   "Quiet Status"
+  ],
+  [
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "78": [
+  [
+   "Preppy",
+   "Ladylike",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Scarf",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Rhinestones"
+    ]
+   }
+  ]
+ ],
+ "79": [
+  [
+   "Eclectic",
+   "Resort"
+  ],
+  [
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Suede"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "80": [
+  [
+   "Intellectual Fashion",
+   "Utilitarian"
+  ],
+  [
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "81": [
+  [
+   "Intellectual Fashion",
+   "Eclectic",
+   "New Classic"
+  ],
+  [
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Appliqué"
+    ]
+   }
+  ]
+ ],
+ "82": [
+  [
+   "Old Money",
+   "Romantic",
+   "New Femininity"
+  ],
+  [
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "83": [
+  [
+   "Grunge",
+   "Utilitarian",
+   "Intellectual Fashion"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "84": [
+  [
+   "Intellectual Fashion",
+   "New Femininity"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "85": [
+  [
+   "Power Dressing",
+   "Loud Luxury"
+  ],
+  [
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "86": [
+  [
+   "Boudoir",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Bag",
+    "materials": [
+     "Sheer Fabric"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "87": [
+  [
+   "Minimalism",
+   "Resort"
+  ],
+  [
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "88": [
+  [
+   "Boudoir",
+   "Power Dressing"
+  ],
+  [
+   {
+    "category": "Belt",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "89": [
+  [
+   "Preppy",
+   "Collegiate/Schoolgirl",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Tweed"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Metal Hardware"
+    ]
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "90": [
+  [
+   "Loud Luxury",
+   "New Femininity"
+  ],
+  [
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "91": [
+  [
+   "Intellectual Fashion",
+   "New Femininity"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "92": [
+  [
+   "Mob Wife",
+   "Ladylike",
+   "Boudoir"
+  ],
+  [
+   {
+    "category": "Hat",
+    "materials": [
+     "Fur/Faux Fur"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "93": [
+  [
+   "Power Dressing",
+   "Loud Luxury"
+  ],
+  [
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Gloves",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "94": [
+  [
+   "Eclectic",
+   "Grunge"
+  ],
+  [
+   {
+    "category": "Bag",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": [
+     "Sequins"
+    ]
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "95": [
+  [
+   "90s Retro",
+   "Streetwear"
+  ],
+  [
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Belt",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "96": [
+  [
+   "Romantic",
+   "Ladylike",
+   "Resort"
+  ],
+  [
+   {
+    "category": "Bag",
+    "materials": [
+     "Satin"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "97": [
+  [
+   "Grunge",
+   "Boudoir",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Sunglasses",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "98": [
+  [
+   "Quiet Luxury",
+   "Artisanal/Craft",
+   "Country Aesthetic"
+  ],
+  [
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "99": [
+  [
+   "New Femininity",
+   "Eclectic"
+  ],
+  [
+   {
+    "category": "Jewelry/Accessory",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "not_visible",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "not_visible"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ],
+ "100": [
+  [
+   "Streetwear",
+   "90s Retro"
+  ],
+  [
+   {
+    "category": "Hat",
+    "materials": [
+     "Fine Knit"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Bag",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   },
+   {
+    "category": "Shoes/Boots",
+    "materials": [
+     "Leather/Faux Leather"
+    ],
+    "pattern": "Solid",
+    "silhouette": [],
+    "construction": [],
+    "decoration": []
+   }
+  ]
+ ]
+}
