@@ -472,6 +472,10 @@ def append_review_queue(data_dir: str, row: dict, tags: dict):
 
 # ─── Batch API ────────────────────────────────────────────────────────────────
 
+CHUNK_SIZE = 150          # луков в одном батче: ~110 МБ < лимита API 256 МБ
+PREP_THREADS = 8          # параллельное скачивание фото
+
+
 def _batch_request(custom_id, params):
     from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
     from anthropic.types.messages.batch_create_params import Request
@@ -484,37 +488,72 @@ def _save_state(data_dir, state):
         json.dump(state, f, ensure_ascii=False)
 
 
-def batch_submit(client, rows, processed, data_dir):
-    """Фаза A: полное фото для всех луков одним батчем.
-    Фаза B (детали по списку предметов из A) отправляется автоматически
-    при --collect, когда фаза A готова."""
-    requests, index = [], {}
-    print(f"⏳ Подготовка изображений, фаза A ({len(rows)} луков)…")
-    for i, row in enumerate(rows):
-        url = row["image_url"]
-        if url in processed:
-            continue
+def _load_state(data_dir):
+    path = f"{data_dir}/batch_state.json"
+    if not os.path.exists(path):
+        return None
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _prepare_parallel(pairs):
+    """[(idx, row)] → {idx: (row, images)}; ошибки скачивания пропускаются."""
+    from concurrent.futures import ThreadPoolExecutor
+    out = {}
+
+    def work(item):
+        idx, row = item
         try:
-            images = prepare_images(url)
+            return idx, row, prepare_images(row["image_url"])
         except Exception as e:
-            print(f"  ⚠️  skip {url}: {e}")
-            continue
-        index[str(i)] = row
-        requests.append(_batch_request(
-            f"{i}-A", request_params_a(images, MODEL_BULK)))
-        if (i + 1) % 100 == 0:
-            print(f"  … {i + 1}/{len(rows)}")
+            print(f"  ⚠️  skip {row['image_url']}: {e}")
+            return None
 
-    if not requests:
-        print("Нечего отправлять — всё уже обработано.")
+    with ThreadPoolExecutor(max_workers=PREP_THREADS) as ex:
+        for res in ex.map(work, pairs):
+            if res:
+                out[res[0]] = (res[1], res[2])
+    return out
+
+
+def batch_submit(client, rows, processed, data_dir):
+    """Фаза A чанками по CHUNK_SIZE луков (память и лимит 256 МБ/батч).
+    Состояние пишется после каждого чанка — сбой не теряет отправленное.
+    Повторный запуск продолжает с места остановки."""
+    state = _load_state(data_dir) or {"phase": "A", "chunks": []}
+    if state.get("phase") != "A":
+        sys.exit("❌ Уже идёт фаза B — используй --collect")
+    submitted = {row["image_url"] for c in state["chunks"]
+                 for row in c["index"].values()}
+
+    pending = [(str(i), row) for i, row in enumerate(rows)
+               if row["image_url"] not in processed
+               and row["image_url"] not in submitted]
+    if not pending:
+        print("Нечего отправлять — всё уже отправлено/обработано.")
         return
+    n_chunks = (len(pending) + CHUNK_SIZE - 1) // CHUNK_SIZE
+    print(f"⏳ Фаза A: {len(pending)} луков, {n_chunks} батчей "
+          f"по ≤{CHUNK_SIZE}…")
 
-    batch = client.client.messages.batches.create(requests=requests)
-    _save_state(data_dir, {"phase": "A", "batch_id": batch.id,
-                           "index": index})
-    print(f"✅ Батч фазы A отправлен: {batch.id} ({len(requests)} запросов)")
-    print("   Дальше: python3 enrich_looks.py --collect "
-          "(соберёт A и отправит фазу B)")
+    for ci in range(n_chunks):
+        chunk = pending[ci * CHUNK_SIZE:(ci + 1) * CHUNK_SIZE]
+        prepared = _prepare_parallel(chunk)
+        requests = [_batch_request(f"{idx}-A",
+                                   request_params_a(images, MODEL_BULK))
+                    for idx, (row, images) in prepared.items()]
+        if not requests:
+            continue
+        batch = client.client.messages.batches.create(requests=requests)
+        state["chunks"].append({
+            "batch_id": batch.id,
+            "index": {idx: row for idx, (row, _) in prepared.items()}})
+        _save_state(data_dir, state)
+        print(f"  ✅ батч {ci + 1}/{n_chunks} отправлен: {batch.id} "
+              f"({len(requests)} луков)")
+
+    print("✅ Фаза A отправлена целиком. Дальше: "
+          "python3 enrich_looks.py --collect")
 
 
 def _retrieve_results(client, batch_id):
@@ -524,60 +563,86 @@ def _retrieve_results(client, batch_id):
             print(f"  ⚠️  {res.custom_id}: {res.result.type}")
             continue
         idx = res.custom_id.rsplit("-", 1)[0]
-        results[idx] = extract_tool_input(res.result.message)
+        try:
+            results[idx] = extract_tool_input(res.result.message)
+        except ValueError:
+            print(f"  ⚠️  {res.custom_id}: нет tool_use в ответе")
     return results
 
 
-def batch_collect(client, data_dir, output_csv):
-    state_path = f"{data_dir}/batch_state.json"
-    if not os.path.exists(state_path):
-        sys.exit("❌ Нет batch_state.json — сначала --full --confirm-full")
-    with open(state_path, encoding="utf-8") as f:
-        state = json.load(f)
-    batch_id, index = state["batch_id"], state["index"]
+def _chunks_status(client, chunks):
+    """→ (все ли завершены, суммарная статистика)."""
+    done = True
+    stats = {"processing": 0, "succeeded": 0, "errored": 0}
+    for c in chunks:
+        b = client.client.messages.batches.retrieve(c["batch_id"])
+        rc = b.request_counts
+        stats["processing"] += rc.processing
+        stats["succeeded"] += rc.succeeded
+        stats["errored"] += rc.errored
+        if b.processing_status != "ended":
+            done = False
+    return done, stats
 
-    batch = client.client.messages.batches.retrieve(batch_id)
-    print(f"Батч {batch_id} (фаза {state['phase']}): "
-          f"{batch.processing_status}")
-    if batch.processing_status != "ended":
-        c = batch.request_counts
-        print(f"  processing={c.processing} succeeded={c.succeeded} "
-              f"errored={c.errored}")
+
+def batch_collect(client, data_dir, output_csv):
+    state = _load_state(data_dir)
+    if not state:
+        sys.exit("❌ Нет batch_state.json — сначала --full --confirm-full")
+
+    done, st = _chunks_status(client, state["chunks"])
+    print(f"Фаза {state['phase']}: {len(state['chunks'])} батчей · "
+          f"в работе {st['processing']} · готово {st['succeeded']} · "
+          f"ошибок {st['errored']}")
+    if not done:
+        print("⏳ Ещё обрабатывается — повтори --collect позже.")
         return
 
     if state["phase"] == "A":
-        # собрать A → подготовить и отправить B
-        results_a = {i: validate_a(r) for i, r in
-                     _retrieve_results(client, batch_id).items()}
-        requests = []
-        print(f"⏳ Фаза B: подготовка кропов ({len(results_a)} луков)…")
-        for n, (idx, a) in enumerate(results_a.items()):
-            if not a["items"]:
+        # собрать все чанки A
+        results_a, index = {}, {}
+        for c in state["chunks"]:
+            index.update(c["index"])
+            for idx, raw in _retrieve_results(client, c["batch_id"]).items():
+                results_a[idx] = validate_a(raw)
+        with open(f"{data_dir}/results_a.json", "w", encoding="utf-8") as f:
+            json.dump({"results_a": results_a, "index": index}, f,
+                      ensure_ascii=False)
+        print(f"✅ Фаза A собрана: {len(results_a)} луков")
+
+        # отправить B чанками
+        pending = [(idx, index[idx]) for idx, a in results_a.items()
+                   if a["items"]]
+        n_chunks = (len(pending) + CHUNK_SIZE - 1) // CHUNK_SIZE
+        print(f"⏳ Фаза B: {len(pending)} луков, {n_chunks} батчей…")
+        state_b = {"phase": "B", "chunks": []}
+        for ci in range(n_chunks):
+            chunk = pending[ci * CHUNK_SIZE:(ci + 1) * CHUNK_SIZE]
+            prepared = _prepare_parallel(chunk)
+            requests = [
+                _batch_request(f"{idx}-B", request_params_b(
+                    images, MODEL_BULK, results_a[idx]["items"]))
+                for idx, (row, images) in prepared.items()]
+            if not requests:
                 continue
-            url = index[idx]["image_url"]
-            try:
-                images = prepare_images(url)
-            except Exception as e:
-                print(f"  ⚠️  skip {url}: {e}")
-                continue
-            requests.append(_batch_request(
-                f"{idx}-B",
-                request_params_b(images, MODEL_BULK, a["items"])))
-            if (n + 1) % 100 == 0:
-                print(f"  … {n + 1}/{len(results_a)}")
-        batch_b = client.client.messages.batches.create(requests=requests)
-        _save_state(data_dir, {"phase": "B", "batch_id": batch_b.id,
-                               "index": index,
-                               "results_a": {i: a for i, a in
-                                             results_a.items()}})
-        print(f"✅ Батч фазы B отправлен: {batch_b.id} "
-              f"({len(requests)} запросов)")
-        print("   Когда завершится: python3 enrich_looks.py --collect")
+            batch = client.client.messages.batches.create(requests=requests)
+            state_b["chunks"].append({
+                "batch_id": batch.id,
+                "index": {idx: row for idx, (row, _) in prepared.items()}})
+            _save_state(data_dir, state_b)
+            print(f"  ✅ батч {ci + 1}/{n_chunks}: {batch.id}")
+        print("✅ Фаза B отправлена. Когда завершится: "
+              "python3 enrich_looks.py --collect")
         return
 
     # фаза B → финальный merge
-    results_b = _retrieve_results(client, batch_id)
-    results_a = state["results_a"]
+    with open(f"{data_dir}/results_a.json", encoding="utf-8") as f:
+        saved = json.load(f)
+    results_a, index = saved["results_a"], saved["index"]
+    results_b = {}
+    for c in state["chunks"]:
+        results_b.update(_retrieve_results(client, c["batch_id"]))
+
     processed = load_processed(output_csv)
     mode = "a" if os.path.exists(output_csv) else "w"
     n_done = n_review = 0
