@@ -17,7 +17,9 @@ eval_elements.py — валидация детекции ключевых тре
 Результат: таблица + output/trusted_elements.json (для trends.py, Фаза 2)
 """
 
+import argparse
 import json
+import os
 import sys
 
 from eval_tagging import load_golden, load_predictions, _clean
@@ -57,12 +59,27 @@ def look_elements(look, field):
     return out
 
 
+def _default_pred():
+    for p in ("output/golden_pred_haiku.csv", "output/golden_pred_sonnet.csv",
+              "output/enriched_looks_v3.csv"):
+        if os.path.exists(p):
+            return p
+    return "output/golden_pred_haiku.csv"
+
+
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--pred", default=None,
+                    help="CSV с предсказаниями (по умолчанию — свежий "
+                         "golden_pred_*.csv)")
+    args = ap.parse_args()
+    pred_path = args.pred or _default_pred()
     golden = load_golden("output/golden_set.json")
     try:
-        preds = load_predictions("output/enriched_looks_v3.csv")
+        preds = load_predictions(pred_path)
     except FileNotFoundError:
         sys.exit("❌ Нет предсказаний: python3 enrich_looks.py --golden")
+    print(f"Предсказания: {pred_path}")
 
     rows, trusted = [], []
     for field, elements in KEY_ELEMENTS.items():

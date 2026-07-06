@@ -128,13 +128,10 @@ The look contains these items (from the full-photo pass):
 {listing}
 
 Pass B — for EACH numbered item report material, construction, decoration \
-(reference by item_index). STRICT PRECISION MODE: report at most 2-3 \
-construction and 1-2 decoration labels per item — only the MOST prominent, \
-unmistakable details. If you would need to zoom further or guess, omit the \
-label. An omitted true detail costs little; an invented one poisons trend \
-statistics. Never tag Slits, Statement Closure, Shirt Collar, Extended \
-Cuffs or Metal Hardware "by default". \
-Use the checklist below only as a reminder of vocabulary:
+(reference by item_index). Tag a detail ONLY when you can point to it in \
+the crop — a checklist item you cannot clearly see is simply omitted. \
+Never tag Slits, Statement Closure or Shirt Collar "by default". \
+Work through this checklist per garment:
 - neckline/collar: Stand Collar? Shirt Collar? Polo Collar? High Neck? \
 V-Neck? Boat Neck? Square Neckline? Halter? Off-Shoulder? Cutout Neckline?
 - shoulders/sleeves: Wide Shoulders? Dropped Shoulder? Puff Sleeves? \
@@ -684,7 +681,10 @@ def main():
 
     data_dir = args.data_dir
     input_csv = f"{data_dir}/all_designers.csv"
-    output_csv = f"{data_dir}/enriched_looks_v3.csv"
+    if args.golden:  # отдельный файл на модель — замеры не затирают друг друга
+        output_csv = f"{data_dir}/golden_pred_{args.model}.csv"
+    else:
+        output_csv = f"{data_dir}/enriched_looks_v3.csv"
 
     def get_client():
         if MOCK:
