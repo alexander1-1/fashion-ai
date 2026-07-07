@@ -60,3 +60,11 @@ STAGES = [
 TYPE4_MIN_Q_GROWTH = 0.1       # растущие запросы
 TYPE4_MAX_CARDS = 150          # низкая конкуренция: карточек < N
 TYPE4_MIN_TOP_REVENUE = 1_000_000  # высокая выручка топов, руб/мес
+
+# ─── MPStats API (раздел 5, Фаза 3) ──────────────────────────────────────────
+MPSTATS_BASE = "https://mpstats.io/api/analytics/v1/wb/"
+MPSTATS_Q_WINDOWS = 13         # число 30-дневных окон частотности (≈13 мес.)
+MPSTATS_WINDOW_DAYS = 30       # длина окна агрегации недельной частотности
+MPSTATS_TOP_N = 20             # топ карточек выдачи для c_top_revenue
+MPSTATS_SERP_ROWS = 100        # сколько карточек запрашивать из выдачи
+MPSTATS_DELAY_SEC = 0.35       # пауза между вызовами API
