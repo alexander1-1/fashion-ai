@@ -2,8 +2,8 @@
  {
   "field": "materials",
   "element": "Leather/Faux Leather",
-  "recall": 0.85,
-  "precision": 0.86,
+  "recall": 1.0,
+  "precision": 0.83,
   "support": 78
  },
  {
@@ -17,21 +17,21 @@
   "field": "pattern",
   "element": "Floral",
   "recall": 0.82,
-  "precision": 0.75,
+  "precision": 0.6,
   "support": 11
  },
  {
   "field": "pattern",
   "element": "Stripes",
-  "recall": 0.89,
-  "precision": 0.67,
+  "recall": 0.78,
+  "precision": 0.88,
   "support": 9
  },
  {
   "field": "pattern",
   "element": "Checks/Plaid",
   "recall": 0.8,
-  "precision": 0.67,
+  "precision": 0.57,
   "support": 5
  }
 ]
