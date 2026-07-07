@@ -76,9 +76,11 @@ def parse_json(text: str) -> dict:
 
 def generate(limit: int | None, force: bool):
     import anthropic
+    from mpstats_client import load_env
+    load_env()                       # ANTHROPIC_API_KEY можно держать в .env
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key:
-        sys.exit("❌ Set ANTHROPIC_API_KEY")
+        sys.exit("❌ Добавь ANTHROPIC_API_KEY=sk-ant-... в .env (или export)")
     client = anthropic.Anthropic(api_key=api_key)
 
     conn = db.connect()
