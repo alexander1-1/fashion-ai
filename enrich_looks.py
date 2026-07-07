@@ -483,6 +483,19 @@ def _batch_request(custom_id, params):
                    params=MessageCreateParamsNonStreaming(**params))
 
 
+def _create_batch_retry(client, requests, retries=5):
+    """batches.create с повторами: 502/529 от API — обычное дело."""
+    for attempt in range(retries):
+        try:
+            return client.client.messages.batches.create(requests=requests)
+        except Exception as e:
+            wait = 15 * (attempt + 1)
+            print(f"  ⚠️  API error ({e.__class__.__name__}), "
+                  f"повтор через {wait}с ({attempt + 1}/{retries})")
+            time.sleep(wait)
+    raise RuntimeError("batches.create не удался после повторов")
+
+
 def _save_state(data_dir, state):
     with open(f"{data_dir}/batch_state.json", "w", encoding="utf-8") as f:
         json.dump(state, f, ensure_ascii=False)
@@ -544,7 +557,7 @@ def batch_submit(client, rows, processed, data_dir):
                     for idx, (row, images) in prepared.items()]
         if not requests:
             continue
-        batch = client.client.messages.batches.create(requests=requests)
+        batch = _create_batch_retry(client, requests)
         state["chunks"].append({
             "batch_id": batch.id,
             "index": {idx: row for idx, (row, _) in prepared.items()}})
@@ -625,7 +638,7 @@ def batch_collect(client, data_dir, output_csv):
                 for idx, (row, images) in prepared.items()]
             if not requests:
                 continue
-            batch = client.client.messages.batches.create(requests=requests)
+            batch = _create_batch_retry(client, requests)
             state_b["chunks"].append({
                 "batch_id": batch.id,
                 "index": {idx: row for idx, (row, _) in prepared.items()}})
