@@ -692,50 +692,141 @@ def batch_collect(client, data_dir, output_csv):
             if tags["confidence"] < CONFIDENCE_THRESHOLD:
                 append_review_queue(os.path.dirname(output_csv), row, tags)
                 n_review += 1
+    for p in (f"{data_dir}/batch_state.json", f"{data_dir}/results_a.json"):
+        if os.path.exists(p):
+            os.replace(p, p + ".done")  # чтобы --full --resume добрал пропуски
     print(f"✅ Собрано: {n_done} луков → {output_csv}")
     print(f"   На пересмотр Sonnet (conf < {CONFIDENCE_THRESHOLD}): "
           f"{n_review} → --review")
 
 
-# ─── Review low-confidence (Sonnet 5) ────────────────────────────────────────
+# ─── Review low-confidence (Sonnet 5, Batch API) ─────────────────────────────
+# Состояние в output/review_state.json; запускать --review повторно до
+# завершения (submit A → collect A + submit B → collect B + запись CSV).
+
+def _review_state(data_dir, state=None):
+    path = f"{data_dir}/review_state.json"
+    if state is not None:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(state, f, ensure_ascii=False)
+        return state
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    return None
+
+
+def _submit_chunks_generic(client, pending, model, tag, build_params,
+                           on_chunk):
+    """pending=[(idx,row)]; build_params(idx,row,images)->params|None."""
+    n_chunks = (len(pending) + CHUNK_SIZE - 1) // CHUNK_SIZE
+    for ci in range(n_chunks):
+        chunk = pending[ci * CHUNK_SIZE:(ci + 1) * CHUNK_SIZE]
+        prepared = _prepare_parallel(chunk)
+        requests = []
+        for idx, (row, images) in prepared.items():
+            params = build_params(idx, row, images)
+            if params:
+                requests.append(_batch_request(f"{idx}-{tag}", params))
+        if not requests:
+            continue
+        batch = _create_batch_retry(client, requests)
+        on_chunk(batch.id, {idx: row for idx, (row, _) in prepared.items()})
+        print(f"  ✅ батч {ci + 1}/{n_chunks}: {batch.id}")
+
 
 def run_review(client, data_dir, output_csv):
+    state = _review_state(data_dir)
     queue_path = f"{data_dir}/review_queue.jsonl"
-    if not os.path.exists(queue_path):
-        print("Очередь пересмотра пуста.")
+
+    if state is None:
+        if not os.path.exists(queue_path):
+            print("Очередь пересмотра пуста.")
+            return
+        with open(queue_path, encoding="utf-8") as f:
+            queue = list({json.loads(l)["image_url"]: json.loads(l)
+                          for l in f if l.strip()}.values())
+        est_in = len(queue) * 2900 / 1e6 * 1.5   # Sonnet batch $1.5/Мток in
+        est_out = len(queue) * 1400 / 1e6 * 7.5
+        print(f"🔍 Пересмотр {len(queue)} луков, {MODEL_REVIEW} + Batch "
+              f"(≈${est_in + est_out:.0f})")
+        st = {"phase": "A", "chunks": []}
+        pending = [(f"r{i}", q) for i, q in enumerate(queue)]
+
+        def on_chunk(bid, index):
+            st["chunks"].append({"batch_id": bid, "index": index})
+            _review_state(data_dir, st)
+
+        _submit_chunks_generic(
+            client, pending, MODEL_REVIEW, "A",
+            lambda idx, row, img: request_params_a(img, MODEL_REVIEW),
+            on_chunk)
+        print("✅ Фаза A review отправлена. Повтори --review позже.")
         return
-    with open(queue_path, encoding="utf-8") as f:
-        queue = [json.loads(line) for line in f if line.strip()]
-    # дедуп по url
-    queue = list({q["image_url"]: q for q in queue}.values())
-    print(f"🔍 Пересмотр {len(queue)} луков моделью {MODEL_REVIEW}")
+
+    done, stt = _chunks_status(client, state["chunks"])
+    print(f"Review, фаза {state['phase']}: {len(state['chunks'])} батчей · "
+          f"в работе {stt['processing']} · готово {stt['succeeded']} · "
+          f"ошибок {stt['errored']}")
+    if not done:
+        print("⏳ Ещё обрабатывается — повтори --review позже.")
+        return
+
+    if state["phase"] == "A":
+        results_a, index = {}, {}
+        for c in state["chunks"]:
+            index.update(c["index"])
+            for idx, raw in _retrieve_results(client, c["batch_id"]).items():
+                results_a[idx] = validate_a(raw)
+        with open(f"{data_dir}/review_results_a.json", "w",
+                  encoding="utf-8") as f:
+            json.dump({"results_a": results_a, "index": index}, f,
+                      ensure_ascii=False)
+        st = {"phase": "B", "chunks": []}
+        pending = [(idx, index[idx]) for idx, a in results_a.items()
+                   if a["items"]]
+
+        def on_chunk(bid, chunk_index):
+            st["chunks"].append({"batch_id": bid, "index": chunk_index})
+            _review_state(data_dir, st)
+
+        _submit_chunks_generic(
+            client, pending, MODEL_REVIEW, "B",
+            lambda idx, row, img: request_params_b(
+                img, MODEL_REVIEW, results_a[idx]["items"]),
+            on_chunk)
+        print("✅ Фаза B review отправлена. Повтори --review позже.")
+        return
+
+    # фаза B готова → merge и обновление CSV
+    with open(f"{data_dir}/review_results_a.json", encoding="utf-8") as f:
+        saved = json.load(f)
+    results_a, index = saved["results_a"], saved["index"]
+    results_b = {}
+    for c in state["chunks"]:
+        results_b.update(_retrieve_results(client, c["batch_id"]))
 
     with open(output_csv, encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
     by_url = {r["image_url"]: r for r in rows}
-
-    for i, q in enumerate(queue):
-        url = q["image_url"]
-        print(f"[{i + 1}/{len(queue)}] {q['designer']} · Look "
-              f"{q['look_number']}", end=" ")
-        try:
-            tags = analyze_look(client, url, model=MODEL_REVIEW)
-        except Exception as e:
-            print(f"→ ошибка: {e}")
+    n_upd = 0
+    for idx, row in index.items():
+        url = row["image_url"]
+        if idx not in results_a or url not in by_url:
             continue
-        print(f"→ conf {tags['confidence']:.2f}")
-        if url in by_url:
-            by_url[url].update(result_row(
-                {k: by_url[url][k] for k in
-                 ("designer", "show", "look_number", "image_url")}, tags))
-        time.sleep(0.3)
-
+        a = results_a[idx]
+        b = validate_b(results_b.get(idx, {"items": []}))
+        tags = merge_passes(a, b)
+        by_url[url].update(result_row(row, tags))
+        n_upd += 1
     with open(output_csv, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
         writer.writeheader()
         writer.writerows(rows)
-    os.rename(queue_path, queue_path + ".done")
-    print(f"✅ Пересмотр завершён → {output_csv}")
+    for p in (queue_path, f"{data_dir}/review_state.json"):
+        if os.path.exists(p):
+            os.rename(p, p + ".done")
+    print(f"✅ Пересмотр завершён: обновлено {n_upd} луков → {output_csv}")
 
 
 # ─── Оценка стоимости ─────────────────────────────────────────────────────────
