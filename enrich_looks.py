@@ -483,7 +483,7 @@ def _batch_request(custom_id, params):
                    params=MessageCreateParamsNonStreaming(**params))
 
 
-def _create_batch_retry(client, requests, retries=5):
+def _create_batch_retry(client, requests, retries=8):
     """batches.create с повторами: 502/529 от API — обычное дело."""
     for attempt in range(retries):
         try:
@@ -598,10 +598,47 @@ def _chunks_status(client, chunks):
     return done, stats
 
 
+def _submit_b_chunks(client, data_dir, state_b, pending, results_a):
+    """Отправить недостающие батчи фазы B (state пишется после каждого)."""
+    n_chunks = (len(pending) + CHUNK_SIZE - 1) // CHUNK_SIZE
+    print(f"⏳ Фаза B: осталось отправить {len(pending)} луков, "
+          f"{n_chunks} батчей…")
+    for ci in range(n_chunks):
+        chunk = pending[ci * CHUNK_SIZE:(ci + 1) * CHUNK_SIZE]
+        prepared = _prepare_parallel(chunk)
+        requests = [
+            _batch_request(f"{idx}-B", request_params_b(
+                images, MODEL_BULK, results_a[idx]["items"]))
+            for idx, (row, images) in prepared.items()]
+        if not requests:
+            continue
+        batch = _create_batch_retry(client, requests)
+        state_b["chunks"].append({
+            "batch_id": batch.id,
+            "index": {idx: row for idx, (row, _) in prepared.items()}})
+        _save_state(data_dir, state_b)
+        print(f"  ✅ батч {ci + 1}/{n_chunks}: {batch.id}")
+    print("✅ Фаза B отправлена целиком. Когда завершится: "
+          "python3 enrich_looks.py --collect")
+
+
 def batch_collect(client, data_dir, output_csv):
     state = _load_state(data_dir)
     if not state:
         sys.exit("❌ Нет batch_state.json — сначала --full --confirm-full")
+
+    # фаза B: сначала дослать батчи, не отправленные из-за сбоев API
+    if state["phase"] == "B":
+        with open(f"{data_dir}/results_a.json", encoding="utf-8") as f:
+            saved = json.load(f)
+        results_a, index = saved["results_a"], saved["index"]
+        submitted = {idx for c in state["chunks"] for idx in c["index"]}
+        pending = [(idx, index[idx]) for idx, a in results_a.items()
+                   if a["items"] and idx not in submitted]
+        if pending:
+            print(f"⚠️  Обнаружены неотправленные луки фазы B: {len(pending)}")
+            _submit_b_chunks(client, data_dir, state, pending, results_a)
+            return
 
     done, st = _chunks_status(client, state["chunks"])
     print(f"Фаза {state['phase']}: {len(state['chunks'])} батчей · "
@@ -623,29 +660,10 @@ def batch_collect(client, data_dir, output_csv):
                       ensure_ascii=False)
         print(f"✅ Фаза A собрана: {len(results_a)} луков")
 
-        # отправить B чанками
         pending = [(idx, index[idx]) for idx, a in results_a.items()
                    if a["items"]]
-        n_chunks = (len(pending) + CHUNK_SIZE - 1) // CHUNK_SIZE
-        print(f"⏳ Фаза B: {len(pending)} луков, {n_chunks} батчей…")
         state_b = {"phase": "B", "chunks": []}
-        for ci in range(n_chunks):
-            chunk = pending[ci * CHUNK_SIZE:(ci + 1) * CHUNK_SIZE]
-            prepared = _prepare_parallel(chunk)
-            requests = [
-                _batch_request(f"{idx}-B", request_params_b(
-                    images, MODEL_BULK, results_a[idx]["items"]))
-                for idx, (row, images) in prepared.items()]
-            if not requests:
-                continue
-            batch = _create_batch_retry(client, requests)
-            state_b["chunks"].append({
-                "batch_id": batch.id,
-                "index": {idx: row for idx, (row, _) in prepared.items()}})
-            _save_state(data_dir, state_b)
-            print(f"  ✅ батч {ci + 1}/{n_chunks}: {batch.id}")
-        print("✅ Фаза B отправлена. Когда завершится: "
-              "python3 enrich_looks.py --collect")
+        _submit_b_chunks(client, data_dir, state_b, pending, results_a)
         return
 
     # фаза B → финальный merge
