@@ -77,9 +77,15 @@ class MpstatsError(RuntimeError):
 def _http(method: str, path: str, params: dict, body: dict | None = None):
     headers = {"X-Mpstats-TOKEN": _token(), "Content-Type": "application/json"}
     url = config.MPSTATS_BASE + path
-    for attempt in range(3):
-        r = requests.request(method, url, params=params, headers=headers,
-                             json=body, timeout=60)
+    for attempt in range(4):
+        try:
+            r = requests.request(method, url, params=params, headers=headers,
+                                 json=body, timeout=90)
+        except requests.RequestException as e:      # таймаут/обрыв — ретрай
+            if attempt == 3:
+                raise MpstatsError(f"{method} {path}: сеть — {e}") from e
+            time.sleep(5 * (attempt + 1))
+            continue
         if r.status_code == 200:
             return r.json()
         if r.status_code == 202:            # принят, но не готов — подождать
@@ -244,8 +250,8 @@ def collect(trend_id: str = None, include_all: bool = False) -> list[dict]:
                   f"C={r['c_cards']} карточек, топ-{config.MPSTATS_TOP_N} "
                   f"выручка {r['c_top_revenue']:,.0f} ₽")
             results.append(r)
-        except MpstatsError as e:
-            print(f"  {t['trend_id']}: ОШИБКА {e}")
+        except (MpstatsError, requests.RequestException) as e:
+            print(f"  {t['trend_id']}: ОШИБКА {e} — пропускаю, продолжай позже")
     return results
 
 
