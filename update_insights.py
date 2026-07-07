@@ -16,7 +16,10 @@ import os
 from collections import Counter
 
 DATA_DIR = "./output"
-ENRICHED_CSV = f"{DATA_DIR}/enriched_looks.csv"
+# v3 (полный прогон, пайплайн со строгими enum) приоритетнее старой разметки
+ENRICHED_CSV = (f"{DATA_DIR}/enriched_looks_v3.csv"
+                if os.path.exists(f"{DATA_DIR}/enriched_looks_v3.csv")
+                else f"{DATA_DIR}/enriched_looks.csv")
 INSIGHTS_JSON = f"{DATA_DIR}/enriched_insights.json"
 
 
@@ -31,7 +34,7 @@ def pct(count, total):
     return round(count / total * 100, 1) if total else 0
 
 
-def top_n(counter, total, n=12, exclude=("Other", "")):
+def top_n(counter, total, n=12, exclude=("Other", "", "not_visible")):
     return [
         {"name": name, "count": count, "pct": pct(count, total)}
         for name, count in counter.most_common(n + len(exclude))

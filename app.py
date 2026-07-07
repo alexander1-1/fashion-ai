@@ -383,7 +383,9 @@ def load_enrichment():
     global _enrichment_index, _enrichment_insights, _enrichment_rows
     idx = {}
     rows_list = []
-    path = f"{DATA_DIR}/enriched_looks.csv"
+    path = f"{DATA_DIR}/enriched_looks_v3.csv"   # v3 — полный прогон
+    if not os.path.exists(path):
+        path = f"{DATA_DIR}/enriched_looks.csv"
     if os.path.exists(path):
         with open(path, encoding="utf-8") as f:
             for r in csv.DictReader(f):
