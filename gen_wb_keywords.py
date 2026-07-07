@@ -87,10 +87,10 @@ def generate(limit: int | None, force: bool):
     rows = conn.execute(
         "SELECT * FROM trends WHERE status != 'archived' ORDER BY trend_id").fetchall()
     todo = [t for t in rows if force or naive(t)]
+    curated = len(rows) - len(todo)
     if limit:
         todo = todo[:limit]
-    skipped = len(rows) - len(todo)
-    print(f"Трендов к генерации: {len(todo)} (пропущено курированных: {skipped})")
+    print(f"Трендов к генерации: {len(todo)} (курированных пропущено: {curated})")
 
     proposed = json.loads(PROPOSED.read_text()) if PROPOSED.exists() else {}
     for i in range(0, len(todo), BATCH):
@@ -99,7 +99,8 @@ def generate(limit: int | None, force: bool):
             model=MODEL, max_tokens=4000,
             system=SYSTEM,
             messages=[{"role": "user", "content": build_user_msg(batch)}])
-        data = parse_json(resp.content[0].text)
+        text = next(b.text for b in resp.content if b.type == "text")
+        data = parse_json(text)
         for t in batch:
             kws = [k.strip().lower() for k in data.get(t["trend_id"], []) if k.strip()]
             if kws:
