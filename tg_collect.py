@@ -19,6 +19,12 @@ inbox/telegram/{channel}/ и регистрирует в ext_photos
     python tg_collect.py --days 30 --limit 100   # max фото на канал
 
 Альбомы: каждое фото альбома скачивается отдельным файлом (единый msg-URL).
+
+РЕЗЕРВНЫЙ РЕЖИМ без api_id/api_hash (--web или просто нет TG_API_ID в .env):
+парсинг веб-превью t.me/s/{channel} (перенос из fashion-ai/fetch_telegram.py).
+Работает сразу, но только для каналов с включённым превью и без гарантий
+Telegram; качество дат/полноты ниже, чем у Telethon. Токен ЧАТ-БОТА
+(BotFather) здесь бесполезен: боты не читают чужие каналы.
 """
 
 import argparse
@@ -45,15 +51,144 @@ def read_channels(path: str = "channels.txt") -> list[str]:
     return channels
 
 
-def _credentials() -> tuple[int, str]:
+def _credentials(required: bool = True) -> tuple[int, str] | None:
     import os
     load_env()
     api_id = os.environ.get("TG_API_ID", "")
     api_hash = os.environ.get("TG_API_HASH", "")
     if not api_id or not api_hash:
-        sys.exit("❌ Добавь в .env: TG_API_ID и TG_API_HASH "
-                 "(https://my.telegram.org → API development tools)")
+        if required:
+            sys.exit("❌ Добавь в .env: TG_API_ID и TG_API_HASH "
+                     "(https://my.telegram.org → API development tools)")
+        return None
     return int(api_id), api_hash
+
+
+# ─── Резервный режим: веб-превью t.me/s/ (без API-ключей) ────────────────────
+
+_UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+       "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+
+
+def _fetch_html(url: str, retries: int = 3) -> str:
+    import time
+    import urllib.request
+    for attempt in range(retries):
+        try:
+            req = urllib.request.Request(url, headers={
+                "User-Agent": _UA,
+                "Accept-Language": "ru-RU,ru;q=0.9,en-US;q=0.8"})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                return r.read().decode("utf-8", errors="ignore")
+        except Exception as e:
+            if attempt == retries - 1:
+                raise
+            time.sleep(4 * (attempt + 1))
+
+
+def _parse_preview_posts(html: str, channel: str) -> list[dict]:
+    """Посты с фото из HTML t.me/s/: [{msg_id, url, img_url, date}]."""
+    import re
+    posts = []
+    for block in re.split(r'<div class="tgme_widget_message_wrap', html)[1:]:
+        m = re.search(
+            r'href="(https://t\.me/' + re.escape(channel) + r'/(\d+))"', block)
+        if not m:
+            continue
+        date_m = re.search(r'<time[^>]+datetime="([^"]+)"', block)
+        post_date = None
+        if date_m:
+            try:
+                post_date = datetime.fromisoformat(
+                    date_m.group(1).replace("Z", "+00:00"))
+            except ValueError:
+                pass
+        imgs = re.findall(r"background-image:url\('(https?://[^']+)'\)", block)
+        imgs = [u for u in imgs if "cdn" in u or "telesco" in u] or imgs
+        if not imgs:
+            continue
+        posts.append({"msg_id": m.group(2), "url": m.group(1),
+                      "img_url": imgs[0], "date": post_date})
+    return posts
+
+
+def _collect_channel_web(conn, channel: str, since: datetime,
+                         limit: int) -> tuple[int, int]:
+    import re
+    import time
+    import urllib.request
+    out_dir = INBOX_TG / channel
+    out_dir.mkdir(parents=True, exist_ok=True)
+    new = skipped = 0
+    url = f"https://t.me/s/{channel}"
+
+    for _page in range(30):
+        html = _fetch_html(url)
+        posts = _parse_preview_posts(html, channel)
+        if not posts:
+            break
+        reached_cutoff = any(p["date"] and p["date"] < since for p in posts)
+
+        for p in posts:
+            if new >= limit:
+                break
+            if p["date"] and p["date"] < since:
+                continue
+            dest = out_dir / f"{p['msg_id']}.jpg"
+            if dest.exists():
+                skipped += 1
+                continue
+            try:
+                req = urllib.request.Request(p["img_url"], headers={
+                    "User-Agent": _UA, "Referer": "https://t.me/"})
+                with urllib.request.urlopen(req, timeout=20) as r:
+                    data = r.read()
+                if len(data) < 3000:
+                    continue
+                dest.write_bytes(data)
+            except Exception:
+                continue
+            d = (p["date"] or datetime.now(timezone.utc)).date().isoformat()
+            if register_photo(conn, dest, level="influencer",
+                              source=f"tg:{channel}", photo_date=d, url=p["url"]):
+                new += 1
+            else:
+                skipped += 1
+
+        if reached_cutoff or new >= limit:
+            break
+        ids = [int(i) for i in re.findall(r't\.me/\w+/(\d+)', html)]
+        if not ids or min(ids) <= 1:
+            break
+        url = f"https://t.me/s/{channel}?before={min(ids)}"
+        time.sleep(2)
+
+    return new, skipped
+
+
+def run_web(days: int, only: list[str] | None, limit: int):
+    conn = db.init_db()
+    channels = read_channels(config.TG_CHANNELS_FILE)
+    if only:
+        channels = [c for c in channels if c in only]
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+    print(f"[веб-превью t.me/s/ — без API] Каналов: {len(channels)}, "
+          f"период: {days} дн.\n")
+    import time
+    total_new = 0
+    for ch in channels:
+        print(f"📢 @{ch}")
+        try:
+            new, skipped = _collect_channel_web(conn, ch, since, limit)
+            total_new += new
+            print(f"   новых фото: {new}, пропущено: {skipped}")
+        except Exception as e:
+            print(f"   ! канал недоступен: {e}")
+        time.sleep(3)
+    n_pending = conn.execute(
+        "SELECT COUNT(*) FROM ext_photos WHERE status='pending'").fetchone()[0]
+    print(f"\n✅ Всего новых: {total_new}. В очереди на тегирование: {n_pending}")
+    print("   Дальше: python photo_tagger.py tag")
 
 
 def _client():
@@ -152,10 +287,18 @@ if __name__ == "__main__":
                     help="список через запятую (по умолчанию все из channels.txt)")
     ap.add_argument("--limit", type=int, default=config.TG_MAX_PHOTOS_PER_CHANNEL,
                     help="max новых фото на канал")
+    ap.add_argument("--web", action="store_true",
+                    help="принудительно веб-превью t.me/s/ (без API)")
     args = ap.parse_args()
 
     if args.login:
         login()
     else:
         only = [c.strip().lstrip("@") for c in args.channels.split(",") if c.strip()]
-        asyncio.run(run(args.days, only or None, args.limit))
+        if args.web or _credentials(required=False) is None:
+            if not args.web:
+                print("TG_API_ID/TG_API_HASH нет в .env → веб-превью t.me/s/. "
+                      "Telethon включится, когда добавишь ключи.\n")
+            run_web(args.days, only or None, args.limit)
+        else:
+            asyncio.run(run(args.days, only or None, args.limit))
