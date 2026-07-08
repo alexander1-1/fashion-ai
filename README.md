@@ -1,6 +1,34 @@
-# Vogue Runway Scraper
+# Vogue Runway Scraper → тренд-платформа WB
 
-Скрапер фото с подиума с [vogue.com/fashion-shows](https://www.vogue.com/fashion-shows).
+Скрапер фото с подиума с [vogue.com/fashion-shows](https://www.vogue.com/fashion-shows)
++ платформа тренд-аналитики (TREND_PLATFORM_INSTRUCTION.md).
+
+## Фаза 4: источники сигналов ниже подиума
+
+```bash
+pip install -r requirements-local.txt && playwright install chromium
+
+# Telegram (18 каналов из channels.txt; один раз: TG_API_ID/TG_API_HASH в .env)
+python tg_collect.py --login          # одноразовая авторизация
+python tg_collect.py --days 30        # скачать фото → inbox/telegram/
+
+# Новинки брендов (middle/fast-fashion, раз в 2–4 недели, видимый браузер)
+python brand_arrivals.py --download   # → inbox/brands/
+
+# Google Trends (RU-динамика по wb_keywords active-трендов)
+python gtrends.py collect             # → signals: social_search
+
+# Ручные папки: inbox/instagram|tiktok|brands/*, inbox/pinterest/*.csv
+python inbox_process.py               # регистрация фото + Pinterest CSV
+
+# Vision-тегирование очереди (Haiku, кропы) → сигналы M/F/I
+python photo_tagger.py tag --sample 20   # тест
+python photo_tagger.py tag               # вся очередь
+python photo_tagger.py status
+
+# Пересчёт стадий с новыми сигналами
+python trends.py score
+```
 
 ## Установка
 

@@ -7,3 +7,5 @@ output/review_queue.jsonl
 golden_photos/
 output/results_a.json
 trend_signals.db
+tg_session.session*
+inbox/

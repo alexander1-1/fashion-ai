@@ -1,0 +1,6 @@
+# Зависимости локальных коллекторов Фазы 4 (не нужны на Railway).
+# pip install -r requirements-local.txt && playwright install chromium
+telethon>=1.36
+pytrends>=4.9
+playwright>=1.45
+pytest>=8.0

@@ -68,3 +68,15 @@ MPSTATS_WINDOW_DAYS = 30       # длина окна агрегации неде
 MPSTATS_TOP_N = 20             # топ карточек выдачи для c_top_revenue
 MPSTATS_SERP_ROWS = 100        # сколько карточек запрашивать из выдачи
 MPSTATS_DELAY_SEC = 0.35       # пауза между вызовами API
+
+# ─── Источники сигналов (раздел 3, Фаза 4) ───────────────────────────────────
+INBOX_DIR = "inbox"            # inbox/telegram|brands|instagram|tiktok|pinterest|wildbox
+
+TG_CHANNELS_FILE = "channels.txt"
+TG_DEFAULT_DAYS = 30           # окно сбора постов
+TG_MAX_PHOTOS_PER_CHANNEL = 150
+
+PYTRENDS_GEO = "RU"            # RU-динамика запросов (п. 3.4)
+PYTRENDS_TIMEFRAME = "today 12-m"
+PYTRENDS_DELAY_SEC = 10        # rate limit Google Trends суров
+PYTRENDS_CACHE_DAYS = 1        # обновление не чаще раза в сутки

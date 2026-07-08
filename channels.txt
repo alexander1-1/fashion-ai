@@ -1,0 +1,20 @@
+# TG-каналы инфлюенсеров (раздел 3.3 инструкции, список из презентации).
+# Формат: username [# комментарий]. Строки с # игнорируются.
+theblueprintnews      # Новостной канал The Blueprint
+fashion_mur           # Канал о моде от журналиста Мадонны Мур
+rogov24               # Персональный канал Александра Рогова
+devilwearshandm       # «Дьявол носит H&M»
+religion_vogue        # VOGUE-religion
+zashmot               # Шмот
+myhotelki             # Вишлист
+fashionisterika       # Модная истерика
+strelets_molodec      # Канал журналиста Надежды Стрелец
+lifestylewhat         # Отдел Стиль Жизни
+russianmoda           # Русская мода
+wearfeelings          # Чувства Wearующих
+girl_who              # The girl who
+mariannaeliseeva      # Стилист Марианна Елисеева
+yesdressnostress      # Yess Dress No Stress
+welcometoyourselfff   # Мода быть собой
+hotcouture            # Хот кутюр
+outfits               # Outfits

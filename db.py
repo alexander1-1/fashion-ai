@@ -7,7 +7,8 @@ db.py — SQLite-хранилище платформы (раздел 1 инст�
   signals     — сигналы по уровням диффузии (podium … wb_sales)
   trends      — сущность «тренд» (п. 4.1)
   trend_scores— снапшоты скоринга: стадия + тип на дату
-  wb_metrics  — кэш ответов MPStats (Фаза 3)
+  wb_metrics  — кэш ответов MPStats (Фаза 3) + pytrends (Фаза 4)
+  ext_photos  — внешние фото (TG/бренды/inbox) для vision-тегирования (Фаза 4)
 
 CSV остаётся только как экспорт.
 """
@@ -102,6 +103,23 @@ CREATE TABLE IF NOT EXISTS trend_scores (
     rationale  TEXT,
     UNIQUE(trend_id, date)
 );
+
+CREATE TABLE IF NOT EXISTS ext_photos (
+    photo_id   INTEGER PRIMARY KEY,
+    level      TEXT NOT NULL CHECK (level IN
+               ('middle','fast_fashion','influencer','social_search')),
+    source     TEXT NOT NULL,     -- 'tg:rogov24', 'zara', 'instagram', 'tiktok'
+    date       TEXT NOT NULL,     -- дата поста/новинки, ISO YYYY-MM-DD
+    path       TEXT NOT NULL UNIQUE,  -- относительный путь к файлу
+    url        TEXT,              -- ссылка на пост/товар
+    sha1       TEXT UNIQUE,       -- дедуп по содержимому файла
+    tags       TEXT,              -- JSON vision-тегов {styles, items, confidence}
+    confidence REAL,
+    status     TEXT NOT NULL DEFAULT 'pending',  -- pending|tagged|error
+    added_at   TEXT NOT NULL DEFAULT (date('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_ext_photos_status ON ext_photos(status);
+CREATE INDEX IF NOT EXISTS idx_ext_photos_source ON ext_photos(level, source, date);
 
 CREATE TABLE IF NOT EXISTS wb_metrics (
     id      INTEGER PRIMARY KEY,
