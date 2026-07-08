@@ -110,6 +110,8 @@ class HttpClient:
 
 
 def make_client():
+    from mpstats_client import load_env
+    load_env()  # ANTHROPIC_API_KEY можно держать в .env
     if el.MOCK:
         return el.MockClient()
     try:
