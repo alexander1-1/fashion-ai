@@ -116,7 +116,8 @@ def _fetch_html(url: str, retries: int = 3) -> str:
 
 
 def _parse_preview_posts(html: str, channel: str) -> list[dict]:
-    """Посты с фото из HTML t.me/s/: [{msg_id, url, img_url, date}]."""
+    """Фото из HTML t.me/s/: по записи на КАЖДОЕ фото поста (альбом из N
+    фото → N записей с img_index 1..N): [{msg_id, url, img_url, img_index, date}]."""
     import re
     posts = []
     for block in re.split(r'<div class="tgme_widget_message_wrap', html)[1:]:
@@ -132,12 +133,23 @@ def _parse_preview_posts(html: str, channel: str) -> list[dict]:
                     date_m.group(1).replace("Z", "+00:00"))
             except ValueError:
                 pass
-        imgs = re.findall(r"background-image:url\('(https?://[^']+)'\)", block)
-        imgs = [u for u in imgs if "cdn" in u or "telesco" in u] or imgs
-        if not imgs:
-            continue
-        posts.append({"msg_id": m.group(2), "url": m.group(1),
-                      "img_url": imgs[0], "date": post_date})
+        # каждое фото поста/альбома — отдельный photo_wrap со своим URL
+        imgs = re.findall(
+            r'class="tgme_widget_message_photo_wrap[^"]*"[^>]*'
+            r"background-image:url\('(https?://[^']+)'\)", block)
+        if not imgs:  # одиночное фото в старой разметке
+            imgs = [u for u in re.findall(
+                r"background-image:url\('(https?://[^']+)'\)", block)
+                if "cdn" in u or "telesco" in u][:1]
+        seen = set()
+        k = 0
+        for img in imgs:
+            if img in seen:
+                continue
+            seen.add(img)
+            k += 1
+            posts.append({"msg_id": m.group(2), "url": m.group(1),
+                          "img_url": img, "img_index": k, "date": post_date})
     return posts
 
 
@@ -162,7 +174,8 @@ def _collect_channel_web(conn, channel: str, since: datetime,
                 break
             if p["date"] and p["date"] < since:
                 continue
-            dest = out_dir / f"{p['msg_id']}.jpg"
+            suffix = "" if p["img_index"] == 1 else f"_{p['img_index']}"
+            dest = out_dir / f"{p['msg_id']}{suffix}.jpg"
             if dest.exists():
                 skipped += 1
                 continue
