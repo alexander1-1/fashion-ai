@@ -1,449 +1,449 @@
 {
   "total_looks": 17724,
-  "total_items": 89488,
+  "total_items": 88802,
   "parse_errors": 0,
   "styles": [
     {
       "name": "Quiet Luxury",
-      "count": 11809,
-      "pct": 66.6
+      "count": 11376,
+      "pct": 64.2
     },
     {
       "name": "New Classic",
-      "count": 7886,
-      "pct": 44.5
+      "count": 7361,
+      "pct": 41.5
     },
     {
       "name": "Minimalism",
-      "count": 4057,
-      "pct": 22.9
+      "count": 4086,
+      "pct": 23.1
     },
     {
       "name": "Loud Luxury",
-      "count": 3230,
-      "pct": 18.2
+      "count": 3119,
+      "pct": 17.6
+    },
+    {
+      "name": "Eclectic",
+      "count": 2860,
+      "pct": 16.1
     },
     {
       "name": "Romantic",
-      "count": 2702,
+      "count": 2686,
       "pct": 15.2
     },
     {
       "name": "New Femininity",
-      "count": 2668,
-      "pct": 15.1
-    },
-    {
-      "name": "Eclectic",
-      "count": 2512,
-      "pct": 14.2
+      "count": 2578,
+      "pct": 14.5
     },
     {
       "name": "Power Dressing",
-      "count": 2246,
-      "pct": 12.7
+      "count": 2204,
+      "pct": 12.4
     },
     {
       "name": "Soft Tailoring",
-      "count": 1545,
-      "pct": 8.7
-    },
-    {
-      "name": "Intellectual Fashion",
-      "count": 1385,
-      "pct": 7.8
-    },
-    {
-      "name": "Body-conscious Basics",
-      "count": 1319,
-      "pct": 7.4
+      "count": 1431,
+      "pct": 8.1
     },
     {
       "name": "Old Money",
-      "count": 1289,
-      "pct": 7.3
+      "count": 1359,
+      "pct": 7.7
+    },
+    {
+      "name": "Body-conscious Basics",
+      "count": 1272,
+      "pct": 7.2
+    },
+    {
+      "name": "Intellectual Fashion",
+      "count": 1266,
+      "pct": 7.1
     }
   ],
   "categories": [
     {
       "name": "Shoes/Boots",
-      "count": 16045,
+      "count": 15890,
       "pct": 17.9
     },
     {
       "name": "Jewelry/Accessory",
-      "count": 10617,
-      "pct": 11.9
+      "count": 10316,
+      "pct": 11.6
     },
     {
       "name": "Bag",
-      "count": 7789,
-      "pct": 8.7
+      "count": 7804,
+      "pct": 8.8
     },
     {
       "name": "Pants/Trousers",
-      "count": 7482,
-      "pct": 8.4
+      "count": 7379,
+      "pct": 8.3
     },
     {
       "name": "Top/Blouse",
-      "count": 5720,
-      "pct": 6.4
+      "count": 5455,
+      "pct": 6.1
     },
     {
       "name": "Jacket/Blazer",
-      "count": 5503,
+      "count": 5450,
       "pct": 6.1
     },
     {
       "name": "Shirt",
-      "count": 4121,
-      "pct": 4.6
+      "count": 4134,
+      "pct": 4.7
     },
     {
       "name": "Knitwear/Cardigan",
-      "count": 3979,
-      "pct": 4.4
+      "count": 3977,
+      "pct": 4.5
     },
     {
       "name": "Skirt",
-      "count": 3921,
+      "count": 3902,
       "pct": 4.4
     },
     {
       "name": "Belt",
-      "count": 3787,
-      "pct": 4.2
+      "count": 3878,
+      "pct": 4.4
     },
     {
       "name": "Sunglasses",
-      "count": 3646,
+      "count": 3651,
       "pct": 4.1
     },
     {
       "name": "Dress",
-      "count": 2927,
+      "count": 2964,
       "pct": 3.3
     },
     {
       "name": "Coat",
-      "count": 2787,
+      "count": 2794,
       "pct": 3.1
     },
     {
       "name": "Hat",
-      "count": 2493,
+      "count": 2486,
       "pct": 2.8
     }
   ],
   "materials": [
     {
       "name": "Leather/Faux Leather",
-      "count": 25168,
-      "pct": 28.1
+      "count": 25096,
+      "pct": 28.3
     },
     {
       "name": "Suiting Fabric",
-      "count": 14589,
-      "pct": 16.3
+      "count": 14053,
+      "pct": 15.8
     },
     {
       "name": "Cotton",
-      "count": 5716,
-      "pct": 6.4
+      "count": 5891,
+      "pct": 6.6
     },
     {
       "name": "Metallic Fabric",
-      "count": 3132,
-      "pct": 3.5
+      "count": 3537,
+      "pct": 4.0
     },
     {
       "name": "Satin",
-      "count": 2789,
-      "pct": 3.1
+      "count": 3008,
+      "pct": 3.4
     },
     {
       "name": "Fur/Faux Fur",
-      "count": 2089,
-      "pct": 2.3
+      "count": 2140,
+      "pct": 2.4
     },
     {
       "name": "Fine Knit",
-      "count": 1880,
-      "pct": 2.1
-    },
-    {
-      "name": "Ribbed Knit",
-      "count": 1818,
-      "pct": 2.0
+      "count": 2078,
+      "pct": 2.3
     },
     {
       "name": "Suede",
-      "count": 1814,
-      "pct": 2.0
+      "count": 1936,
+      "pct": 2.2
+    },
+    {
+      "name": "Ribbed Knit",
+      "count": 1829,
+      "pct": 2.1
     },
     {
       "name": "Chiffon",
-      "count": 1760,
+      "count": 1738,
       "pct": 2.0
     },
     {
       "name": "Lace",
-      "count": 1656,
+      "count": 1653,
       "pct": 1.9
     },
     {
-      "name": "Denim",
-      "count": 1445,
-      "pct": 1.6
+      "name": "Textured Knit",
+      "count": 1517,
+      "pct": 1.7
     },
     {
-      "name": "Textured Knit",
-      "count": 1433,
+      "name": "Denim",
+      "count": 1431,
       "pct": 1.6
     },
     {
       "name": "Sheer Fabric",
-      "count": 1119,
-      "pct": 1.3
+      "count": 1222,
+      "pct": 1.4
     }
   ],
   "patterns": [
     {
       "name": "Solid",
-      "count": 69043,
-      "pct": 77.2
+      "count": 68311,
+      "pct": 76.9
     },
     {
       "name": "Stripes",
-      "count": 2538,
-      "pct": 2.8
+      "count": 2605,
+      "pct": 2.9
     },
     {
       "name": "Checks/Plaid",
-      "count": 2233,
+      "count": 2219,
       "pct": 2.5
     },
     {
       "name": "Floral",
-      "count": 2014,
+      "count": 2026,
       "pct": 2.3
     },
     {
       "name": "Abstract",
-      "count": 1398,
+      "count": 1389,
       "pct": 1.6
     },
     {
       "name": "Embroidery Print",
-      "count": 1288,
-      "pct": 1.4
+      "count": 1311,
+      "pct": 1.5
     },
     {
       "name": "Geometric",
-      "count": 1137,
-      "pct": 1.3
+      "count": 1097,
+      "pct": 1.2
     },
     {
       "name": "Animal Print",
-      "count": 818,
-      "pct": 0.9
-    },
-    {
-      "name": "Polka Dots",
-      "count": 543,
-      "pct": 0.6
+      "count": 845,
+      "pct": 1.0
     },
     {
       "name": "Logo/Monogram",
-      "count": 531,
+      "count": 595,
+      "pct": 0.7
+    },
+    {
+      "name": "Polka Dots",
+      "count": 544,
       "pct": 0.6
     }
   ],
   "silhouettes": [
     {
-      "name": "Straight",
-      "count": 8713,
+      "name": "Fitted/Waisted",
+      "count": 8575,
       "pct": 9.7
     },
     {
-      "name": "Fitted/Waisted",
-      "count": 8488,
-      "pct": 9.5
+      "name": "Straight",
+      "count": 8518,
+      "pct": 9.6
     },
     {
       "name": "Oversized",
-      "count": 7375,
+      "count": 7300,
       "pct": 8.2
     },
     {
       "name": "Relaxed",
-      "count": 5484,
-      "pct": 6.1
+      "count": 5686,
+      "pct": 6.4
     },
     {
       "name": "Elongated",
-      "count": 4131,
-      "pct": 4.6
+      "count": 4183,
+      "pct": 4.7
     },
     {
       "name": "High Rise",
-      "count": 4074,
-      "pct": 4.6
-    },
-    {
-      "name": "Semi-Fitted",
-      "count": 3972,
+      "count": 3917,
       "pct": 4.4
     },
     {
+      "name": "Semi-Fitted",
+      "count": 3811,
+      "pct": 4.3
+    },
+    {
       "name": "Column",
-      "count": 2971,
+      "count": 2908,
       "pct": 3.3
     },
     {
       "name": "A-line",
-      "count": 2857,
+      "count": 2833,
       "pct": 3.2
     },
     {
       "name": "Wide Leg/Flare",
-      "count": 2706,
-      "pct": 3.0
+      "count": 2823,
+      "pct": 3.2
     },
     {
       "name": "Cropped",
-      "count": 2510,
-      "pct": 2.8
+      "count": 2540,
+      "pct": 2.9
     },
     {
-      "name": "Slim Leg",
-      "count": 2237,
+      "name": "Shoulder Emphasis",
+      "count": 2221,
       "pct": 2.5
     }
   ],
   "construction": [
     {
       "name": "Extended Cuffs",
-      "count": 6269,
-      "pct": 7.0
+      "count": 5982,
+      "pct": 6.7
     },
     {
       "name": "Shirt Collar",
-      "count": 5642,
+      "count": 5555,
       "pct": 6.3
     },
     {
       "name": "High Neck",
-      "count": 5108,
-      "pct": 5.7
+      "count": 4958,
+      "pct": 5.6
     },
     {
       "name": "V-Neck",
-      "count": 4429,
-      "pct": 4.9
+      "count": 4267,
+      "pct": 4.8
     },
     {
       "name": "Draping",
-      "count": 3735,
-      "pct": 4.2
+      "count": 3812,
+      "pct": 4.3
     },
     {
       "name": "Waist Seam",
-      "count": 3515,
-      "pct": 3.9
+      "count": 3749,
+      "pct": 4.2
     },
     {
       "name": "Asymmetry",
-      "count": 3179,
-      "pct": 3.6
+      "count": 3418,
+      "pct": 3.8
     },
     {
       "name": "Dropped Shoulder",
-      "count": 3112,
-      "pct": 3.5
-    },
-    {
-      "name": "Wide Shoulders",
-      "count": 2539,
-      "pct": 2.8
-    },
-    {
-      "name": "Patch Pockets",
-      "count": 2424,
-      "pct": 2.7
+      "count": 3395,
+      "pct": 3.8
     },
     {
       "name": "Statement Closure",
-      "count": 2301,
-      "pct": 2.6
+      "count": 2911,
+      "pct": 3.3
     },
     {
-      "name": "Slits",
-      "count": 1375,
-      "pct": 1.5
+      "name": "Patch Pockets",
+      "count": 2809,
+      "pct": 3.2
+    },
+    {
+      "name": "Wide Shoulders",
+      "count": 2762,
+      "pct": 3.1
+    },
+    {
+      "name": "Pleats",
+      "count": 1541,
+      "pct": 1.7
     }
   ],
   "decoration": [
     {
       "name": "Metal Hardware",
-      "count": 19204,
-      "pct": 21.5
+      "count": 19577,
+      "pct": 22.0
     },
     {
       "name": "Contrast Stitching",
-      "count": 4066,
-      "pct": 4.5
+      "count": 4424,
+      "pct": 5.0
     },
     {
       "name": "Statement Buttons",
-      "count": 3362,
-      "pct": 3.8
+      "count": 3603,
+      "pct": 4.1
     },
     {
       "name": "Embroidery",
-      "count": 2657,
-      "pct": 3.0
+      "count": 2833,
+      "pct": 3.2
     },
     {
       "name": "Fringe",
-      "count": 1523,
-      "pct": 1.7
+      "count": 1723,
+      "pct": 1.9
     },
     {
       "name": "Sequins",
-      "count": 1426,
-      "pct": 1.6
+      "count": 1466,
+      "pct": 1.7
     },
     {
       "name": "Lace Trim",
-      "count": 954,
-      "pct": 1.1
+      "count": 1033,
+      "pct": 1.2
     },
     {
       "name": "Logos",
-      "count": 842,
-      "pct": 0.9
+      "count": 930,
+      "pct": 1.0
     },
     {
       "name": "Ruffles",
-      "count": 767,
+      "count": 815,
       "pct": 0.9
     },
     {
-      "name": "Bows",
-      "count": 559,
-      "pct": 0.6
+      "name": "Ties",
+      "count": 718,
+      "pct": 0.8
     },
     {
-      "name": "Ties",
-      "count": 501,
-      "pct": 0.6
+      "name": "Bows",
+      "count": 650,
+      "pct": 0.7
     },
     {
       "name": "Sheer Inserts",
-      "count": 451,
-      "pct": 0.5
+      "count": 551,
+      "pct": 0.6
     }
   ]
 }
