@@ -70,17 +70,46 @@ _UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
 
 
+def _ssl_ctx():
+    """macOS-питон часто без корневых сертификатов (см. fashion-ai):
+    пробуем certifi, иначе — unverified (публичные превью, риск минимален)."""
+    import ssl
+    try:
+        import certifi
+        return ssl.create_default_context(cafile=certifi.where())
+    except ImportError:
+        pass
+    try:
+        ctx = ssl.create_default_context()
+        import urllib.request
+        urllib.request.urlopen("https://t.me", timeout=10, context=ctx)
+        return ctx
+    except Exception:
+        return ssl._create_unverified_context()
+
+
+_SSL_CTX = None
+
+
+def _fetch_url(url: str, timeout: int = 30, referer: str = "") -> bytes:
+    global _SSL_CTX
+    import urllib.request
+    if _SSL_CTX is None:
+        _SSL_CTX = _ssl_ctx()
+    headers = {"User-Agent": _UA, "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8"}
+    if referer:
+        headers["Referer"] = referer
+    req = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(req, timeout=timeout, context=_SSL_CTX) as r:
+        return r.read()
+
+
 def _fetch_html(url: str, retries: int = 3) -> str:
     import time
-    import urllib.request
     for attempt in range(retries):
         try:
-            req = urllib.request.Request(url, headers={
-                "User-Agent": _UA,
-                "Accept-Language": "ru-RU,ru;q=0.9,en-US;q=0.8"})
-            with urllib.request.urlopen(req, timeout=30) as r:
-                return r.read().decode("utf-8", errors="ignore")
-        except Exception as e:
+            return _fetch_url(url).decode("utf-8", errors="ignore")
+        except Exception:
             if attempt == retries - 1:
                 raise
             time.sleep(4 * (attempt + 1))
@@ -116,7 +145,6 @@ def _collect_channel_web(conn, channel: str, since: datetime,
                          limit: int) -> tuple[int, int]:
     import re
     import time
-    import urllib.request
     out_dir = INBOX_TG / channel
     out_dir.mkdir(parents=True, exist_ok=True)
     new = skipped = 0
@@ -139,10 +167,7 @@ def _collect_channel_web(conn, channel: str, since: datetime,
                 skipped += 1
                 continue
             try:
-                req = urllib.request.Request(p["img_url"], headers={
-                    "User-Agent": _UA, "Referer": "https://t.me/"})
-                with urllib.request.urlopen(req, timeout=20) as r:
-                    data = r.read()
+                data = _fetch_url(p["img_url"], timeout=20, referer="https://t.me/")
                 if len(data) < 3000:
                     continue
                 dest.write_bytes(data)
