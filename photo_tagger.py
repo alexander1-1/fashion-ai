@@ -216,7 +216,12 @@ def tag_pending(conn, sample: int = 0, model: str = el.MODEL_BULK) -> dict:
         rows = rows[:sample]
 
     stats = {"tagged": 0, "errors": 0, "signals": 0, "skipped_missing": 0}
+    consecutive_errors = 0
     for i, row in enumerate(rows, 1):
+        if consecutive_errors >= 8:
+            print("\n! 8 ошибок подряд — похоже на rate limit / квоту API. "
+                  "Стоп; позже: python photo_tagger.py retry && ... tag")
+            break
         path = row["path"]
         if not el.MOCK and not Path(path).exists():
             conn.execute("UPDATE ext_photos SET status='error' WHERE photo_id=?",
@@ -235,12 +240,14 @@ def tag_pending(conn, sample: int = 0, model: str = el.MODEL_BULK) -> dict:
             n_sig = write_signals_for_photo(conn, fresh, trend_idx)
             stats["tagged"] += 1
             stats["signals"] += n_sig
+            consecutive_errors = 0
             print(f"  [{i}/{len(rows)}] {row['source']:20s} {Path(path).name:40s} "
                   f"conf={tags['confidence']:.2f} сигналов={n_sig}")
         except Exception as e:
             conn.execute("UPDATE ext_photos SET status='error' WHERE photo_id=?",
                          (row["photo_id"],))
             stats["errors"] += 1
+            consecutive_errors += 1
             print(f"  [{i}/{len(rows)}] ! {path}: {e}")
         conn.commit()
     return stats
@@ -266,7 +273,7 @@ def _cmd_status(conn):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("command", choices=["tag", "signals", "status"])
+    ap.add_argument("command", choices=["tag", "signals", "status", "retry"])
     ap.add_argument("--sample", type=int, default=0, help="только N фото")
     ap.add_argument("--model", default=el.MODEL_BULK)
     ap.add_argument("--db", default=None)
@@ -282,3 +289,8 @@ if __name__ == "__main__":
         print(f"Пересобрано: {n_ph} фото → {n_sig} сигналов")
     elif args.command == "status":
         _cmd_status(conn)
+    elif args.command == "retry":
+        n = conn.execute(
+            "UPDATE ext_photos SET status='pending' WHERE status='error'").rowcount
+        conn.commit()
+        print(f"Сброшено error → pending: {n}. Запусти: python photo_tagger.py tag")
