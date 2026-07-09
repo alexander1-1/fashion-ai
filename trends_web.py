@@ -16,7 +16,8 @@ import os
 import sqlite3
 from collections import defaultdict
 
-from flask import Blueprint, abort, render_template, request, send_from_directory
+from flask import (Blueprint, Response, abort, jsonify, render_template,
+                   request, send_from_directory)
 
 import config
 
@@ -319,11 +320,13 @@ def trend_detail(trend_id):
     podium_refs = _podium_refs(conn, t["field"], t["element"])
     ext_refs = _ext_refs(conn, t["element"])
     keyword_freqs = _keyword_freqs(conn, t["wb_keywords"])
+    designs = _designs(conn, trend_id)
     conn.close()
 
     return render_template("trend_detail.html", t=t, series=series, funnel=funnel,
                            podium_refs=podium_refs, ext_refs=ext_refs,
-                           keyword_freqs=keyword_freqs, stages=config.STAGES,
+                           keyword_freqs=keyword_freqs, designs=designs,
+                           stages=config.STAGES,
                            stage_colors=STAGE_COLORS,
                            stage_advice=STAGE_ADVICE.get(t["stage"] or "", ""))
 
@@ -332,3 +335,64 @@ def trend_detail(trend_id):
 def inbox_photo(relpath):
     """Отдача фото-референсов из inbox/ (только чтение, только внутри папки)."""
     return send_from_directory(os.path.abspath(config.INBOX_DIR), relpath)
+
+
+# ─── Студия дизайна (раздел 6, Фаза 6) ────────────────────────────────────────
+
+def _designs(conn, trend_id, limit=12):
+    """Сгенерированные варианты тренда — свежие первыми, только существующие PNG."""
+    try:
+        rows = conn.execute(
+            """SELECT * FROM designs WHERE trend_id=?
+               ORDER BY created_at DESC, design_id DESC LIMIT ?""",
+            (trend_id, limit)).fetchall()
+    except sqlite3.OperationalError:      # старая база без таблицы designs
+        return []
+    out = []
+    for r in rows:
+        d = dict(r)
+        d["img_ok"] = bool(d["image_path"]) and os.path.exists(d["image_path"])
+        d["rel_path"] = (os.path.relpath(d["image_path"], config.STUDIO_DIR)
+                         if d["img_ok"] else None)
+        out.append(d)
+    return out
+
+
+@bp.route("/api/trends/<trend_id>/generate", methods=["POST"])
+def api_generate_designs(trend_id):
+    """Кнопка «Сгенерировать варианты»: бриф Sonnet 5 → Replicate → designs."""
+    import db as _db
+    import studio_gen
+    conn = _db.init_db(os.environ.get("TRENDS_DB", config.DB_PATH))
+    try:
+        n = int(request.args.get("n", config.STUDIO_N_VARIANTS))
+        created = studio_gen.generate_for_trend(conn, trend_id, n)
+    except Exception as e:
+        conn.close()
+        return jsonify({"error": str(e)}), 500
+    conn.close()
+    return jsonify({"created": len(created),
+                    "designs": [d["design_id"] for d in created]})
+
+
+@bp.route("/studio-img/<path:relpath>")
+def studio_img(relpath):
+    """Отдача сгенерированных PNG из output/studio/."""
+    return send_from_directory(os.path.abspath(config.STUDIO_DIR), relpath)
+
+
+@bp.route("/designs/<int:design_id>/techspec")
+def design_techspec(design_id):
+    """Экспорт ТЗ конструктору — плоский текст (п. 6.3)."""
+    import studio_gen
+    conn = _conn()
+    if conn is None:
+        abort(404)
+    d = conn.execute("SELECT * FROM designs WHERE design_id=?", (design_id,)).fetchone()
+    conn.close()
+    if not d:
+        abort(404, f"нет дизайна {design_id}")
+    return Response(
+        studio_gen.techspec_text(d), mimetype="text/plain; charset=utf-8",
+        headers={"Content-Disposition":
+                 f"attachment; filename=techspec_{design_id}.txt"})

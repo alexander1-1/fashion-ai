@@ -9,3 +9,10 @@ output/results_a.json
 trend_signals.db
 tg_session.session*
 inbox/
+output/studio/
+output/reports/
+.DS_Store
+output/*.done
+output/review_results_a.json
+output/enriched_looks_v1_backup.csv
+output/wb_keywords_proposed.json

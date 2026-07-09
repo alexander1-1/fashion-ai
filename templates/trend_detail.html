@@ -70,6 +70,25 @@
   }
   .section { margin-top: 28px; }
   .section > h3 { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text3); margin-bottom: 14px; font-weight: 500; }
+
+  /* Студия */
+  .studio-head { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .btn-gen {
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 8px 16px; border-radius: 4px; cursor: pointer;
+    background: var(--text); color: var(--bg); border: none; font-weight: 600;
+  }
+  .btn-gen:disabled { opacity: 0.5; cursor: wait; }
+  .studio-status { font-size: 11px; color: var(--text3); }
+  .design-card .acts {
+    position: absolute; top: 6px; right: 6px; display: flex; gap: 4px;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .design-card:hover .acts { opacity: 1; }
+  .design-card .acts a, .design-card .acts button {
+    font-size: 10px; padding: 3px 7px; border-radius: 3px; cursor: pointer;
+    background: rgba(0,0,0,0.72); color: #fff; border: none; text-decoration: none;
+  }
 </style>
 {% endblock %}
 
@@ -194,6 +213,39 @@
   </div>
   {% endif %}
 
+  <div class="section">
+    <div class="studio-head">
+      <h3 style="margin-bottom:0">Студия: варианты дизайна</h3>
+      <button class="btn-gen" id="genBtn" onclick="generateDesigns()">Сгенерировать варианты</button>
+      <span class="studio-status" id="genStatus">
+        {% if not designs %}FLUX через Replicate · 4 варианта + ТЗ конструктору{% endif %}
+      </span>
+    </div>
+    <div class="photos-grid" id="designsGrid">
+      {% for d in designs %}
+        <div class="ref-card design-card" style="position:relative">
+          {% if d.img_ok %}
+            <a href="/studio-img/{{ d.rel_path }}" target="_blank" rel="noopener">
+              <img src="/studio-img/{{ d.rel_path }}" loading="lazy" alt="дизайн #{{ d.design_id }}">
+            </a>
+          {% else %}
+            <div style="aspect-ratio:2/3; display:flex; align-items:center; justify-content:center; color:var(--text3); font-size:11px;">генерация не удалась</div>
+          {% endif %}
+          <span class="cap">#{{ d.design_id }} · {{ d.model }} · {{ d.created_at[:10] }}</span>
+          <div class="acts">
+            <a href="/designs/{{ d.design_id }}/techspec">ТЗ</a>
+            {% if d.img_ok %}
+            <button onclick="addToMoodboard('/studio-img/{{ d.rel_path }}', '{{ d.design_id }}')">+ Мудборд</button>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    {% if not designs %}
+      <p class="muted" style="font-size:12px" id="noDesigns">Вариантов пока нет — нажми «Сгенерировать варианты» (или MOCK=1 python studio_gen.py generate {{ t.trend_id }}).</p>
+    {% endif %}
+  </div>
+
   {% if ext_refs %}
   <div class="section">
     <h3>Референсы: соцсети и бренды</h3>
@@ -241,5 +293,40 @@
     svg += '</svg>';
     el.innerHTML = svg;
   });
+
+  // ── Студия: генерация вариантов и мудборд ──────────────────────────────────
+  async function generateDesigns() {
+    const btn = document.getElementById('genBtn');
+    const status = document.getElementById('genStatus');
+    btn.disabled = true;
+    status.textContent = 'Генерация… бриф Sonnet 5 + 4 изображения FLUX (~30–60 сек)';
+    try {
+      const r = await fetch('/api/trends/{{ t.trend_id }}/generate', { method: 'POST' });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || r.statusText);
+      status.textContent = 'Готово: ' + data.created + ' вариантов. Обновляю…';
+      setTimeout(() => location.reload(), 600);
+    } catch (e) {
+      status.textContent = 'Ошибка: ' + e.message;
+      btn.disabled = false;
+    }
+  }
+
+  // Тот же localStorage-формат, что в moodboard.html/explore.html
+  function addToMoodboard(imageUrl, designId) {
+    let boards;
+    try { boards = JSON.parse(localStorage.getItem('mb_boards') || '{}'); } catch { boards = {}; }
+    if (!boards['default']) boards['default'] = { name: 'My Board', looks: [] };
+    const id = localStorage.getItem('activeBoardId') || 'default';
+    const board = boards[id] || boards['default'];
+    if (board.looks.some(l => l.image_url === imageUrl)) return;
+    board.looks.push({
+      designer: 'Студия · {{ t.name_ru }}',
+      show: 'AI-дизайн ({{ t.trend_id }})',
+      look_number: designId,
+      image_url: imageUrl,
+    });
+    localStorage.setItem('mb_boards', JSON.stringify(boards));
+  }
 </script>
 {% endblock %}

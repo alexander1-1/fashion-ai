@@ -9,6 +9,7 @@ db.py — SQLite-хранилище платформы (раздел 1 инст�
   trend_scores— снапшоты скоринга: стадия + тип на дату
   wb_metrics  — кэш ответов MPStats (Фаза 3) + pytrends (Фаза 4)
   ext_photos  — внешние фото (TG/бренды/inbox) для vision-тегирования (Фаза 4)
+  designs     — сгенерированные Студией варианты дизайна + ТЗ (Фаза 6)
 
 CSV остаётся только как экспорт.
 """
@@ -120,6 +121,20 @@ CREATE TABLE IF NOT EXISTS ext_photos (
 );
 CREATE INDEX IF NOT EXISTS idx_ext_photos_status ON ext_photos(status);
 CREATE INDEX IF NOT EXISTS idx_ext_photos_source ON ext_photos(level, source, date);
+
+CREATE TABLE IF NOT EXISTS designs (
+    design_id    INTEGER PRIMARY KEY,
+    trend_id     TEXT NOT NULL REFERENCES trends(trend_id) ON DELETE CASCADE,
+    created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+    stage        TEXT,               -- стадия тренда на момент генерации
+    category     TEXT,               -- категория изделия (EN из taxonomy)
+    image_prompt TEXT NOT NULL,      -- EN-промпт для FLUX/SDXL
+    tech_spec    TEXT NOT NULL,      -- JSON ТЗ конструктору (категория, силуэт, крой…)
+    image_path   TEXT,               -- output/studio/…, NULL если генерация не удалась
+    model        TEXT,               -- 'flux-schnell' | 'mock'
+    status       TEXT NOT NULL DEFAULT 'ok'   -- ok|error
+);
+CREATE INDEX IF NOT EXISTS idx_designs_trend ON designs(trend_id, created_at);
 
 CREATE TABLE IF NOT EXISTS wb_metrics (
     id      INTEGER PRIMARY KEY,

@@ -4,3 +4,6 @@ telethon>=1.36
 pytrends>=4.9
 playwright>=1.45
 pytest>=8.0
+
+# Фаза 6: отчёты (reports/) и заглушки Студии
+reportlab>=4.4

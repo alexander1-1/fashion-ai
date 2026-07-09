@@ -80,3 +80,15 @@ PYTRENDS_GEO = "RU"            # RU-динамика запросов (п. 3.4)
 PYTRENDS_TIMEFRAME = "today 12-m"
 PYTRENDS_DELAY_SEC = 10        # rate limit Google Trends суров
 PYTRENDS_CACHE_DAYS = 1        # обновление не чаще раза в сутки
+
+# ─── Студия дизайна (раздел 6, Фаза 6) ───────────────────────────────────────
+STUDIO_DIR = "output/studio"           # PNG-варианты: output/studio/<trend_id>/
+STUDIO_N_VARIANTS = 4                  # вариантов на одну генерацию
+STUDIO_BRIEF_MODEL = "claude-sonnet-5" # синтез промпта и ТЗ
+REPLICATE_MODEL = "black-forest-labs/flux-schnell"   # ~$0.003/изображение
+REPLICATE_ASPECT = "3:4"               # вертикаль, как фото лука
+
+# ─── Отчёты (п. 5.1, Фаза 6) ─────────────────────────────────────────────────
+REPORTS_DIR = "output/reports"         # готовые PDF
+REPORTS_IMG_CACHE = "output/reports/img_cache"  # скачанные фото-референсы
+REPORT_TOP_CARDS = 20                  # топ карточек выдачи в отчёте
