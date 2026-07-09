@@ -12,6 +12,13 @@ from flask import Flask, render_template, jsonify, request, session
 app = Flask(__name__)
 app.secret_key = "fashion-ai-secret-2026"
 
+# Фаза 5: страница «Тренды» (дашборд + карточка тренда), читает trend_signals.db
+try:
+    from trends_web import bp as trends_bp
+    app.register_blueprint(trends_bp)
+except Exception as e:  # база/модуль недоступны — остальной UI работает
+    print(f"trends_web не подключён: {e}")
+
 DATA_DIR = "./output"
 HF_SPACES_URL = "https://alexanderl12-fashion-ai.hf.space"
 

@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block title %} — Тренды{% endblock %}
+
+{% block head %}
+<style>
+  .trends-wrap { max-width: 1440px; margin: 0 auto; padding: 32px; }
+  .trends-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+  .trends-header h1 { font-size: 22px; font-weight: 600; letter-spacing: 0.04em; }
+  .trends-header .sub { font-size: 12px; color: var(--text2); }
+
+  /* Стадии-сводка */
+  .stage-summary { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .stage-chip {
+    display: flex; align-items: center; gap: 8px;
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 14px; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text2); text-decoration: none;
+    transition: border-color .2s;
+  }
+  .stage-chip:hover, .stage-chip.active { border-color: var(--text2); color: var(--text); }
+  .stage-chip .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .stage-chip .n { font-size: 13px; font-weight: 600; color: var(--text); }
+
+  /* Фильтры */
+  .filters { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .filters select, .filters input {
+    background: var(--bg2); border: 1px solid var(--border); color: var(--text);
+    font-size: 12px; padding: 7px 10px; border-radius: 4px; outline: none;
+  }
+  .filters input { width: 220px; }
+
+  /* Таблица */
+  table.trends { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.trends th {
+    text-align: left; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text3); font-weight: 500; padding: 8px 10px;
+    border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  table.trends td { padding: 10px; border-bottom: 1px solid var(--bg3); vertical-align: middle; }
+  table.trends tr:hover td { background: var(--bg2); }
+  table.trends a.trend-name { color: var(--text); text-decoration: none; font-weight: 600; }
+  table.trends a.trend-name:hover { text-decoration: underline; }
+  .trend-en { color: var(--text3); font-size: 11px; }
+  .dim { color: var(--text2); }
+  .stage-badge {
+    display: inline-block; font-size: 10px; letter-spacing: 0.05em;
+    padding: 3px 8px; border-radius: 3px; border: 1px solid; white-space: nowrap;
+  }
+  .type-badge { color: var(--text2); font-size: 11px; white-space: nowrap; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .growth-up { color: #6aaa6a; } .growth-down { color: #c96a5a; }
+  .muted { color: var(--text3); }
+  .status-candidate { color: var(--gold); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .status-active { color: #6aaa6a; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .spark { display: block; }
+  .spark-empty { color: var(--text3); font-size: 10px; }
+  td.spark-cell { min-width: 90px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="trends-wrap">
+  <div class="trends-header">
+    <h1>Тренды</h1>
+    <span class="sub">{{ rows|length }} трендов · стадия диффузии подиум → WB · скоринг trends.py</span>
+  </div>
+
+  {% if db_missing %}
+    <p class="muted" style="font-size:13px">trend_signals.db не найден — запусти Фазу 2
+    (migrate_csv_to_db.py, trends.py autoregister + score).</p>
+  {% else %}
+
+  <div class="stage-summary">
+    {% for s in stages %}
+      <a class="stage-chip {% if f_stage == s %}active{% endif %}"
+         href="?stage={{ '' if f_stage == s else s|urlencode }}&dimension={{ f_dim }}&status={{ f_status }}&q={{ f_q }}">
+        <span class="dot" style="background: {{ stage_colors[s] }}"></span>
+        {{ s }} <span class="n">{{ stage_counts.get(s, 0) }}</span>
+      </a>
+    {% endfor %}
+  </div>
+
+  <form class="filters" method="get">
+    <input type="hidden" name="stage" value="{{ f_stage }}">
+    <select name="dimension" onchange="this.form.submit()">
+      <option value="">Все измерения</option>
+      {% for d in dimensions %}
+        <option value="{{ d }}" {% if f_dim == d %}selected{% endif %}>{{ d }}</option>
+      {% endfor %}
+    </select>
+    <select name="status" onchange="this.form.submit()">
+      <option value="">Любой статус</option>
+      {% for s in statuses %}
+        <option value="{{ s }}" {% if f_status == s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+    <input type="search" name="q" placeholder="Поиск тренда…" value="{{ f_q }}">
+    <button class="btn" type="submit">Фильтровать</button>
+    {% if f_stage or f_dim or f_status or f_q %}
+      <a class="btn" href="/trends">Сбросить</a>
+    {% endif %}
+  </form>
+
+  <table class="trends">
+    <thead>
+      <tr>
+        <th>Тренд</th>
+        <th>Измерение</th>
+        <th>Статус</th>
+        <th>Стадия</th>
+        <th>Тип</th>
+        <th class="num">P подиум</th>
+        <th>Подиум ↗</th>
+        <th class="num">M</th>
+        <th class="num">F</th>
+        <th class="num">I</th>
+        <th>Соцсети (нед.)</th>
+        <th class="num">Q, WB/мес</th>
+        <th>WB (12 мес.)</th>
+        <th class="num">Карточек</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for d in rows %}
+      <tr>
+        <td>
+          <a class="trend-name" href="/trends/{{ d.trend_id }}">{{ d.name_ru }}</a>
+          <div class="trend-en">{{ d.name_en }}</div>
+        </td>
+        <td class="dim">{{ d.type_dimension }}</td>
+        <td><span class="status-{{ d.status }}">{{ d.status }}</span></td>
+        <td>
+          {% if d.stage %}
+            <span class="stage-badge" style="color: {{ d.stage_color }}; border-color: {{ d.stage_color }}44;">{{ d.stage }}</span>
+          {% else %}<span class="muted">не оценён</span>{% endif %}
+        </td>
+        <td class="type-badge">{% if d.trend_type %}тип {{ d.trend_type }}{% else %}—{% endif %}</td>
+        <td class="num">
+          {% if d.p_share %}{{ "%.1f"|format(d.p_share * 100) }}%
+            {% if d.p_growth %}<div class="{{ 'growth-up' if d.p_growth >= 1 else 'growth-down' }}" style="font-size:10px">×{{ "%.2f"|format(d.p_growth) }}</div>{% endif %}
+          {% else %}<span class="muted">—</span>{% endif %}
+        </td>
+        <td class="spark-cell"><span class="spark" data-series='{{ d.spark.podium|tojson }}' data-color="#9b8cde"></span></td>
+        <td class="num">{{ d.m_count if d.m_count is not none else '—' }}</td>
+        <td class="num">{{ d.f_count if d.f_count is not none else '—' }}</td>
+        <td class="num">{{ d.i_count if d.i_count is not none else '—' }}</td>
+        <td class="spark-cell"><span class="spark" data-series='{{ d.spark.influencer|tojson }}' data-color="#6ca0dc"></span></td>
+        <td class="num">
+          {% if d.q_freq %}{{ "{:,.0f}".format(d.q_freq).replace(',', ' ') }}
+            {% if d.q_growth is not none %}<div class="{{ 'growth-up' if d.q_growth >= 0 else 'growth-down' }}" style="font-size:10px">{{ "%+.0f"|format(d.q_growth * 100) }}%</div>{% endif %}
+          {% else %}<span class="muted">—</span>{% endif %}
+        </td>
+        <td class="spark-cell"><span class="spark" data-series='{{ d.spark.q|tojson }}' data-color="#c9a84c"></span></td>
+        <td class="num">{{ d.c_cards if d.c_cards is not none else '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Спарклайны: SVG-полилинии из data-series [{label, value}, …]
+  document.querySelectorAll('.spark').forEach(el => {
+    const pts = JSON.parse(el.dataset.series || '[]');
+    if (pts.length < 2) { el.innerHTML = '<span class="spark-empty">' + (pts.length === 1 ? '·' : '—') + '</span>'; return; }
+    const w = 84, h = 24, pad = 2;
+    const vals = pts.map(p => p.value);
+    const min = Math.min(...vals), max = Math.max(...vals);
+    const span = (max - min) || 1;
+    const x = i => pad + i * (w - 2 * pad) / (pts.length - 1);
+    const y = v => h - pad - (v - min) * (h - 2 * pad) / span;
+    const d = vals.map((v, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ');
+    const c = el.dataset.color || '#888';
+    const last = vals[vals.length - 1];
+    el.innerHTML = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+      <path d="${d}" fill="none" stroke="${c}" stroke-width="1.4"/>
+      <circle cx="${x(pts.length - 1)}" cy="${y(last)}" r="2" fill="${c}"/>
+    </svg>`;
+    el.title = pts.map(p => p.label + ': ' + (+p.value.toFixed(3))).join('\n');
+  });
+</script>
+{% endblock %}

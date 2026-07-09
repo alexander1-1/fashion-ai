@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+{% block title %} — {{ t.name_ru }}{% endblock %}
+
+{% block head %}
+<style>
+  .detail-wrap { max-width: 1200px; margin: 0 auto; padding: 32px; }
+  .back { font-size: 11px; color: var(--text2); text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase; }
+  .back:hover { color: var(--text); }
+
+  .detail-head { margin: 18px 0 8px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .detail-head h1 { font-size: 26px; font-weight: 600; }
+  .detail-head .en { color: var(--text3); font-size: 14px; }
+  .meta-line { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+  .meta-line .sep { color: var(--text3); margin: 0 6px; }
+  .notes { font-size: 12px; color: var(--text3); margin-bottom: 24px; }
+
+  .stage-badge-lg {
+    display: inline-block; font-size: 12px; letter-spacing: 0.06em;
+    padding: 5px 12px; border-radius: 4px; border: 1px solid;
+  }
+
+  /* Полоса стадий */
+  .stage-track { display: flex; gap: 4px; margin: 20px 0 8px; }
+  .stage-step {
+    flex: 1; text-align: center; font-size: 10px; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--text3);
+    border-top: 3px solid var(--bg3); padding-top: 8px;
+  }
+  .stage-step.current { color: var(--text); font-weight: 600; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 28px; }
+  @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 20px; }
+  .panel h3 { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text3); margin-bottom: 16px; font-weight: 500; }
+
+  /* Воронка */
+  .funnel-row { display: flex; align-items: baseline; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--bg3); font-size: 13px; }
+  .funnel-row:last-child { border-bottom: none; }
+  .funnel-key { width: 20px; color: var(--text3); font-size: 11px; }
+  .funnel-level { flex: 1; color: var(--text2); }
+  .funnel-value { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .funnel-hint { font-size: 10px; color: var(--text3); }
+
+  /* Рекомендации */
+  .reco { font-size: 13px; line-height: 1.55; color: var(--text); }
+  .reco .label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin: 14px 0 4px; }
+  .reco .rationale { color: var(--text2); font-size: 12px; }
+
+  /* Ключи WB */
+  table.kw { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.kw td { padding: 6px 8px; border-bottom: 1px solid var(--bg3); }
+  table.kw td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .growth-up { color: #6aaa6a; } .growth-down { color: #c96a5a; }
+  .muted { color: var(--text3); }
+
+  /* Графики */
+  .chart-block { margin-bottom: 22px; }
+  .chart-block .cap { font-size: 11px; color: var(--text2); margin-bottom: 6px; }
+  .chart { width: 100%; }
+
+  /* Фото */
+  .photos-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  @media (max-width: 700px) { .photos-grid { grid-template-columns: repeat(2, 1fr); } }
+  .ref-card { position: relative; border-radius: 4px; overflow: hidden; background: var(--bg3); display: block; }
+  .ref-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; }
+  .ref-card .cap {
+    position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 8px;
+    font-size: 10px; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,0.85));
+  }
+  .section { margin-top: 28px; }
+  .section > h3 { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text3); margin-bottom: 14px; font-weight: 500; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-wrap">
+  <a class="back" href="/trends">← Все тренды</a>
+
+  <div class="detail-head">
+    <h1>{{ t.name_ru }}</h1>
+    <span class="en">{{ t.name_en }}</span>
+    {% if t.stage %}
+      <span class="stage-badge-lg" style="color: {{ t.stage_color }}; border-color: {{ t.stage_color }}66;">{{ t.stage }}</span>
+    {% endif %}
+    {% if t.type_label %}<span class="stage-badge-lg" style="color: var(--text2); border-color: var(--border);">{{ t.type_label }}</span>{% endif %}
+  </div>
+  <div class="meta-line">
+    {{ t.type_dimension }} <span class="sep">·</span>
+    статус: {{ t.status }} <span class="sep">·</span>
+    {{ 'автозаведён' if t.origin == 'auto' else 'вручную' }} {{ t.created_at }}
+    {% if t.score_date %}<span class="sep">·</span> скоринг: {{ t.score_date }}{% endif %}
+  </div>
+  {% if t.notes %}<div class="notes">{{ t.notes }}</div>{% endif %}
+
+  <div class="stage-track">
+    {% for s in stages %}
+      <div class="stage-step {% if s == t.stage %}current{% endif %}"
+           {% if s == t.stage %}style="border-top-color: {{ stage_colors[s] }}"{% endif %}>{{ s }}</div>
+    {% endfor %}
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3>Воронка: подиум → WB</h3>
+      {% for f in funnel %}
+        <div class="funnel-row">
+          <span class="funnel-key">{{ f.key }}</span>
+          <span class="funnel-level">{{ f.level }}</span>
+          <span>
+            <span class="funnel-value">{{ f.value }}</span>
+            {% if f.hint %}<div class="funnel-hint">{{ f.hint }}</div>{% endif %}
+          </span>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="panel">
+      <h3>Рекомендации</h3>
+      <div class="reco">
+        {% if stage_advice %}<p>{{ stage_advice }}</p>{% endif %}
+        {% if t.type_label %}
+          <div class="label">Тип тренда</div>
+          <p>{{ t.type_label }}</p>
+        {% endif %}
+        {% if t.rationale %}
+          <div class="label">Обоснование скоринга</div>
+          <p class="rationale">{{ t.rationale }}</p>
+        {% endif %}
+        {% if not stage_advice and not t.rationale %}
+          <p class="muted">Скоринг ещё не выполнялся — запусти <code>python trends.py score</code>.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3>Динамика сигналов</h3>
+      <div class="chart-block">
+        <div class="cap">Подиум — доля луков по сезонам</div>
+        <div class="chart" data-series='{{ series.podium|tojson }}' data-color="#9b8cde" data-fmt="pct"></div>
+      </div>
+      <div class="chart-block">
+        <div class="cap">Инфлюенсеры / соцсети — появлений в неделю</div>
+        <div class="chart" data-series='{{ series.influencer|tojson }}' data-color="#6ca0dc" data-fmt="int"></div>
+      </div>
+      <div class="chart-block">
+        <div class="cap">WB — частотность запросов по месяцам (MPStats)</div>
+        <div class="chart" data-series='{{ series.q|tojson }}' data-color="#c9a84c" data-fmt="int"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Метрики MPStats по ключам WB</h3>
+      {% if keyword_freqs %}
+      <table class="kw">
+        <tr><td class="muted">ключ</td><td class="num muted">частотность/нед.</td><td class="num muted">н/н</td></tr>
+        {% for k in keyword_freqs %}
+        <tr>
+          <td>{{ k.keyword }}</td>
+          <td class="num">{% if k.freq is not none %}{{ "{:,.0f}".format(k.freq).replace(',', ' ') }}{% else %}<span class="muted">нет в кэше</span>{% endif %}</td>
+          <td class="num">
+            {% if k.wow is not none %}
+              <span class="{{ 'growth-up' if k.wow >= 0 else 'growth-down' }}">{{ "%+.0f"|format(k.wow * 100) }}%</span>
+            {% else %}<span class="muted">—</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% else %}
+        <p class="muted" style="font-size:12px">WB-ключи не заданы. Добавь их в trends.wb_keywords (gen_wb_keywords.py).</p>
+      {% endif %}
+      <div style="margin-top:16px; font-size:12px; color: var(--text2);">
+        {% if t.q_freq %}Суммарная частотность: <b>{{ "{:,.0f}".format(t.q_freq).replace(',', ' ') }}</b>/мес
+          {% if t.q_growth is not none %} ({{ "%+.0f"|format(t.q_growth * 100) }}% м/м){% endif %}<br>{% endif %}
+        {% if t.c_cards is not none %}Карточек в выдаче: <b>{{ t.c_cards }}</b>{% endif %}
+        {% if t.c_top_revenue %} · выручка топ-20: <b>{{ "{:,.0f}".format(t.c_top_revenue).replace(',', ' ') }} ₽/мес</b>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% if podium_refs %}
+  <div class="section">
+    <h3>Референсы: подиум ({{ t.name_ru }})</h3>
+    <div class="photos-grid">
+      {% for p in podium_refs %}
+        <a class="ref-card" href="{{ p.image_url }}" target="_blank" rel="noopener">
+          <img src="{{ p.image_url }}" loading="lazy" alt="{{ p.designer }}">
+          <span class="cap">{{ p.designer }} · {{ p.season_label }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if ext_refs %}
+  <div class="section">
+    <h3>Референсы: соцсети и бренды</h3>
+    <div class="photos-grid">
+      {% for p in ext_refs %}
+        <a class="ref-card" href="{{ p.url or ('/' ~ p.path) }}" target="_blank" rel="noopener">
+          <img src="/{{ p.path }}" loading="lazy" alt="{{ p.source }}">
+          <span class="cap">{{ p.source }} · {{ p.date }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Line/area-графики из data-series [{label, value}, …]
+  document.querySelectorAll('.chart').forEach(el => {
+    const pts = JSON.parse(el.dataset.series || '[]');
+    if (!pts.length) { el.innerHTML = '<span style="color:var(--text3);font-size:11px">нет данных</span>'; return; }
+    const w = el.clientWidth || 480, h = 110, padX = 6, padT = 8, padB = 18;
+    const vals = pts.map(p => p.value);
+    const min = Math.min(0, ...vals), max = Math.max(...vals) || 1;
+    const span = (max - min) || 1;
+    const x = i => pts.length === 1 ? w / 2 : padX + i * (w - 2 * padX) / (pts.length - 1);
+    const y = v => h - padB - (v - min) * (h - padT - padB) / span;
+    const c = el.dataset.color, fmt = el.dataset.fmt;
+    const fv = v => fmt === 'pct' ? (v * 100).toFixed(1) + '%' : Math.round(v).toLocaleString('ru-RU');
+    let svg = `<svg class="chart" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`;
+    if (pts.length > 1) {
+      const line = vals.map((v, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ');
+      svg += `<path d="${line} L${x(pts.length-1)},${h-padB} L${x(0)},${h-padB} Z" fill="${c}18" stroke="none"/>`;
+      svg += `<path d="${line}" fill="none" stroke="${c}" stroke-width="1.6"/>`;
+    }
+    pts.forEach((p, i) => {
+      svg += `<circle cx="${x(i)}" cy="${y(p.value)}" r="2.5" fill="${c}"><title>${p.label}: ${fv(p.value)}</title></circle>`;
+    });
+    // подписи: первая, последняя + значение последней
+    const lastX = Math.min(x(pts.length - 1), w - 40);
+    svg += `<text x="${x(0)}" y="${h-4}" font-size="9" fill="var(--text3)">${pts[0].label}</text>`;
+    if (pts.length > 1) svg += `<text x="${lastX}" y="${h-4}" font-size="9" fill="var(--text3)" >${pts[pts.length-1].label}</text>`;
+    svg += `<text x="${lastX}" y="${Math.max(y(vals[vals.length-1]) - 6, 10)}" font-size="10" font-weight="600" fill="${c}">${fv(vals[vals.length-1])}</text>`;
+    svg += '</svg>';
+    el.innerHTML = svg;
+  });
+</script>
+{% endblock %}

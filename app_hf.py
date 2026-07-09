@@ -12,6 +12,13 @@ from flask import Flask, render_template, jsonify, request, session
 app = Flask(__name__)
 app.secret_key = "fashion-ai-secret-2026"
 
+# Фаза 5: страница «Тренды» — если trend_signals.db нет (HF Spaces), покажет пустое состояние
+try:
+    from trends_web import bp as trends_bp
+    app.register_blueprint(trends_bp)
+except Exception as e:
+    print(f"trends_web не подключён: {e}")
+
 DATA_DIR = "./output"
 
 # ─── Русские переводы тегов (для отображения; фильтрация идёт по англ. значению) ──
