@@ -48,7 +48,7 @@ BRANDS = [
     {"slug": "mango", "name": "Mango", "level": "fast_fashion",
      "url": "https://shop.mango.com/us/en/c/women/new-now_d55927954"},
     {"slug": "lime", "name": "Lime", "level": "fast_fashion",
-     "url": "https://lime-shop.com/ru/catalog/new"},
+     "url": "https://limestore.com/ru_ru/catalog/women_new"},
     {"slug": "love-republic", "name": "Love Republic", "level": "fast_fashion",
      "url": "https://loverepublic.ru/catalog/novinki/"},
     {"slug": "befree", "name": "Befree", "level": "fast_fashion",
@@ -227,8 +227,25 @@ def scrape_brand(page, conn, brand: dict, target: int) -> int:
             pass
 
     page.on("response", on_response)
-    scroll_page(page, steps=15)
-    urls = extract_images_from_dom(page, target=target)
+    # SPA с виртуализацией удаляют карточки из DOM при прокрутке →
+    # собираем URL инкрементально на каждом шаге скролла
+    urls: list[str] = []
+    seen_urls: set[str] = set()
+    page.wait_for_timeout(3500)  # первичная отрисовка SPA
+    steps = 18
+    for i in range(steps):
+        for u in extract_images_from_dom(page, target=target * 3):
+            if u not in seen_urls:
+                seen_urls.add(u)
+                urls.append(u)
+        page.evaluate(
+            f"window.scrollTo(0, document.body.scrollHeight * {(i + 1) / steps:.3f})")
+        page.wait_for_timeout(1000)
+    page.wait_for_timeout(1500)
+    for u in extract_images_from_dom(page, target=target * 3):
+        if u not in seen_urls:
+            seen_urls.add(u)
+            urls.append(u)
     page.remove_listener("response", on_response)
     print(f"  → DOM: {len(urls)} URL, перехвачено байт: {len(captured)}")
 
