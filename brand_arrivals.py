@@ -234,18 +234,24 @@ def scrape_brand(page, conn, brand: dict, target: int) -> int:
     page.wait_for_timeout(3500)  # первичная отрисовка SPA
     steps = 18
     for i in range(steps):
+        try:
+            for u in extract_images_from_dom(page, target=target * 3):
+                if u not in seen_urls:
+                    seen_urls.add(u)
+                    urls.append(u)
+            page.evaluate(
+                f"window.scrollTo(0, document.body.scrollHeight * {(i + 1) / steps:.3f})")
+        except Exception:
+            pass  # навигация/редирект посреди шага — пропускаем шаг
+        page.wait_for_timeout(1000)
+    page.wait_for_timeout(1500)
+    try:
         for u in extract_images_from_dom(page, target=target * 3):
             if u not in seen_urls:
                 seen_urls.add(u)
                 urls.append(u)
-        page.evaluate(
-            f"window.scrollTo(0, document.body.scrollHeight * {(i + 1) / steps:.3f})")
-        page.wait_for_timeout(1000)
-    page.wait_for_timeout(1500)
-    for u in extract_images_from_dom(page, target=target * 3):
-        if u not in seen_urls:
-            seen_urls.add(u)
-            urls.append(u)
+    except Exception:
+        pass
     page.remove_listener("response", on_response)
     print(f"  → DOM: {len(urls)} URL, перехвачено байт: {len(captured)}")
 
