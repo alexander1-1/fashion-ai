@@ -199,12 +199,21 @@ def scrape_brand(page, conn, brand: dict, target: int) -> int:
     print(f"\n🏪 {brand['name']} ({brand['level']})\n  → {url}")
     try:
         page.goto(url, wait_until="domcontentloaded", timeout=45000)
-        page.wait_for_timeout(3000)
-        close_popups(page)
-        page.wait_for_timeout(1000)
     except Exception as e:
         print(f"  ! страница не открылась: {e}")
         return 0
+    try:  # SPA дорисовывается/редиректит после domcontentloaded
+        page.wait_for_load_state("networkidle", timeout=15000)
+    except Exception:
+        pass
+    page.wait_for_timeout(3000)
+    for _attempt in range(3):  # редирект рушит evaluate — пробуем ещё раз
+        try:
+            close_popups(page)
+            break
+        except Exception:
+            page.wait_for_timeout(2500)
+    page.wait_for_timeout(1000)
 
     # перехват байтов — для CDN, блокирующих прямые запросы
     captured: dict[str, bytes] = {}
