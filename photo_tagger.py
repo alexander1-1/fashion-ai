@@ -155,13 +155,20 @@ def _photo_elements(tags: dict) -> set[tuple[str, str]]:
     out = set()
     for s in tags.get("styles") or []:
         out.add(("styles", s))
+    accessories = getattr(config, "ACCESSORY_CATEGORIES", set())
     for it in tags.get("items") or []:
         if (it.get("confidence") or 0) < config.MIN_ITEM_CONFIDENCE:
             continue
+        is_accessory = it.get("category") in accessories
         for f in ("category", "pattern"):
             v = it.get(f)
+            # У аксессуаров сигналим только категорию (как в season_element_shares)
+            if is_accessory and f != "category":
+                continue
             if v and v != taxonomy.NOT_VISIBLE and v != "Other":
                 out.add((f, v))
+        if is_accessory:
+            continue
         for f in ("materials", "silhouette", "construction", "decoration", "colors"):
             for v in it.get(f) or []:
                 if v and v != taxonomy.NOT_VISIBLE:

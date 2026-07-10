@@ -277,11 +277,19 @@ def rgb_to_hex(rgb):
     return "#{:02x}{:02x}{:02x}".format(*rgb)
 
 
+def _is_menswear(show):
+    return "menswear" in (show or "").lower()
+
+
 def load_csv(path):
+    """Платформа — только женская одежда: мужские коллекции отфильтровываются."""
     if not os.path.exists(path):
         return []
     with open(path, "r", encoding="utf-8") as f:
-        return list(csv.DictReader(f))
+        rows = list(csv.DictReader(f))
+    if rows and "show" in rows[0]:
+        rows = [r for r in rows if not _is_menswear(r["show"])]
+    return rows
 
 
 def get_insights(designer=None, show=None):
@@ -341,6 +349,26 @@ def get_insights(designer=None, show=None):
     }
 
 
+# Аксессуары не участвуют в предметных фильтрах (материал/силуэт/крой/отделка),
+# если категория не выбрана явно: иначе «Замша» находит каждый лук с замшевыми
+# туфлями, а «Металлическая фурнитура» — каждый лук с сумкой (86% тегов).
+ACCESSORY_CATEGORIES = {"Shoes/Boots", "Bag", "Belt", "Hat", "Scarf",
+                        "Gloves", "Jewelry/Accessory", "Sunglasses"}
+
+
+def _item_filter_ok(items, category, field, value):
+    """Есть ли value в списке it[field] у подходящего предмета лука.
+
+    Категория выбрана → ищем строго у предметов этой категории
+    (связка «Сумка + Замша» работает). Не выбрана → только одежда.
+    """
+    if category:
+        return any(it.get("category") == category
+                   and value in (it.get(field) or []) for it in items)
+    return any(value in (it.get(field) or [])
+               and it.get("category") not in ACCESSORY_CATEGORIES for it in items)
+
+
 def get_all_looks(designer=None, show=None, city=None, category=None, material=None,
                    style=None, silhouette=None, construction=None, decoration=None,
                    limit=60, offset=0):
@@ -362,13 +390,13 @@ def get_all_looks(designer=None, show=None, city=None, category=None, material=N
             items = enr["items"]
             if category and not any(it.get("category") == category for it in items):
                 continue
-            if material and not any(material in (it.get("materials") or []) for it in items):
+            if material and not _item_filter_ok(items, category, "materials", material):
                 continue
-            if silhouette and not any(silhouette in (it.get("silhouette") or []) for it in items):
+            if silhouette and not _item_filter_ok(items, category, "silhouette", silhouette):
                 continue
-            if construction and not any(construction in (it.get("construction") or []) for it in items):
+            if construction and not _item_filter_ok(items, category, "construction", construction):
                 continue
-            if decoration and not any(decoration in (it.get("decoration") or []) for it in items):
+            if decoration and not _item_filter_ok(items, category, "decoration", decoration):
                 continue
             filtered.append(r)
         rows = filtered
@@ -403,6 +431,15 @@ _clip_url_index = {}          # image_url -> позиция в индексе (O
 FCLIP_MODEL_ID = "patrickjohncyh/fashion-clip"
 
 
+def _drop_menswear_from_index(embeddings, metadata):
+    """Мужские луки остаются в файлах индекса, но в поиск не попадают."""
+    keep = [i for i, m in enumerate(metadata)
+            if "menswear" not in (m.get("show") or "").lower()]
+    if len(keep) == len(metadata):
+        return embeddings, metadata
+    return embeddings[keep], [metadata[i] for i in keep]
+
+
 def _load_clip():
     global _clip_model, _clip_processor, _clip_backend
     global _clip_embeddings, _clip_metadata, _clip_url_index
@@ -426,11 +463,13 @@ def _load_clip():
                 import gzip
                 with gzip.open(fclip_meta_gz, "rt", encoding="utf-8") as f:
                     _clip_metadata = json.load(f)
+            _clip_embeddings, _clip_metadata = _drop_menswear_from_index(
+                _clip_embeddings, _clip_metadata)
             _clip_model = CLIPModel.from_pretrained(FCLIP_MODEL_ID).eval()
             _clip_processor = CLIPProcessor.from_pretrained(FCLIP_MODEL_ID)
             _clip_backend = "fashion-clip"
             _clip_url_index = {m["image_url"]: i for i, m in enumerate(_clip_metadata)}
-            print(f"Fashion-CLIP loaded — {len(_clip_metadata)} looks indexed")
+            print(f"Fashion-CLIP loaded — {len(_clip_metadata)} looks indexed (womenswear)")
             return
         except Exception as e:
             print(f"Fashion-CLIP not available ({e}), falling back to legacy CLIP")
@@ -444,10 +483,12 @@ def _load_clip():
         _clip_embeddings = np.load(legacy_index)
         with open(legacy_meta, "r") as f:
             _clip_metadata = json.load(f)
+        _clip_embeddings, _clip_metadata = _drop_menswear_from_index(
+            _clip_embeddings, _clip_metadata)
         _clip_model = SentenceTransformer("clip-ViT-B-32")
         _clip_backend = "clip-vit-b32"
         _clip_url_index = {m["image_url"]: i for i, m in enumerate(_clip_metadata)}
-        print(f"CLIP model loaded — {len(_clip_metadata)} looks indexed")
+        print(f"CLIP model loaded — {len(_clip_metadata)} looks indexed (womenswear)")
     except Exception as e:
         print(f"CLIP not available: {e}")
 
@@ -496,6 +537,8 @@ def load_enrichment():
     if os.path.exists(path):
         with open(path, encoding="utf-8") as f:
             for r in csv.DictReader(f):
+                if _is_menswear(r.get("show")):
+                    continue
                 try:
                     items = json.loads(r.get("items_json") or "[]")
                 except json.JSONDecodeError:
@@ -556,6 +599,10 @@ def compute_enrichment(designer=None, show=None):
         for it in r["items"]:
             total_items += 1
             category_c[it.get("category", "Other") or "Other"] += 1
+            # У аксессуаров учитываем только категорию: их материал/принт/отделка
+            # искажали сводку («Кожа 28%» была в основном обувью и сумками).
+            if it.get("category") in ACCESSORY_CATEGORIES:
+                continue
             for m in it.get("materials", []) or []:
                 material_c[m] += 1
             pattern_c[it.get("pattern", "Other") or "Other"] += 1
@@ -586,6 +633,15 @@ def compute_enrichment(designer=None, show=None):
         "construction": top(construction_c, total_items, 12),
         "decoration": top(decoration_c, total_items, 12),
     }
+
+
+# Сводные инсайты пересчитываем по актуальным правилам (только женская
+# одежда, аксессуары без материалов/отделки) — enriched_insights.json
+# на диске посчитан по-старому и используется лишь как фолбэк.
+if _enrichment_rows:
+    _fresh_insights = compute_enrichment()
+    if _fresh_insights:
+        _enrichment_insights = _fresh_insights
 
 
 def enrich_row(row):

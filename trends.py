@@ -63,12 +63,20 @@ def season_element_shares(conn) -> dict:
                   l.season_family, l.season_year
            FROM items i JOIN looks l USING (look_id)
            WHERE i.confidence >= ?"""
+    accessories = getattr(config, "ACCESSORY_CATEGORIES", set())
     for r in conn.execute(q, (config.MIN_ITEM_CONFIDENCE,)):
         season = (r["season_family"], r["season_year"])
+        is_accessory = r["category"] in accessories
         for f in SCALAR_FIELDS:
             v = r[f]
+            # У аксессуаров учитываем только саму категорию (тренды «Сумка»,
+            # «Обувь»), но не их принт/материал и т.д.
+            if is_accessory and f != "category":
+                continue
             if v and v != taxonomy.NOT_VISIBLE:
                 counts[(f, v)][season].add(r["look_id"])
+        if is_accessory:
+            continue
         for f in ARRAY_FIELDS:
             for v in json.loads(r[f] or "[]"):
                 if v and v != taxonomy.NOT_VISIBLE:

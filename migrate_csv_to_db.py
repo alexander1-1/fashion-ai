@@ -19,11 +19,26 @@ def migrate(csv_path: str, db_path: str) -> None:
     conn = db.init_db(db_path)
     inserted = updated = skipped = items_total = 0
 
+    # Аналитика платформы — только женская одежда: мужские коллекции
+    # не мигрируются, а уже попавшие в базу — вычищаются.
+    mens = conn.execute(
+        "SELECT COUNT(*) FROM looks WHERE LOWER(show_name) LIKE '%menswear%'"
+    ).fetchone()[0]
+    if mens:
+        conn.execute("""DELETE FROM items WHERE look_id IN
+            (SELECT look_id FROM looks WHERE LOWER(show_name) LIKE '%menswear%')""")
+        conn.execute("DELETE FROM looks WHERE LOWER(show_name) LIKE '%menswear%'")
+        conn.commit()
+        print(f"Удалено мужских луков из БД: {mens}")
+
     with open(csv_path, newline="", encoding="utf-8") as f:
         for row in csv.DictReader(f):
             show = row.get("show", "").strip()
             image_url = row.get("image_url", "").strip()
             if not show or not image_url:
+                skipped += 1
+                continue
+            if "menswear" in show.lower():
                 skipped += 1
                 continue
 
