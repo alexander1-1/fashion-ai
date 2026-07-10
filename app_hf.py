@@ -460,7 +460,16 @@ def _encode_text(query):
         inputs = _clip_processor(text=[query], return_tensors="pt",
                                  padding=True, truncation=True)
         with torch.no_grad():
-            feat = _clip_model.get_text_features(**inputs).cpu().numpy()[0]
+            out = _clip_model.get_text_features(**inputs)
+            # В новых версиях transformers get_text_features может вернуть
+            # ModelOutput (BaseModelOutputWithPooling) вместо тензора —
+            # тогда проецируем pooled-выход в joint-пространство вручную.
+            if not torch.is_tensor(out):
+                pooled = getattr(out, "pooler_output", None)
+                if pooled is None:
+                    pooled = out[1] if len(out) > 1 else out[0]
+                out = _clip_model.text_projection(pooled)
+            feat = out.cpu().numpy()[0]
     else:
         feat = _clip_model.encode([query], convert_to_numpy=True)[0]
     return feat / (np.linalg.norm(feat) + 1e-9)

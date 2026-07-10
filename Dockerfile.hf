@@ -1,0 +1,21 @@
+# Dockerfile для HF Space alexanderl12/fashion-ai
+# Версии transformers/numpy закреплены = окружению, в котором строился
+# fclip_index (Mac, transformers 4.44.2): text-энкодер должен совпадать
+# с image-энкодером, иначе scores разъезжаются.
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc g++ && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir flask requests beautifulsoup4 pillow \
+    anthropic gunicorn sentence-transformers \
+    "transformers==4.44.2" "numpy<2"
+
+COPY . .
+
+ENV PYTHONUNBUFFERED=1
+
+CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:7860", "--workers", "1", "--timeout", "300"]

@@ -16,11 +16,16 @@ SPACE = "alexanderl12/fashion-ai"
 MSG = "Fashion-CLIP: новый индекс + RU-перевод запросов + диверсификация похожих"
 
 FILES = [
+    ("Dockerfile.hf", "Dockerfile"),
     ("app_hf.py", "app.py"),
     ("translate_query.py", "translate_query.py"),
     ("output/fclip_index.npy", "output/fclip_index.npy"),
     # metadata сжимаем: 4 MB json не проходит через нестабильную сеть
     ("output/fclip_metadata.json.gz", "output/fclip_metadata.json.gz"),
+    # полная разметка (на Space лежал старый частичный CSV — 186 луков);
+    # 26 MB идёт через LFS-канал, который у нас проходит стабильно
+    ("output/enriched_looks_v3.csv", "output/enriched_looks_v3.csv"),
+    ("output/enriched_insights.json", "output/enriched_insights.json"),
 ]
 
 
