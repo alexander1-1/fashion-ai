@@ -73,6 +73,7 @@ python3 enrich_looks.py --resume          # тегирование новых л
 python3 migrate_csv_to_db.py              # теги → trend_signals.db
 python3 mpstats_client.py collect         # обновить сигналы WB
 python3 trends.py score                   # пересчитать стадии
+python3 signals_sync.py export            # сигналы → git-файл для Railway
 export HF_TOKEN=hf_...
 python3.11 deploy_hf_fclip.py             # выложить обновлённый индекс
 git add -A && git commit -m "weekly update" && git push origin main
