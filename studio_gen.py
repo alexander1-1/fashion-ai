@@ -137,9 +137,19 @@ def build_brief(t, score, n: int = None) -> dict:
             f"Установка по стадии: {STAGE_DESIGN_HINTS.get(stage, 'носибельно и коммерчески.')}\n"
             f"Вариантов: {n}.")
 
-    resp = client.messages.create(
-        model=config.STUDIO_BRIEF_MODEL, max_tokens=2000,
-        system=SYSTEM, messages=[{"role": "user", "content": user}])
+    # 529 Overloaded / сетевые сбои — временные: повторяем до 4 раз
+    for attempt in range(1, 5):
+        try:
+            resp = client.messages.create(
+                model=config.STUDIO_BRIEF_MODEL, max_tokens=2000,
+                system=SYSTEM, messages=[{"role": "user", "content": user}])
+            break
+        except Exception as e:
+            if attempt == 4:
+                raise
+            wait = 15 * attempt
+            print(f"  API занят ({type(e).__name__}), повтор {attempt}/4 через {wait} c…")
+            time.sleep(wait)
     text = next(b.text for b in resp.content if b.type == "text").strip()
     if text.startswith("```"):
         text = text.split("```")[1].lstrip("json").strip()

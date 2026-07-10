@@ -507,11 +507,23 @@ def build_report(category: str, db_path: str = None, allow_net: bool = True) -> 
             ("LEFTPADDING", (0, 0), (-1, -1), 10)]))
         story += [blk, Spacer(1, 0.12 * cm)]
 
+    # ── 5. Закупочный бриф (Фаза 7) ───────────────────────────────────────────
+    from reports.purchase_brief import (append_brief_section, build_brief_data,
+                                        export_excel)
+    brief = build_brief_data(conn, category, element_trends)
+    out_xlsx = None
+    if brief:
+        story.append(PageBreak())
+        append_brief_section(story, brief, cat_ru)
+        out_xlsx = export_excel(brief, category, out_dir)
+
     footer = (f"ТРЕНД-АНАЛИТИКА · {cat_ru.upper()} · "
               f"{date.today().strftime('%d.%m.%Y')}").upper()
     doc.build(story, canvasmaker=K.make_canvas(footer))
     conn.close()
     print(f"PDF: {out_pdf}")
+    if out_xlsx:
+        print(f"Excel (закупка): {out_xlsx}")
     return out_pdf
 
 
