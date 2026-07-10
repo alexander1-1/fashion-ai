@@ -9,6 +9,10 @@ import random
 from collections import Counter
 from flask import Flask, render_template, jsonify, request, session
 
+# enriched_looks_v3.csv содержит крупные JSON-поля (items_json) —
+# стандартный лимит csv (128KB на поле) может оборвать загрузку разметки.
+csv.field_size_limit(100_000_000)
+
 app = Flask(__name__)
 app.secret_key = "fashion-ai-secret-2026"
 
@@ -617,6 +621,14 @@ def api_search():
     show = request.args.get("show", "").strip()
     city = request.args.get("city", "").strip()
 
+    # RU-запрос → EN до отправки в CLIP (здесь есть ANTHROPIC_API_KEY,
+    # так что словарь + Haiku-фолбэк работают в полную силу)
+    try:
+        from translate_query import translate_query
+        query = translate_query(query)
+    except Exception as e:
+        print(f"translate_query failed: {e}")
+
     try:
         import requests as req
         params = {"q": query}
@@ -641,7 +653,10 @@ def api_similar():
     try:
         import requests as req
         _wake_hf()
-        resp = req.get(f"{HF_SPACES_URL}/api/similar", params={"url": url}, timeout=90)
+        params = {"url": url}
+        if request.args.get("same_show"):
+            params["same_show"] = request.args.get("same_show")
+        resp = req.get(f"{HF_SPACES_URL}/api/similar", params=params, timeout=90)
         if resp.status_code == 200:
             return jsonify(resp.json())
     except Exception as e:

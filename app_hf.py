@@ -9,6 +9,10 @@ import random
 from collections import Counter
 from flask import Flask, render_template, jsonify, request, session
 
+# enriched_looks_v3.csv содержит крупные JSON-поля (items_json) —
+# стандартный лимит csv (128KB на поле) может оборвать загрузку разметки.
+csv.field_size_limit(100_000_000)
+
 app = Flask(__name__)
 app.secret_key = "fashion-ai-secret-2026"
 
@@ -386,29 +390,80 @@ def get_shows(designer=None):
 
 
 # ─── CLIP (загружаем один раз при старте) ─────────────────────────────────────
+# Приоритет: Fashion-CLIP (patrickjohncyh/fashion-clip) + fclip_index,
+# если reindex_fashion_clip.py уже отработал. Иначе — легаси clip-ViT-B-32.
 
-_clip_model = None
+_clip_model = None            # sentence-transformers (легаси) ИЛИ transformers CLIPModel
+_clip_processor = None        # только для fashion-clip
+_clip_backend = None          # "fashion-clip" | "clip-vit-b32"
 _clip_embeddings = None
 _clip_metadata = None
+_clip_url_index = {}          # image_url -> позиция в индексе (O(1) для /api/similar)
+
+FCLIP_MODEL_ID = "patrickjohncyh/fashion-clip"
 
 
 def _load_clip():
-    global _clip_model, _clip_embeddings, _clip_metadata
+    global _clip_model, _clip_processor, _clip_backend
+    global _clip_embeddings, _clip_metadata, _clip_url_index
+    import numpy as np
+
+    fclip_index = f"{DATA_DIR}/fclip_index.npy"
+    fclip_meta = f"{DATA_DIR}/fclip_metadata.json"
+    legacy_index = f"{DATA_DIR}/clip_index.npy"
+    legacy_meta = f"{DATA_DIR}/clip_metadata.json"
+
+    # 1. Fashion-CLIP (новый индекс); metadata может лежать в .json или .json.gz
+    fclip_meta_gz = fclip_meta + ".gz"
+    if os.path.exists(fclip_index) and (os.path.exists(fclip_meta) or os.path.exists(fclip_meta_gz)):
+        try:
+            from transformers import CLIPModel, CLIPProcessor
+            _clip_embeddings = np.load(fclip_index)
+            if os.path.exists(fclip_meta):
+                with open(fclip_meta, "r") as f:
+                    _clip_metadata = json.load(f)
+            else:
+                import gzip
+                with gzip.open(fclip_meta_gz, "rt", encoding="utf-8") as f:
+                    _clip_metadata = json.load(f)
+            _clip_model = CLIPModel.from_pretrained(FCLIP_MODEL_ID).eval()
+            _clip_processor = CLIPProcessor.from_pretrained(FCLIP_MODEL_ID)
+            _clip_backend = "fashion-clip"
+            _clip_url_index = {m["image_url"]: i for i, m in enumerate(_clip_metadata)}
+            print(f"Fashion-CLIP loaded — {len(_clip_metadata)} looks indexed")
+            return
+        except Exception as e:
+            print(f"Fashion-CLIP not available ({e}), falling back to legacy CLIP")
+
+    # 2. Легаси CLIP
     try:
-        import numpy as np
         from sentence_transformers import SentenceTransformer
-        index_path = f"{DATA_DIR}/clip_index.npy"
-        meta_path = f"{DATA_DIR}/clip_metadata.json"
-        if not (os.path.exists(index_path) and os.path.exists(meta_path)):
+        if not (os.path.exists(legacy_index) and os.path.exists(legacy_meta)):
             print("CLIP index files not found, using text search fallback")
             return
-        _clip_embeddings = np.load(index_path)
-        with open(meta_path, "r") as f:
+        _clip_embeddings = np.load(legacy_index)
+        with open(legacy_meta, "r") as f:
             _clip_metadata = json.load(f)
         _clip_model = SentenceTransformer("clip-ViT-B-32")
+        _clip_backend = "clip-vit-b32"
+        _clip_url_index = {m["image_url"]: i for i, m in enumerate(_clip_metadata)}
         print(f"CLIP model loaded — {len(_clip_metadata)} looks indexed")
     except Exception as e:
         print(f"CLIP not available: {e}")
+
+
+def _encode_text(query):
+    """Текст → unit-norm вектор (единый интерфейс для обоих бэкендов)."""
+    import numpy as np
+    if _clip_backend == "fashion-clip":
+        import torch
+        inputs = _clip_processor(text=[query], return_tensors="pt",
+                                 padding=True, truncation=True)
+        with torch.no_grad():
+            feat = _clip_model.get_text_features(**inputs).cpu().numpy()[0]
+    else:
+        feat = _clip_model.encode([query], convert_to_numpy=True)[0]
+    return feat / (np.linalg.norm(feat) + 1e-9)
 
 
 _load_clip()
@@ -624,12 +679,18 @@ def api_search():
     show = request.args.get("show", "").strip().lower()
     city = request.args.get("city", "").strip()
 
+    # RU-запрос → EN (CLIP обучен на английских подписях)
+    try:
+        from translate_query import translate_query
+        query = translate_query(query)
+    except Exception as e:
+        print(f"translate_query failed: {e}")
+
     # CLIP поиск (если модель загружена при старте)
     if _clip_model is not None and _clip_embeddings is not None:
         try:
             import numpy as np
-            text_feat = _clip_model.encode([query], convert_to_numpy=True)[0]
-            text_feat = text_feat / (np.linalg.norm(text_feat) + 1e-9)
+            text_feat = _encode_text(query)
             scores = _clip_embeddings @ text_feat
             # Retrieve top 500 then apply filters
             top_idx = list(map(int, (-scores).argsort()[:500]))
@@ -732,28 +793,44 @@ def _text_search(query, designer="", show="", city=""):
 
 @app.route("/api/similar")
 def api_similar():
-    """Find visually similar looks using CLIP embeddings."""
+    """Find visually similar looks using CLIP embeddings.
+
+    Диверсификация: CLIP-близость сильно ловит фон/свет того же показа,
+    поэтому луки из той же коллекции того же бренда ограничиваются
+    SAME_SHOW_CAP местами — остальное заполняют другие бренды/показы.
+    ?same_show=all отключает ограничение.
+    """
+    SAME_SHOW_CAP = 12
     url = request.args.get("url", "").strip()
+    same_show_mode = request.args.get("same_show", "").strip()
     if not url:
         return jsonify([])
     if _clip_model is not None and _clip_embeddings is not None and _clip_metadata:
         try:
             import numpy as np
-            # Find this look in metadata by image_url
-            idx = next((i for i, m in enumerate(_clip_metadata) if m["image_url"] == url), None)
+            idx = _clip_url_index.get(url)
             if idx is not None:
+                src = _clip_metadata[idx]
+                src_key = (src["designer"], src["show"])
                 look_vec = _clip_embeddings[idx]
                 scores = _clip_embeddings @ look_vec
                 scores[idx] = -1  # exclude self
-                top_idx = list(map(int, (-scores).argsort()[:96]))
-                results = []
+                # Берём топ с запасом, чтобы после капа осталось 96
+                top_idx = list(map(int, (-scores).argsort()[:400]))
+                results, same_show_used = [], 0
                 for i in top_idx:
                     m = _clip_metadata[i]
+                    if same_show_mode != "all" and (m["designer"], m["show"]) == src_key:
+                        if same_show_used >= SAME_SHOW_CAP:
+                            continue
+                        same_show_used += 1
                     results.append({
                         "designer": m["designer"], "show": m["show"],
                         "look_number": m["look_number"], "image_url": m["image_url"],
                         "score": float(scores[i]), "mode": "similar",
                     })
+                    if len(results) >= 96:
+                        break
                 return jsonify(results)
         except Exception as e:
             print(f"Similar search error: {e}")
