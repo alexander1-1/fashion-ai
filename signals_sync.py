@@ -28,14 +28,18 @@ EXPORT_PATH = "output/wb_signals_export.json.gz"
 def export(db_path=None):
     conn = db.init_db(db_path or config.DB_PATH)
     data = {
+        # Все сигналы, кроме подиумных (source='vogue' пересоздаются из CSV):
+        # инфлюенсеры (tg:*), fast-fashion (zara/hm), MPStats, соцпоиск.
         "signals": [dict(r) for r in conn.execute(
             """SELECT trend_id, level, source, date, value FROM signals
-               WHERE source LIKE 'mpstats%'""")],
+               WHERE source != 'vogue'""")],
         "wb_metrics": [dict(r) for r in conn.execute(
             "SELECT key, kind, date, payload FROM wb_metrics")],
         "wb_keywords": {r["trend_id"]: r["wb_keywords"] for r in conn.execute(
             "SELECT trend_id, wb_keywords FROM trends WHERE wb_keywords IS NOT NULL "
             "AND wb_keywords != '' AND wb_keywords != '[]'")},
+        # Фото инфлюенсеров/брендов для карточек трендов
+        "ext_photos": [dict(r) for r in conn.execute("SELECT * FROM ext_photos")],
     }
     with gzip.open(EXPORT_PATH, "wt", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False)
@@ -60,10 +64,19 @@ def import_(db_path=None):
             for s in data["signals"] if s["trend_id"] in known]
     skipped = len(data["signals"]) - len(rows)
 
-    conn.execute("DELETE FROM signals WHERE source LIKE 'mpstats%'")
+    conn.execute("DELETE FROM signals WHERE source != 'vogue'")
     conn.executemany(
         "INSERT INTO signals (trend_id, level, source, date, value) VALUES (?,?,?,?,?)",
         rows)
+
+    # Фото инфлюенсеров/брендов (старые версии экспорта поля не имели)
+    if data.get("ext_photos"):
+        cols = [x[1] for x in conn.execute("PRAGMA table_info(ext_photos)")]
+        conn.execute("DELETE FROM ext_photos")
+        ph = ",".join("?" * len(cols))
+        conn.executemany(
+            f"INSERT INTO ext_photos ({','.join(cols)}) VALUES ({ph})",
+            [tuple(p.get(c) for c in cols) for p in data["ext_photos"]])
 
     conn.execute("DELETE FROM wb_metrics")
     conn.executemany(
