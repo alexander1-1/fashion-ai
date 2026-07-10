@@ -251,6 +251,12 @@ def collect_metrics(conn, trend_id: str, shares_cache: dict | None = None) -> di
             q_decline += 1
         else:
             break
+    # Сезонная поправка: летние/зимние просадки м/м — не спад тренда.
+    # Если есть данные за 13 месяцев и текущее значение не хуже прошлогоднего
+    # (с допуском SEASONAL_YOY_TOLERANCE), серию м/м-падения не считаем спадом.
+    if (len(q_rows) >= 13 and q_rows[12]
+            and q_rows[0] >= getattr(config, "SEASONAL_YOY_TOLERANCE", 0.9) * q_rows[12]):
+        q_decline = 0
 
     # C: насыщенность ниши — из последнего сигнала wb_sales/кэша MPStats (Фаза 3)
     c_row = conn.execute(

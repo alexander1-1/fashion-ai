@@ -62,6 +62,25 @@ git push origin main
 ```
 Внимание: локально есть незапушенная Фаза 6 (`bb2b1e5`) — push отправит и её.
 
+## Еженедельный цикл (эксплуатация)
+
+Когда появляются новые луки (скрейпер дописывает их в `output/all_designers.csv`):
+
+```bash
+cd ~/Desktop/runway_scraper
+python3.11 reindex_fashion_clip.py        # доиндексирует ТОЛЬКО новые луки (resume)
+python3 enrich_looks.py --resume          # тегирование новых луков Клодом
+python3 migrate_csv_to_db.py              # теги → trend_signals.db
+python3 mpstats_client.py collect         # обновить сигналы WB
+python3 trends.py score                   # пересчитать стадии
+export HF_TOKEN=hf_...
+python3.11 deploy_hf_fclip.py             # выложить обновлённый индекс
+git add -A && git commit -m "weekly update" && git push origin main
+```
+
+Скрипт переиндексации пропускает уже готовые луки, так что еженедельный
+прогон занимает минуты, а не часы.
+
 ### 7. Проверка после деплоя
 ```bash
 curl "https://fashion-ai-production-1e53.up.railway.app/api/search?q=красное+вечернее+платье" | head -c 400
